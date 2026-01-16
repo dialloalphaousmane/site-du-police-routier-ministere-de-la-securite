@@ -1,0 +1,586 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tableau de Bord Agent - Police Routière Guinée{% endblock %}
+
+{% block stylesheets %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://127.0.0.1:8000/assets/css/dashboard.css" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+            <i class="bi bi-shield-check me-2"></i>
+            Police Routière Guinée - Agent
+        </a>
+        
+        <div class="navbar-nav ms-auto">
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                    <i class="bi bi-person-circle me-1"></i>
+                    {{ app.user.email }}
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profil</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Paramètres</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{{ path('app_logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Déconnexion</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ path('app_dashboard_agent') }}">
+                            <i class="bi bi-speedometer2 me-2"></i>Tableau de bord
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_controle_new') }}">
+                            <i class="bi bi-plus-circle me-2"></i>Nouveau Contrôle
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_controle_index') }}">
+                            <i class="bi bi-clipboard-check me-2"></i>Mes Contrôles
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_infraction_index') }}">
+                            <i class="bi bi-exclamation-triangle me-2"></i>Infractions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_rapport_new') }}">
+                            <i class="bi bi-file-plus me-2"></i>Nouveau Rapport
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_dashboard') }}">
+                            <i class="bi bi-house me-2"></i>Accueil
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_logout') }}">
+                            <i class="bi bi-box-arrow-right me-2"></i>Déconnexion
+                        </a>
+                    </li>
+                </ul>
+                            <i class="bi bi-clipboard-plus me-2"></i>Créer contrôles
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#my-controls">
+                            <i class="bi bi-clipboard-check me-2"></i>Mes contrôles
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#infractions">
+                            <i class="bi bi-exclamation-triangle me-2"></i>Ajouter infractions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#statistics">
+                            <i class="bi bi-graph-up me-2"></i>Mes statistiques
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#reports">
+                            <i class="bi bi-file-text me-2"></i>Rapports
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Tableau de Bord Agent</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a href="{{ path('app_controle_new') }}" class="btn btn-sm btn-primary">
+                        <i class="bi bi-plus-circle me-1"></i>Nouveau Contrôle
+                    </a>
+                </div>
+            </div>
+
+            <!-- Agent Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-primary shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        Contrôles Aujourd'hui
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.controls_today|default(12) }}</div>
+                                    <div class="text-xs text-gray-500">Objectif quotidien: 15</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-clipboard-check fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-success shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                        Contrôles Mois
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.controls_month|default(234) }}</div>
+                                    <div class="text-xs text-gray-500">Moyenne: 7.8/jour</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-calendar-check fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-info shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                        Infractions
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.infractions_count|default(89) }}</div>
+                                    <div class="text-xs text-gray-500">38% des contrôles</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-exclamation-triangle fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-warning shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                        Recettes (GNF)
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.revenue_total|number_format(0, '.', ',')|default('8,945,000') }} GNF</div>
+                                    <div class="text-xs text-gray-500">Moyenne: 38,225/contrôle</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-cash-stack fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Actions Rapides</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#newControlModal">
+                                        <i class="bi bi-clipboard-plus me-2"></i>Nouveau Contrôle
+                                    </button>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <button class="btn btn-info w-100" data-bs-toggle="modal" data-bs-target="#addInfractionModal">
+                                        <i class="bi bi-exclamation-triangle me-2"></i>Ajouter Infraction
+                                    </button>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <button class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#dailyReportModal">
+                                        <i class="bi bi-file-text me-2"></i>Rapport Journalier
+                                    </button>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <button class="btn btn-warning w-100" data-bs-toggle="modal" data-bs-target="#requestAssistanceModal">
+                                        <i class="bi bi-telephone me-2"></i>Demander Assistance
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Chart -->
+            <div class="row mb-4">
+                <div class="col-xl-8 col-lg-7">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-primary">Performance Mensuelle</h6>
+                            <div class="dropdown no-arrow">
+                                <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-three-dots-vertical fa-sm fa-fw text-gray-400"></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right shadow">
+                                    <a class="dropdown-item" href="#">Cette semaine</a>
+                                    <a class="dropdown-item" href="#">Ce mois</a>
+                                    <a class="dropdown-item" href="#">Ce trimestre</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-area">
+                                <canvas id="agentPerformanceChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-4 col-lg-5">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Types de Contrôles</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-pie pt-4">
+                                <canvas id="controlTypesChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- My Controls Table -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Mes Contrôles Récents</h6>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-outline-secondary">Aujourd'hui</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary">Cette semaine</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary">Ce mois</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Date/Heure</th>
+                                    <th>Type</th>
+                                    <th>Localisation</th>
+                                    <th>Véhicules</th>
+                                    <th>Infractions</th>
+                                    <th>Montant (GNF)</th>
+                                    <th>Statut</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>08/01/2026 14:30</td>
+                                    <td><span class="badge bg-primary">Vitesse</span></td>
+                                    <td>Avenue du Général De Gaulle</td>
+                                    <td>15</td>
+                                    <td>3</td>
+                                    <td>450,000</td>
+                                    <td><span class="badge bg-success">Complété</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button>
+                                        <button class="btn btn-sm btn-outline-warning"><i class="bi bi-pencil"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>08/01/2026 13:45</td>
+                                    <td><span class="badge bg-info">Documentation</span></td>
+                                    <td>Carrefour du 8 Novembre</td>
+                                    <td>12</td>
+                                    <td>2</td>
+                                    <td>300,000</td>
+                                    <td><span class="badge bg-success">Complété</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button>
+                                        <button class="btn btn-sm btn-outline-warning"><i class="bi bi-pencil"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>08/01/2026 12:30</td>
+                                    <td><span class="badge bg-warning">Alcoolémie</span></td>
+                                    <td>Pont du 8 Novembre</td>
+                                    <td>8</td>
+                                    <td>1</td>
+                                    <td>250,000</td>
+                                    <td><span class="badge bg-warning">En cours</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button>
+                                        <button class="btn btn-sm btn-outline-success"><i class="bi bi-check-circle"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>08/01/2026 11:15</td>
+                                    <td><span class="badge bg-secondary">Équipement</span></td>
+                                    <td>Route de Friguiagbé</td>
+                                    <td>10</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td><span class="badge bg-success">Complété</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button>
+                                        <button class="btn btn-sm btn-outline-info"><i class="bi bi-plus-circle"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>08/01/2026 10:00</td>
+                                    <td><span class="badge bg-dark">Chargement</span></td>
+                                    <td>Avenue du Niger</td>
+                                    <td>6</td>
+                                    <td>2</td>
+                                    <td>400,000</td>
+                                    <td><span class="badge bg-success">Complété</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button>
+                                        <button class="btn btn-sm btn-outline-warning"><i class="bi bi-pencil"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Infractions -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Infractions Récentes</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Conducteur</th>
+                                    <th>Véhicule</th>
+                                    <th>Montant (GNF)</th>
+                                    <th>Statut</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>08/01/2026 14:30</td>
+                                    <td><span class="badge bg-danger">Excès de vitesse</span></td>
+                                    <td>Mamadou Bah</td>
+                                    <td>Toyota Hilux - GN-1234-AB</td>
+                                    <td>150,000</td>
+                                    <td><span class="badge bg-success">Payée</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button>
+                                        <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-printer"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>08/01/2026 13:45</td>
+                                    <td><span class="badge bg-warning">Permis non valide</span></td>
+                                    <td>Oumar Touré</td>
+                                    <td>Mercedes - GN-5678-CD</td>
+                                    <td>100,000</td>
+                                    <td><span class="badge bg-warning">En attente</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button>
+                                        <button class="btn btn-sm btn-outline-success"><i class="bi bi-cash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>08/01/2026 12:30</td>
+                                    <td><span class="badge bg-info">Alcoolémie > 0.8</span></td>
+                                    <td>Sékou Condé</td>
+                                    <td>Peugeot - GN-9012-EF</td>
+                                    <td>250,000</td>
+                                    <td><span class="badge bg-success">Payée</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button>
+                                        <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-printer"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- New Control Modal -->
+<div class="modal fade" id="newControlModal" tabindex="-1" aria-labelledby="newControlModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="newControlModalLabel">Démarrer un Nouveau Contrôle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="controlType" class="form-label">Type de Contrôle</label>
+                            <select class="form-select" id="controlType">
+                                <option selected>Sélectionner...</option>
+                                <option value="vitesse">Contrôle vitesse</option>
+                                <option value="documentation">Contrôle documentation</option>
+                                <option value="alcool">Contrôle alcoolémie</option>
+                                <option value="equipement">Contrôle équipement</option>
+                                <option value="chargement">Contrôle chargement</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="location" class="form-label">Localisation</label>
+                            <input type="text" class="form-control" id="location" placeholder="Ex: Avenue du Général De Gaulle">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="startTime" class="form-label">Heure Début</label>
+                            <input type="time" class="form-control" id="startTime" value="14:30">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="expectedDuration" class="form-label">Durée Estimée</label>
+                            <select class="form-select" id="expectedDuration">
+                                <option value="1">1 heure</option>
+                                <option value="2" selected>2 heures</option>
+                                <option value="3">3 heures</option>
+                                <option value="4">4 heures</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="partnerAgent" class="form-label">Agent Partenaire</label>
+                            <select class="form-select" id="partnerAgent">
+                                <option selected>Sélectionner...</option>
+                                <option value="1">Agent Oumar Touré</option>
+                                <option value="2">Agent Sékou Condé</option>
+                                <option value="3">Agent Alpha Camara</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="equipment" class="form-label">Équipement Utilisé</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="radar" checked>
+                            <label class="form-check-label" for="radar">
+                                Radar de vitesse
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="alcootest">
+                            <label class="form-check-label" for="alcootest">
+                                Éthylotest
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="terminal">
+                            <label class="form-check-label" for="terminal">
+                                Terminal de paiement
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="observations" class="form-label">Observations Initiales</label>
+                        <textarea class="form-control" id="observations" rows="3" placeholder="Notes sur le contrôle..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary">Démarrer Contrôle</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Infraction Modal -->
+<div class="modal fade" id="addInfractionModal" tabindex="-1" aria-labelledby="addInfractionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addInfractionModalLabel">Ajouter une Infraction</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="infractionType" class="form-label">Type d'Infraction</label>
+                        <select class="form-select" id="infractionType">
+                            <option selected>Sélectionner...</option>
+                            <option value="speed">Excès de vitesse</option>
+                            <option value="license">Permis non valide</option>
+                            <option value="alcohol">Alcoolémie</option>
+                            <option value="equipment">Équipement manquant</option>
+                            <option value="documents">Documents manquants</option>
+                            <option value="overload">Surcharge</option>
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="driverName" class="form-label">Nom du Conducteur</label>
+                            <input type="text" class="form-control" id="driverName" placeholder="Nom complet">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="vehiclePlate" class="form-label">Immatriculation</label>
+                            <input type="text" class="form-control" id="vehiclePlate" placeholder="Ex: GN-1234-AB">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="fineAmount" class="form-label">Montant Amende (GNF)</label>
+                            <input type="number" class="form-control" id="fineAmount" placeholder="0">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="paymentMethod" class="form-label">Méthode Paiement</label>
+                            <select class="form-select" id="paymentMethod">
+                                <option selected>Sélectionner...</option>
+                                <option value="cash">Espèces</option>
+                                <option value="orange">Orange Money</option>
+                                <option value="mtn">MTN Mobile Money</option>
+                                <option value="later">Plus tard</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="infractionDetails" class="form-label">Détails de l'Infraction</label>
+                        <textarea class="form-control" id="infractionDetails" rows="3" placeholder="Description détaillée de l'infraction..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary">Ajouter l'Infraction</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://127.0.0.1:8000/assets/js/dashboard.js"></script>
+{% endblock %}

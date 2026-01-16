@@ -1,0 +1,307 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvel Utilisateur - Police Routière Guinée{% endblock %}
+
+{% block stylesheets %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+    .form-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    .card {
+        border-left: 4px solid #1e3a8a;
+    }
+    .form-label {
+        font-weight: 600;
+        color: #374151;
+    }
+    .required::after {
+        content: " *";
+        color: #ef4444;
+    }
+    .btn-group .btn {
+        margin-right: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_dashboard') }}">
+                            <i class="bi bi-speedometer2 me-2"></i>Tableau de bord
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ path('app_user_index') }}">
+                            <i class="bi bi-people me-2"></i>Gestion utilisateurs
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_region_index') }}">
+                            <i class="bi bi-geo-alt me-2"></i>Régions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_brigade_index') }}">
+                            <i class="bi bi-shield me-2"></i>Brigades
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_report_index') }}">
+                            <i class="bi bi-file-text me-2"></i>Rapports
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_export_users') }}">
+                            <i class="bi bi-download me-2"></i>Export
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_config_index') }}">
+                            <i class="bi bi-gear me-2"></i>Configuration
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_log_index') }}">
+                            <i class="bi bi-journal-text me-2"></i>Logs d'audit
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_notification_index') }}">
+                            <i class="bi bi-bell me-2"></i>Notifications
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Nouvel Utilisateur</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <a href="{{ path('app_user_index') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Retour à la liste
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flash Messages -->
+            {% for type, messages in app.session.flashbag.all() %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ type == 'error' ? 'danger' : type }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+
+            <!-- User Form -->
+            <div class="form-container">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-person-plus me-2"></i>Informations de l'utilisateur
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form_label(form.email, 'Email', {'label_attr': {'class': 'form-label required'}}) }}
+                                    {{ form_widget(form.email, {'attr': {'class': 'form-control', 'placeholder': 'email@exemple.com'}}) }}
+                                    {{ form_errors(form.email) }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form_label(form.nom, 'Nom', {'label_attr': {'class': 'form-label required'}}) }}
+                                    {{ form_widget(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Nom de famille'}}) }}
+                                    {{ form_errors(form.nom) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form_label(form.prenom, 'Prénom', {'label_attr': {'class': 'form-label required'}}) }}
+                                    {{ form_widget(form.prenom, {'attr': {'class': 'form-control', 'placeholder': 'Prénom'}}) }}
+                                    {{ form_errors(form.prenom) }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Téléphone</label>
+                                    <input type="tel" class="form-control" name="telephone" placeholder="+224 000 000 000">
+                                    <small class="form-text text-muted">Numéro de téléphone professionnel</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form_label(form.region, 'Région', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.region, {'attr': {'class': 'form-select'}}) }}
+                                    {{ form_errors(form.region) }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form_label(form.brigade, 'Brigade', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.brigade, {'attr': {'class': 'form-select'}}) }}
+                                    {{ form_errors(form.brigade) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form_label(form.roleCode, 'Rôles', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.roleCode, {'attr': {'class': 'form-select'}}) }}
+                                    {{ form_errors(form.roleCode) }}
+                                    <small class="form-text text-muted">Sélectionnez un ou plusieurs rôles pour cet utilisateur</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form_label(form.isActive, 'Statut', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.isActive, {'attr': {'class': 'form-check'}}) }}
+                                    {{ form_errors(form.isActive) }}
+                                    <small class="form-text text-muted">Cochez pour activer ce compte</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form_label(form.plainPassword, 'Mot de passe', {'label_attr': {'class': 'form-label required'}}) }}
+                                    {{ form_widget(form.plainPassword, {'attr': {'class': 'form-control', 'placeholder': 'Mot de passe sécurisé'}}) }}
+                                    {{ form_errors(form.plainPassword) }}
+                                    <small class="form-text text-muted">Minimum 8 caractères, incluant majuscules, minuscules et chiffres</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Confirmation mot de passe</label>
+                                    <input type="password" class="form-control" name="confirm_password" placeholder="Répétez le mot de passe">
+                                    <small class="form-text text-muted">Doit être identique au mot de passe ci-dessus</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="sendWelcomeEmail">
+                                <label class="form-check-label" for="sendWelcomeEmail">
+                                    Envoyer un email de bienvenue
+                                </label>
+                            </div>
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-circle me-1"></i>Créer l'utilisateur
+                                </button>
+                                <a href="{{ path('app_user_index') }}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-x-circle me-1"></i>Annuler
+                                </a>
+                            </div>
+                        </div>
+
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Information Panel -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="bi bi-info-circle me-2"></i>Informations importantes
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Rôles disponibles:</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>ROLE_USER:</strong> Utilisateur standard</li>
+                                <li><strong>ROLE_AGENT:</strong> Agent de terrain</li>
+                                <li><strong>ROLE_CHEF_BRIGADE:</strong> Chef de brigade</li>
+                                <li><strong>ROLE_DIRECTION_REGIONALE:</strong> Direction régionale</li>
+                                <li><strong>ROLE_DIRECTION_GENERALE:</strong> Direction générale</li>
+                                <li><strong>ROLE_ADMIN:</strong> Administrateur système</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Recommandations:</h6>
+                            <ul class="list-unstyled">
+                                <li>• Utilisez un email professionnel</li>
+                                <li>• Le mot de passe doit être sécurisé</li>
+                                <li>• Assignez une région et une brigade</li>
+                                <li>• Activez le compte après création</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-select brigade when region is selected
+    const regionSelect = document.querySelector('[id*="region"]');
+    const brigadeSelect = document.querySelector('[id*="brigade"]');
+    
+    if (regionSelect && brigadeSelect) {
+        regionSelect.addEventListener('change', function() {
+            // This would typically load brigades via AJAX
+            // For now, we'll just show a message
+            const selectedRegion = this.options[this.selectedIndex].text;
+            console.log('Region selected:', selectedRegion);
+        });
+    }
+    
+    // Form validation
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const password = document.querySelector('[id*="password_first"]').value;
+            const confirmPassword = document.querySelector('[id*="password_second"]').value;
+            
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                alert('Les mots de passe ne correspondent pas.');
+                return false;
+            }
+            
+            if (password.length < 8) {
+                e.preventDefault();
+                alert('Le mot de passe doit contenir au moins 8 caractères.');
+                return false;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,295 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Performance - Direction Générale{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                    <span>Direction Générale</span>
+                </h6>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_dashboard') }}">
+                            <i class="fas fa-tachometer-alt"></i> Tableau de Bord
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_statistiques') }}">
+                            <i class="fas fa-chart-bar"></i> Statistiques Nationales
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_supervision') }}">
+                            <i class="fas fa-eye"></i> Supervision Régions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_rapports') }}">
+                            <i class="fas fa-file-alt"></i> Rapports Consolidés
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ path('app_direction_generale_performance') }}">
+                            <i class="fas fa-chart-line"></i> Performance
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_planification') }}">
+                            <i class="fas fa-calendar-alt"></i> Planification
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Indicateurs de Performance</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="refreshPerformance()">
+                            <i class="fas fa-sync"></i> Actualiser
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-download"></i> Exporter
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Globale -->
+            <div class="row mb-4">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-primary shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        Performance Globale
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ globalPerformance.overall_rate }}%</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-chart-line fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-success shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                        Efficacité des Contrôles
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ globalPerformance.controls_efficiency }}%</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-shield-alt fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-info shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                        Détection d'Infractions
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ globalPerformance.infraction_detection_rate }}%</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-warning shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                        Productivité Agents
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ globalPerformance.agent_productivity }}%</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-users fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance par Région -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Performance par Région</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Région</th>
+                                            <th>Performance</th>
+                                            <th>Contrôles</th>
+                                            <th>Revenus</th>
+                                            <th>Agents</th>
+                                            <th>Tendance</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for region in regionalPerformance %}
+                                        <tr>
+                                            <td><strong>{{ region.region }}</strong></td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="progress mr-2" style="width: 60px; height: 10px;">
+                                                        <div class="progress-bar bg-{{ region.performance >= 90 ? 'success' : region.performance >= 80 ? 'info' : region.performance >= 70 ? 'warning' : 'danger' }}" 
+                                                             style="width: {{ region.performance }}%"></div>
+                                                    </div>
+                                                    <span>{{ region.performance }}%</span>
+                                                </div>
+                                            </td>
+                                            <td>{{ region.controls|number_format(0, '.', ' ') }}</td>
+                                            <td>{{ region.revenue|number_format(0, '.', ' ') }} GNF</td>
+                                            <td>{{ region.agents }}</td>
+                                            <td>
+                                                <span class="badge bg-{{ region.trend == 'up' ? 'success' : region.trend == 'down' ? 'danger' : 'secondary' }}">
+                                                    {{ region.trend == 'up' ? '↗' : region.trend == 'down' ? '↘' : '→' }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <a href="{{ path('app_direction_generale_performance_region', {'id': loop.index}) }}" class="btn btn-sm btn-info">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Performers -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Top Performers</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                {% for performer in topPerformers %}
+                                <div class="col-md-6 col-lg-3 mb-4">
+                                    <div class="card border-left-{{ performer.category == 'Meilleure région' ? 'primary' : performer.category == 'Meilleure brigade' ? 'success' : performer.category == 'Meilleur agent' ? 'info' : 'warning' }} shadow h-100">
+                                        <div class="card-body">
+                                            <div class="text-xs font-weight-bold text-{{ performer.category == 'Meilleure région' ? 'primary' : performer.category == 'Meilleure brigade' ? 'success' : performer.category == 'Meilleur agent' ? 'info' : 'warning' }} text-uppercase mb-1">
+                                                {{ performer.category }}
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ performer.name }}</div>
+                                            <div class="text-muted">{{ performer.metric }}: <strong>{{ performer.value }}</strong></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Évolution Mensuelle -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Évolution Mensuelle</h6>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="performanceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+function refreshPerformance() {
+    fetch('{{ path('app_direction_generale_performance_refresh') }}')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        });
+}
+
+// Graphique d'évolution
+const ctx = document.getElementById('performanceChart');
+if (ctx) {
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ monthlyEvolution.labels|json_encode()|raw }},
+            datasets: [
+                {
+                    label: 'Performance Globale',
+                    data: {{ monthlyEvolution.performance|json_encode()|raw }},
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1
+                },
+                {
+                    label: 'Efficacité',
+                    data: {{ monthlyEvolution.efficiency|json_encode()|raw }},
+                    borderColor: 'rgb(54, 162, 235)',
+                    tension: 0.1
+                },
+                {
+                    label: 'Productivité',
+                    data: {{ monthlyEvolution.productivity|json_encode()|raw }},
+                    borderColor: 'rgb(255, 99, 132)',
+                    tension: 0.1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    min: 70,
+                    max: 100
+                }
+            }
+        }
+    });
+}
+</script>
+
+{% endblock %}

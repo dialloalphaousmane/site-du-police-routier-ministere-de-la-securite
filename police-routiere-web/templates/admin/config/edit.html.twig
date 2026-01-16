@@ -1,0 +1,203 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier la Configuration - Police Routière Guinée{% endblock %}
+
+{% block stylesheets %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_dashboard_admin') }}">
+                            <i class="bi bi-speedometer2 me-2"></i>Tableau de bord
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_region_index') }}">
+                            <i class="bi bi-geo-alt me-2"></i>Régions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_brigade_index') }}">
+                            <i class="bi bi-shield me-2"></i>Brigades
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_report_index') }}">
+                            <i class="bi bi-file-text me-2"></i>Rapports
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_export_users') }}">
+                            <i class="bi bi-download me-2"></i>Export
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_log_index') }}">
+                            <i class="bi bi-journal-text me-2"></i>Logs
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_config_index') }}">
+                            <i class="bi bi-gear me-2"></i>Configuration
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Modifier la Configuration</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a href="{{ path('app_admin_config_index') }}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Retour
+                    </a>
+                </div>
+            </div>
+
+            <!-- Flash Messages -->
+            {% for type, messages in app.session.flashbag.all() %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ type == 'error' ? 'danger' : type }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+
+            <!-- Form -->
+            <div class="card">
+                <div class="card-body">
+                    {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.cle, 'Clé de configuration *', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.cle, {'attr': {'class': 'form-control', 'required': 'required', 'readonly': true, 'pattern': '[a-zA-Z0-9_]+', 'title': 'Utiliser uniquement des lettres, chiffres et underscores'}}) }}
+                                {{ form_errors(form.cle) }}
+                                <small class="form-text text-muted">La clé ne peut pas être modifiée</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.type, 'Type de valeur *', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.type, {'attr': {'class': 'form-control', 'required': 'required'}}) }}
+                                {{ form_errors(form.type) }}
+                                <small class="form-text text-muted">Choisissez le type de données pour cette configuration</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.categorie, 'Catégorie *', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.categorie, {'attr': {'class': 'form-control', 'required': 'required'}}) }}
+                                {{ form_errors(form.categorie) }}
+                                <small class="form-text text-muted">Sélectionnez la catégorie appropriée</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.valeur, 'Valeur *', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.valeur, {'attr': {'class': 'form-control', 'required': 'required'}}) }}
+                                {{ form_errors(form.valeur) }}
+                                <small class="form-text text-muted">Entrez la valeur de la configuration</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 3}}) }}
+                        {{ form_errors(form.description) }}
+                        <small class="form-text text-muted">Description détaillée de cette configuration (optionnel)</small>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form_label(form.actif, 'Configuration active', {'label_attr': {'class': 'form-label'}}) }}
+                        <div class="form-check mt-2">
+                            {{ form_widget(form.actif, {'attr': {'class': 'form-check-input'}}) }}
+                            {{ form_label(form.actif, 'Cochez pour activer cette configuration', {'label_attr': {'class': 'form-check-label'}}) }}
+                        </div>
+                        {{ form_errors(form.actif) }}
+                        <small class="form-text text-muted">Les configurations inactives ne seront pas prises en compte</small>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ path('app_admin_config_index') }}" class="btn btn-secondary me-2">
+                            <i class="bi bi-x-circle me-1"></i>Annuler
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-1"></i>Enregistrer les modifications
+                        </button>
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+
+            <!-- History Section -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-clock-history me-2"></i>Historique des modifications
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Créé le</h6>
+                            <p class="text-muted">
+                                {% if configuration.createdBy %}
+                                    {{ configuration.createdBy.email }}<br>
+                                {% endif %}
+                                {{ configuration.createdAt|date('d/m/Y H:i') }}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Dernière modification</h6>
+                            <p class="text-muted">
+                                {% if configuration.updatedBy %}
+                                    {{ configuration.updatedBy.email }}<br>
+                                {% endif %}
+                                {{ configuration.updatedAt|date('d/m/Y H:i') }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// Bootstrap form validation
+(function () {
+    'use strict'
+    var forms = document.querySelectorAll('.needs-validation')
+    Array.prototype.slice.call(forms).forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+            if (!form.checkValidity()) {
+                event.preventDefault()
+                event.stopPropagation()
+            }
+            form.classList.add('was-validated')
+        }, false)
+    })
+})()
+</script>
+{% endblock %}

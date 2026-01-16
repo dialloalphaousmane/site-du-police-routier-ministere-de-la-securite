@@ -1,0 +1,213 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails du Rapport - Police Routière Guinée{% endblock %}
+
+{% block stylesheets %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_dashboard_admin') }}">
+                            <i class="bi bi-speedometer2 me-2"></i>Tableau de bord
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_region_index') }}">
+                            <i class="bi bi-geo-alt me-2"></i>Régions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_brigade_index') }}">
+                            <i class="bi bi-shield me-2"></i>Brigades
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ path('app_admin_report_index') }}">
+                            <i class="bi bi-file-text me-2"></i>Rapports
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="bi bi-people me-2"></i>Utilisateurs
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Détails du Rapport</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a href="{{ path('app_admin_report_index') }}" class="btn btn-secondary me-2">
+                        <i class="bi bi-arrow-left me-1"></i>Retour
+                    </a>
+                    <a href="{{ path('app_admin_report_edit', {'id': rapport.id}) }}" class="btn btn-primary">
+                        <i class="bi bi-pencil me-1"></i>Modifier
+                    </a>
+                </div>
+            </div>
+
+            <!-- Report Details -->
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="bi bi-file-text me-2"></i>Informations du rapport
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <table class="table table-borderless">
+                                        <tr>
+                                            <td class="fw-bold">Titre:</td>
+                                            <td>{{ rapport.titre }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">Type:</td>
+                                            <td><span class="badge bg-info">{{ rapport.type }}</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">Auteur:</td>
+                                            <td>{{ rapport.auteur.email }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">Date création:</td>
+                                            <td>{{ rapport.dateCreation|date('d/m/Y H:i') }}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <table class="table table-borderless">
+                                        <tr>
+                                            <td class="fw-bold">Statut:</td>
+                                            <td>
+                                                {% if rapport.statut == 'BROUILLON' %}
+                                                    <span class="badge bg-secondary">Brouillon</span>
+                                                {% elseif rapport.statut == 'VALIDE' %}
+                                                    <span class="badge bg-success">Validé</span>
+                                                {% elseif rapport.statut == 'REJETE' %}
+                                                    <span class="badge bg-danger">Rejeté</span>
+                                                {% else %}
+                                                    <span class="badge bg-warning">{{ rapport.statut }}</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">Région:</td>
+                                            <td>
+                                                {% if rapport.region %}
+                                                    <span class="badge bg-primary">{{ rapport.region.libelle }}</span>
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">Brigade:</td>
+                                            <td>
+                                                {% if rapport.brigade %}
+                                                    <span class="badge bg-info">{{ rapport.brigade.libelle }}</span>
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">Validateur:</td>
+                                            <td>
+                                                {% if rapport.validateur %}
+                                                    {{ rapport.validateur.email }}
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            {% if rapport.dateValidation %}
+                                <div class="mt-3">
+                                    <h6 class="fw-bold">Date de validation:</h6>
+                                    <p class="text-muted">{{ rapport.dateValidation|date('d/m/Y H:i') }}</p>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="mt-3">
+                                <h6 class="fw-bold">Contenu du rapport:</h6>
+                                <div class="border p-3 bg-light">
+                                    <p class="text-muted">{{ rapport.contenu|nl2br }}</p>
+                                </div>
+                            </div>
+                            
+                            {% if rapport.observations %}
+                                <div class="mt-3">
+                                    <h6 class="fw-bold">Observations:</h6>
+                                    <p class="text-muted">{{ rapport.observations|nl2br }}</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <!-- Actions -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="bi bi-gear me-2"></i>Actions
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <a href="{{ path('app_admin_report_edit', {'id': rapport.id}) }}" class="btn btn-warning">
+                                    <i class="bi bi-pencil me-2"></i>Modifier
+                                </a>
+                                {% if rapport.statut == 'BROUILLON' %}
+                                    <form method="post" action="{{ path('app_admin_report_validate', {'id': rapport.id}) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('validate' ~ rapport.id) }}">
+                                        <button type="submit" class="btn btn-success w-100">
+                                            <i class="bi bi-check-circle me-2"></i>Valider
+                                        </button>
+                                    </form>
+                                    <form method="post" action="{{ path('app_admin_report_reject', {'id': rapport.id}) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('reject' ~ rapport.id) }}">
+                                        <button type="submit" class="btn btn-danger w-100">
+                                            <i class="bi bi-x-circle me-2"></i>Rejeter
+                                        </button>
+                                    </form>
+                                {% endif %}
+                                <a href="{{ path('app_admin_report_export', {'id': rapport.id}) }}" class="btn btn-info">
+                                    <i class="bi bi-download me-2"></i>Exporter (CSV)
+                                </a>
+                                <form method="post" action="{{ path('app_admin_report_delete', {'id': rapport.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce rapport ?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ rapport.id) }}">
+                                    <button type="submit" class="btn btn-danger w-100">
+                                        <i class="bi bi-trash me-2"></i>Supprimer
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

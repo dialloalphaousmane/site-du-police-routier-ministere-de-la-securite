@@ -1,0 +1,414 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tableau de Bord Administrateur - Police Routière Guinée{% endblock %}
+
+{% block stylesheets %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://127.0.0.1:8000/assets/css/dashboard.css" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+            <i class="bi bi-shield-check me-2"></i>
+            Police Routière Guinée
+        </a>
+        
+        <div class="navbar-nav ms-auto">
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                    <i class="bi bi-person-circle me-1"></i>
+                    {{ app.user.email }}
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profil</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Paramètres</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{{ path('app_logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Déconnexion</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_dashboard') }}">
+                            <i class="bi bi-speedometer2 me-2"></i>Tableau de bord
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_user_index') }}">
+                            <i class="bi bi-people me-2"></i>Gestion utilisateurs
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_region_index') }}">
+                            <i class="bi bi-geo-alt me-2"></i>Régions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_brigade_index') }}">
+                            <i class="bi bi-shield me-2"></i>Brigades
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_report_index') }}">
+                            <i class="bi bi-file-text me-2"></i>Rapports
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_export_users') }}">
+                            <i class="bi bi-download me-2"></i>Export
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_config_index') }}">
+                            <i class="bi bi-gear me-2"></i>Configuration
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_log_index') }}">
+                            <i class="bi bi-journal-text me-2"></i>Logs d'audit
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_notification_index') }}">
+                            <i class="bi bi-bell me-2"></i>Notifications
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Tableau de Bord Administrateur</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-download me-1"></i>Exporter
+                        </button>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-primary">
+                        <i class="bi bi-plus-circle me-1"></i>Nouveau
+                    </button>
+                </div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-primary shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        Utilisateurs Actifs
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">2,456</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-people fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-success shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                        Contrôles Aujourd'hui
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">342</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-clipboard-check fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-info shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                        Infractions
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">89</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-exclamation-triangle fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-warning shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                        Amendes Collectées
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">45,678,000 GNF</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-cash-stack fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="row">
+                <div class="col-xl-8 col-lg-7">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-primary">Évolution des Contrôles</h6>
+                            <div class="dropdown no-arrow">
+                                <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-three-dots-vertical fa-sm fa-fw text-gray-400"></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right shadow">
+                                    <a class="dropdown-item" href="#">7 jours</a>
+                                    <a class="dropdown-item" href="#">30 jours</a>
+                                    <a class="dropdown-item" href="#">3 mois</a>
+                                    <a class="dropdown-item" href="#">1 an</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-area">
+                                <canvas id="controlsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-4 col-lg-5">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Répartition par Région</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-pie pt-4">
+                                <canvas id="regionChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activities -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Activités Récentes</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Utilisateur</th>
+                                    <th>Action</th>
+                                    <th>Région</th>
+                                    <th>Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>08/01/2026 14:30</td>
+                                    <td>Agent Mamadou Diallo</td>
+                                    <td>Création contrôle</td>
+                                    <td>Conakry</td>
+                                    <td><span class="badge bg-success">Complété</span></td>
+                                </tr>
+                                <tr>
+                                    <td>08/01/2026 14:15</td>
+                                    <td>Chef Brigade Soumah</td>
+                                    <td>Validation rapport</td>
+                                    <td>Kindia</td>
+                                    <td><span class="badge bg-success">Validé</span></td>
+                                </tr>
+                                <tr>
+                                    <td>08/01/2026 13:45</td>
+                                    <td>Agent Bah</td>
+                                    <td>Ajout infraction</td>
+                                    <td>Labé</td>
+                                    <td><span class="badge bg-warning">En cours</span></td>
+                                </tr>
+                                <tr>
+                                    <td>08/01/2026 13:20</td>
+                                    <td>Direction Régionale</td>
+                                    <td>Création utilisateur</td>
+                                    <td>Faranah</td>
+                                    <td><span class="badge bg-success">Actif</span></td>
+                                </tr>
+                                <tr>
+                                    <td>08/01/2026 12:50</td>
+                                    <td>Agent Touré</td>
+                                    <td>Modification contrôle</td>
+                                    <td>N'Zérékoré</td>
+                                    <td><span class="badge bg-info">Modifié</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Dashboard JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    // Chart.js configuration
+    Chart.defaults.font.family = 'system-ui, -apple-system, sans-serif';
+    
+    // Initialize charts
+    initializeCharts();
+    
+    // Auto-refresh stats every 30 seconds
+    setInterval(refreshStats, 30000);
+});
+
+function initializeCharts() {
+    // Controls Chart
+    const controlsCtx = document.getElementById('controlsChart');
+    if (controlsCtx) {
+        new Chart(controlsCtx, {
+            type: 'line',
+            data: {
+                labels: {{ controlsChart.labels|json_encode() }},
+                datasets: [{
+                    label: 'Contrôles quotidiens',
+                    data: {{ controlsChart.data|json_encode() }},
+                    borderColor: '#1e3a8a',
+                    backgroundColor: 'rgba(30, 58, 138, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+    
+    // Infractions Chart
+    const infractionsCtx = document.getElementById('infractionsChart');
+    if (infractionsCtx) {
+        new Chart(infractionsCtx, {
+            type: 'doughnut',
+            data: {
+                labels: {{ infractionsByType.labels|json_encode() }},
+                datasets: [{
+                    data: {{ infractionsByType.data|json_encode() }},
+                    backgroundColor: [
+                        '#ef4444',
+                        '#f59e0b',
+                        '#10b981',
+                        '#3b82f6',
+                        '#8b5cf6'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    }
+                }
+            }
+        });
+    }
+    
+    // Regions Chart
+    const regionsCtx = document.getElementById('regionsChart');
+    if (regionsCtx) {
+        new Chart(regionsCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ controlsByRegion.labels|json_encode() }},
+                datasets: [{
+                    label: 'Activité par région',
+                    data: {{ controlsByRegion.data|json_encode() }},
+                    backgroundColor: '#1e3a8a'
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+}
+
+function refreshStats() {
+    fetch('/api/stats/realtime')
+        .then(response => response.json())
+        .then(data => {
+            // Update statistics cards
+            updateStatCard('totalUsers', data.users);
+            updateStatCard('totalControls', data.controls);
+            updateStatCard('totalInfractions', data.infractions);
+            updateStatCard('totalReports', data.reports);
+        })
+        .catch(error => console.error('Error refreshing stats:', error));
+}
+
+function updateStatCard(id, value) {
+    const element = document.getElementById(id);
+    if (element) {
+        element.textContent = value;
+        element.classList.add('animate-pulse');
+        setTimeout(() => {
+            element.classList.remove('animate-pulse');
+        }, 1000);
+    }
+}
+</script>
+{% endblock %}

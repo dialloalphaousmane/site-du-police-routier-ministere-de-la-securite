@@ -1,0 +1,195 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Rapports - Police Routière Guinée{% endblock %}
+
+{% block stylesheets %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_dashboard') }}">
+                            <i class="bi bi-speedometer2 me-2"></i>Tableau de bord
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_user_index') }}">
+                            <i class="bi bi-people me-2"></i>Gestion utilisateurs
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_region_index') }}">
+                            <i class="bi bi-geo-alt me-2"></i>Régions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_brigade_index') }}">
+                            <i class="bi bi-shield me-2"></i>Brigades
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ path('app_admin_report_index') }}">
+                            <i class="bi bi-file-text me-2"></i>Rapports
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_export_users') }}">
+                            <i class="bi bi-download me-2"></i>Export
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_config_index') }}">
+                            <i class="bi bi-gear me-2"></i>Configuration
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_log_index') }}">
+                            <i class="bi bi-journal-text me-2"></i>Logs d'audit
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_notification_index') }}">
+                            <i class="bi bi-bell me-2"></i>Notifications
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Gestion des Rapports</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <a href="{{ path('app_admin_report_new') }}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-1"></i>Nouveau rapport
+                        </a>
+                    </div>
+                    <div class="btn-group me-2">
+                        <a href="{{ path('app_admin_export_rapports') }}" class="btn btn-success">
+                            <i class="bi bi-download me-1"></i>Export CSV
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flash Messages -->
+            {% for type, messages in app.session.flashbag.all() %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ type == 'error' ? 'danger' : type }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+
+            <!-- Table -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Titre</th>
+                                    <th>Type</th>
+                                    <th>Auteur</th>
+                                    <th>Région</th>
+                                    <th>Statut</th>
+                                    <th>Date création</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for rapport in rapports %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ rapport.titre }}</strong>
+                                            {% if rapport.region %}
+                                                <br><small class="text-muted">{{ rapport.region.libelle }}</small>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info">{{ rapport.type }}</span>
+                                        </td>
+                                        <td>{{ rapport.auteur.email }}</td>
+                                        <td>
+                                            {% if rapport.region %}
+                                                <span class="badge bg-primary">{{ rapport.region.libelle }}</span>
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if rapport.statut == 'BROUILLON' %}
+                                                <span class="badge bg-secondary">Brouillon</span>
+                                            {% elseif rapport.statut == 'VALIDE' %}
+                                                <span class="badge bg-success">Validé</span>
+                                            {% elseif rapport.statut == 'REJETE' %}
+                                                <span class="badge bg-danger">Rejeté</span>
+                                            {% else %}
+                                                <span class="badge bg-warning">{{ rapport.statut }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ rapport.dateCreation|date('d/m/Y H:i') }}</td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{{ path('app_admin_report_show', {'id': rapport.id}) }}" class="btn btn-outline-primary" title="Voir">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                <a href="{{ path('app_admin_report_edit', {'id': rapport.id}) }}" class="btn btn-outline-warning" title="Modifier">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                {% if rapport.statut == 'BROUILLON' %}
+                                                    <form method="post" action="{{ path('app_admin_report_validate', {'id': rapport.id}) }}" style="display: inline;">
+                                                        <input type="hidden" name="_token" value="{{ csrf_token('validate' ~ rapport.id) }}">
+                                                        <button type="submit" class="btn btn-outline-success" title="Valider">
+                                                            <i class="bi bi-check-circle"></i>
+                                                        </button>
+                                                    </form>
+                                                    <form method="post" action="{{ path('app_admin_report_reject', {'id': rapport.id}) }}" style="display: inline;">
+                                                        <input type="hidden" name="_token" value="{{ csrf_token('reject' ~ rapport.id) }}">
+                                                        <button type="submit" class="btn btn-outline-danger" title="Rejeter">
+                                                            <i class="bi bi-x-circle"></i>
+                                                        </button>
+                                                    </form>
+                                                {% endif %}
+                                                <a href="{{ path('app_admin_report_export', {'id': rapport.id}) }}" class="btn btn-outline-info" title="Exporter">
+                                                    <i class="bi bi-download"></i>
+                                                </a>
+                                                <form method="post" action="{{ path('app_admin_report_delete', {'id': rapport.id}) }}" style="display: inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce rapport ?');">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ rapport.id) }}">
+                                                    <button type="submit" class="btn btn-outline-danger" title="Supprimer">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted">
+                                            <i class="bi bi-inbox me-2"></i>Aucun rapport trouvé
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

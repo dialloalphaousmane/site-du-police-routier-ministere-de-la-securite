@@ -1,0 +1,215 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Planification - Direction Générale{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                    <span>Direction Générale</span>
+                </h6>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_dashboard') }}">
+                            <i class="fas fa-tachometer-alt"></i> Tableau de Bord
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_statistiques') }}">
+                            <i class="fas fa-chart-bar"></i> Statistiques Nationales
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_supervision') }}">
+                            <i class="fas fa-eye"></i> Supervision Régions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_rapports') }}">
+                            <i class="fas fa-file-alt"></i> Rapports Consolidés
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_performance') }}">
+                            <i class="fas fa-chart-line"></i> Performance
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ path('app_direction_generale_planification') }}">
+                            <i class="fas fa-calendar-alt"></i> Planification
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Planification Stratégique</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <a href="{{ path('app_direction_generale_planification_nouveau') }}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Nouveau Plan
+                        </a>
+                        <a href="{{ path('app_direction_generale_planification_calendrier') }}" class="btn btn-info">
+                            <i class="fas fa-calendar"></i> Calendrier
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Plans Actifs -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Plans Actifs</h6>
+                        </div>
+                        <div class="card-body">
+                            {% for plan in activePlans %}
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-8">
+                                            <h6 class="card-title">{{ plan.title }}</h6>
+                                            <p class="card-text text-muted">
+                                                <i class="fas fa-calendar"></i> {{ plan.start_date }} - {{ plan.end_date }}
+                                                <span class="badge bg-{{ plan.status == 'En cours' ? 'success' : 'warning' }} ms-2">{{ plan.status }}</span>
+                                            </p>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="progress mb-2" style="height: 20px;">
+                                                <div class="progress-bar" role="progressbar" style="width: {{ plan.progress }}%;" aria-valuenow="{{ plan.progress }}" aria-valuemin="0" aria-valuemax="100">
+                                                    {{ plan.progress }}%
+                                                </div>
+                                            </div>
+                                            <small class="text-muted">{{ plan.completed_objectives }}/{{ plan.objectives_count }} objectifs</small>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3">
+                                        <div class="col-md-6">
+                                            <small class="text-muted">Budget: {{ plan.budget|number_format(0, '.', ' ') }} GNF</small>
+                                        </div>
+                                        <div class="col-md-6 text-right">
+                                            <a href="{{ path('app_direction_generale_planification_details', {'id': plan.id}) }}" class="btn btn-sm btn-info">
+                                                <i class="fas fa-eye"></i> Détails
+                                            </a>
+                                            <a href="{{ path('app_direction_generale_planification_modifier', {'id': plan.id}) }}" class="btn btn-sm btn-warning">
+                                                <i class="fas fa-edit"></i> Modifier
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Plans à Venir -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-info">Plans à Venir</h6>
+                        </div>
+                        <div class="card-body">
+                            {% for plan in upcomingPlans %}
+                            <div class="card mb-3 border-info">
+                                <div class="card-body">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-8">
+                                            <h6 class="card-title">{{ plan.title }}</h6>
+                                            <p class="card-text text-muted">
+                                                <i class="fas fa-calendar"></i> {{ plan.start_date }} - {{ plan.end_date }}
+                                                <span class="badge bg-info ms-2">{{ plan.status }}</span>
+                                            </p>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="progress mb-2" style="height: 20px;">
+                                                <div class="progress-bar bg-info" role="progressbar" style="width: {{ plan.progress }}%;" aria-valuenow="{{ plan.progress }}" aria-valuemin="0" aria-valuemax="100">
+                                                    {{ plan.progress }}%
+                                                </div>
+                                            </div>
+                                            <small class="text-muted">{{ plan.completed_objectives }}/{{ plan.objectives_count }} objectifs</small>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3">
+                                        <div class="col-md-6">
+                                            <small class="text-muted">Budget: {{ plan.budget|number_format(0, '.', ' ') }} GNF</small>
+                                        </div>
+                                        <div class="col-md-6 text-right">
+                                            <a href="{{ path('app_direction_generale_planification_details', {'id': plan.id}) }}" class="btn btn-sm btn-info">
+                                                <i class="fas fa-eye"></i> Détails
+                                            </a>
+                                            <a href="{{ path('app_direction_generale_planification_modifier', {'id': plan.id}) }}" class="btn btn-sm btn-warning">
+                                                <i class="fas fa-edit"></i> Modifier
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Plans Archivés -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-secondary">Plans Archivés</h6>
+                        </div>
+                        <div class="card-body">
+                            {% for plan in archivedPlans %}
+                            <div class="card mb-3 border-secondary">
+                                <div class="card-body">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-8">
+                                            <h6 class="card-title">{{ plan.title }}</h6>
+                                            <p class="card-text text-muted">
+                                                <i class="fas fa-calendar"></i> {{ plan.start_date }} - {{ plan.end_date }}
+                                                <span class="badge bg-secondary ms-2">{{ plan.status }}</span>
+                                            </p>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="progress mb-2" style="height: 20px;">
+                                                <div class="progress-bar bg-secondary" role="progressbar" style="width: {{ plan.progress }}%;" aria-valuenow="{{ plan.progress }}" aria-valuemin="0" aria-valuemax="100">
+                                                    {{ plan.progress }}%
+                                                </div>
+                                            </div>
+                                            <small class="text-muted">{{ plan.completed_objectives }}/{{ plan.objectives_count }} objectifs</small>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3">
+                                        <div class="col-md-6">
+                                            <small class="text-muted">Budget: {{ plan.budget|number_format(0, '.', ' ') }} GNF</small>
+                                        </div>
+                                        <div class="col-md-6 text-right">
+                                            <a href="{{ path('app_direction_generale_planification_details', {'id': plan.id}) }}" class="btn btn-sm btn-info">
+                                                <i class="fas fa-eye"></i> Détails
+                                            </a>
+                                            <button class="btn btn-sm btn-success">
+                                                <i class="fas fa-download"></i> Exporter
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+{% endblock %}

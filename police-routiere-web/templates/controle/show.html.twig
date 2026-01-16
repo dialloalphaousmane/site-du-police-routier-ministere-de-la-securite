@@ -1,0 +1,197 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails du Contrôle - Police Routière{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <!-- Carte du contrôle -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-card-checklist"></i> Détails du Contrôle
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Informations du Contrôle</h6>
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><strong>Date:</strong></td>
+                                    <td>{{ controle.dateControle|date('d/m/Y H:i') }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Lieu:</strong></td>
+                                    <td>{{ controle.lieuControle }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Brigade:</strong></td>
+                                    <td>
+                                        {% if controle.brigade %}
+                                            {{ controle.brigade.libelle }} ({{ controle.brigade.code }})
+                                        {% else %}
+                                            <span class="text-muted">Non assignée</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Agent:</strong></td>
+                                    <td>
+                                        {% if controle.agent %}
+                                            {{ controle.agent.nom }} {{ controle.agent.prenom }}
+                                            <br><small class="text-muted">Matricule: {{ controle.agent.matricule }}</small>
+                                        {% else %}
+                                            <span class="text-muted">Non assigné</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Informations du Véhicule</h6>
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><strong>Marque:</strong></td>
+                                    <td>{{ controle.marqueVehicule }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Immatriculation:</strong></td>
+                                    <td>{{ controle.immatriculation }}</td>
+                                </tr>
+                            </table>
+
+                            <h6 class="text-primary mt-3">Informations du Conducteur</h6>
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><strong>Nom:</strong></td>
+                                    <td>{{ controle.nomConducteur }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Prénom:</strong></td>
+                                    <td>{{ controle.prenomConducteur }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>N° Permis:</strong></td>
+                                    <td>{{ controle.noConducteur }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    {% if controle.observation %}
+                        <div class="row mt-3">
+                            <div class="col-md-12">
+                                <h6 class="text-primary">Observations</h6>
+                                <div class="alert alert-info">
+                                    {{ controle.observation }}
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section des infractions -->
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="bi bi-exclamation-triangle"></i> Infractions
+                        </h5>
+                        {% if is_granted('ROLE_AGENT') or is_granted('ROLE_CHEF_BRIGADE') or is_granted('ROLE_DIRECTION_REGIONALE') %}
+                            <a href="{{ path('app_infraction_new', {'controleId': controle.id}) }}" 
+                               class="btn btn-sm btn-light">
+                                <i class="bi bi-plus-circle"></i> Ajouter
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if controle.infractions|length > 0 %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Référence</th>
+                                        <th>Libellé</th>
+                                        <th>Montant</th>
+                                        <th>Statut</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for infraction in controle.infractions %}
+                                        <tr>
+                                            <td>{{ infraction.reference }}</td>
+                                            <td>{{ infraction.libelle }}</td>
+                                            <td>{{ infraction.montantAmende|number_format(0, ',', ' ') }} GNF</td>
+                                            <td>
+                                                {% if infraction.statut == 'PAYEE' %}
+                                                    <span class="badge bg-success">Payée</span>
+                                                {% elseif infraction.statut == 'PARTIELLEMENT_PAYEE' %}
+                                                    <span class="badge bg-warning">Partiellement payée</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">Non payée</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <a href="{{ path('app_infraction_show', {'id': infraction.id}) }}" 
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr class="table-dark">
+                                        <th colspan="2">Total</th>
+                                        <th>
+                                            {% set total = 0 %}
+                                            {% for infraction in controle.infractions %}
+                                                {% set total = total + infraction.montantAmende %}
+                                            {% endfor %}
+                                            {{ total|number_format(0, ',', ' ') }} GNF
+                                        </th>
+                                        <th colspan="2"></th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i>
+                            Aucune infraction enregistrée pour ce contrôle.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Boutons d'action -->
+    <div class="row mt-4">
+        <div class="col-md-10 offset-md-1">
+            <div class="d-flex justify-content-between">
+                <a href="{{ path('app_controle_index') }}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Retour à la liste
+                </a>
+                
+                {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_DIRECTION_GENERALE') or 
+                      (is_granted('ROLE_DIRECTION_REGIONALE') and controle.brigade.region == app.user.region) or
+                      (is_granted('ROLE_CHEF_BRIGADE') and controle.brigade == app.user.brigade) %}
+                    <a href="{{ path('app_controle_edit', {'id': controle.id}) }}" class="btn btn-warning">
+                        <i class="bi bi-pencil"></i> Modifier
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

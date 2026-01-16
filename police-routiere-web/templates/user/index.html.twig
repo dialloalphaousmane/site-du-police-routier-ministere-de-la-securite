@@ -1,0 +1,248 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Utilisateurs - Police Routière Guinée{% endblock %}
+
+{% block stylesheets %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+    .user-card {
+        transition: transform 0.2s;
+        border-left: 4px solid #1e3a8a;
+    }
+    .user-card:hover {
+        transform: translateY(-2px);
+    }
+    .status-badge {
+        font-size: 0.8em;
+        padding: 4px 8px;
+        border-radius: 12px;
+    }
+    .status-active {
+        background-color: #10b981;
+        color: white;
+    }
+    .status-inactive {
+        background-color: #6b7280;
+        color: white;
+    }
+    .role-badge {
+        background-color: #3b82f6;
+        color: white;
+        font-size: 0.7em;
+        padding: 2px 6px;
+        border-radius: 8px;
+    }
+    .action-buttons {
+        display: flex;
+        gap: 5px;
+    }
+    .action-buttons .btn {
+        padding: 4px 8px;
+        font-size: 0.8em;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_dashboard') }}">
+                            <i class="bi bi-speedometer2 me-2"></i>Tableau de bord
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ path('app_user_index') }}">
+                            <i class="bi bi-people me-2"></i>Gestion utilisateurs
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_region_index') }}">
+                            <i class="bi bi-geo-alt me-2"></i>Régions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_brigade_index') }}">
+                            <i class="bi bi-shield me-2"></i>Brigades
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_report_index') }}">
+                            <i class="bi bi-file-text me-2"></i>Rapports
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_export_users') }}">
+                            <i class="bi bi-download me-2"></i>Export
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_config_index') }}">
+                            <i class="bi bi-gear me-2"></i>Configuration
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_log_index') }}">
+                            <i class="bi bi-journal-text me-2"></i>Logs d'audit
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_notification_index') }}">
+                            <i class="bi bi-bell me-2"></i>Notifications
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Gestion des Utilisateurs</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <a href="{{ path('app_user_new') }}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-1"></i>Nouvel utilisateur
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flash Messages -->
+            {% for type, messages in app.session.flashbag.all() %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ type == 'error' ? 'danger' : type }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+
+            <!-- Users List -->
+            <div class="row">
+                {% for user in users %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card user-card h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title mb-0">{{ user.nom }} {{ user.prenom }}</h6>
+                                    <small class="text-muted">{{ user.email }}</small>
+                                </div>
+                                <div>
+                                    <span class="status-badge {{ user.isActive ? 'status-active' : 'status-inactive' }}">
+                                        {{ user.isActive ? 'Actif' : 'Inactif' }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <strong>Email:</strong> {{ user.email }}<br>
+                                    <strong>Téléphone:</strong> {{ user.telephone ?? 'Non renseigné' }}<br>
+                                    <strong>Région:</strong> {{ user.region ? user.region.libelle : 'Non assigné' }}<br>
+                                    <strong>Brigade:</strong> {{ user.brigade ? user.brigade.libelle : 'Non assigné' }}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    {% for role in user.roles %}
+                                        {% if role != 'ROLE_USER' %}
+                                            <span class="role-badge me-1">{{ role|replace({'ROLE_': ''}) }}</span>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+
+                                <div class="action-buttons">
+                                    <a href="{{ path('app_user_show', {'id': user.id}) }}" class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{{ path('app_user_edit', {'id': user.id}) }}" class="btn btn-outline-secondary btn-sm">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    {% if user.isActive %}
+                                        <form method="post" action="{{ path('app_user_toggle_active', {'id': user.id}) }}" style="display: inline;">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('toggle' ~ user.id) }}">
+                                            <button type="submit" class="btn btn-outline-warning btn-sm">
+                                                <i class="bi bi-pause"></i>
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <form method="post" action="{{ path('app_user_toggle_active', {'id': user.id}) }}" style="display: inline;">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('toggle' ~ user.id) }}">
+                                            <button type="submit" class="btn btn-outline-success btn-sm">
+                                                <i class="bi bi-play"></i>
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                    <form method="post" action="{{ path('app_user_reset_password', {'id': user.id}) }}" style="display: inline;">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('reset' ~ user.id) }}">
+                                        <button type="submit" class="btn btn-outline-info btn-sm">
+                                            <i class="bi bi-key"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="card-footer text-muted">
+                                <small>Créé le {{ user.createdAt ? user.createdAt|date('d/m/Y H:i') : 'Inconnu' }}</small>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="col-12">
+                        <div class="alert alert-info text-center">
+                            <i class="bi bi-info-circle me-2"></i>
+                            Aucun utilisateur trouvé. 
+                            <a href="{{ path('app_user_new') }}" class="btn btn-primary btn-sm ms-2">
+                                Créer le premier utilisateur
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Statistics -->
+            <div class="row mt-4">
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ users|length }}</h5>
+                            <p class="card-text">Total utilisateurs</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ users|filter(u => u.isActive)|length }}</h5>
+                            <p class="card-text">Utilisateurs actifs</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ users|filter(u => not u.isActive)|length }}</h5>
+                            <p class="card-text">Utilisateurs inactifs</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ users|filter(u => 'ROLE_ADMIN' in u.roles)|length }}</h5>
+                            <p class="card-text">Administrateurs</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

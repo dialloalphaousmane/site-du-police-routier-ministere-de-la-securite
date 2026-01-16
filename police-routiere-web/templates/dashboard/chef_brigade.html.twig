@@ -1,0 +1,556 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tableau de Bord Chef de Brigade - Police Routière Guinée{% endblock %}
+
+{% block stylesheets %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://127.0.0.1:8000/assets/css/dashboard.css" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+            <i class="bi bi-shield-check me-2"></i>
+            Police Routière Guinée - Chef de Brigade
+        </a>
+        
+        <div class="navbar-nav ms-auto">
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                    <i class="bi bi-person-circle me-1"></i>
+                    {{ app.user.email }}
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profil</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Paramètres</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{{ path('app_logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Déconnexion</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ path('app_dashboard_chef_brigade') }}">
+                            <i class="bi bi-speedometer2 me-2"></i>Tableau de bord
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_agent_index') }}">
+                            <i class="bi bi-people me-2"></i>Équipe
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_controle_index') }}">
+                            <i class="bi bi-clipboard-check me-2"></i>Contrôles
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_infraction_index') }}">
+                            <i class="bi bi-exclamation-triangle me-2"></i>Infractions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_amende_index') }}">
+                            <i class="bi bi-cash-stack me-2"></i>Amendes
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_rapport_new') }}">
+                            <i class="bi bi-file-plus me-2"></i>Nouveau Rapport
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_dashboard') }}">
+                            <i class="bi bi-house me-2"></i>Accueil
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_logout') }}">
+                            <i class="bi bi-box-arrow-right me-2"></i>Déconnexion
+                        </a>
+                    </li>
+                </ul>
+                            <i class="bi bi-people me-2"></i>Gestion équipe
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#controls">
+                            <i class="bi bi-clipboard-check me-2"></i>Contrôles brigade
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#infractions">
+                            <i class="bi bi-exclamation-triangle me-2"></i>Infractions brigade
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#planning">
+                            <i class="bi bi-calendar3 me-2"></i>Planning
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#reports">
+                            <i class="bi bi-file-text me-2"></i>Rapports
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Tableau de Bord - Chef de Brigade</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <a href="{{ path('app_admin_export_controls') }}" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-download me-1"></i>Exporter Contrôles
+                        </a>
+                    </div>
+                    <a href="{{ path('app_controle_new') }}" class="btn btn-sm btn-primary">
+                        <i class="bi bi-plus-circle me-1"></i>Nouveau Contrôle
+                    </a>
+                </div>
+            </div>
+
+            <!-- Brigade Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-primary shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        Effectif Brigade
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.team_size|default(12) }}</div>
+                                    <div class="text-xs text-gray-500">Présents: {{ stats.team_present|default(11) }} (91.7%)</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-people-fill fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-success shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                        Contrôles Aujourd'hui
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.controls_today|default(45) }}</div>
+                                    <div class="text-xs text-gray-500">Objectif: 50 (90%)</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-clipboard-check fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-info shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                        Infractions
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.infractions_count|default(18) }}</div>
+                                    <div class="text-xs text-gray-500">40% des contrôles</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-exclamation-triangle fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-warning shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                        Recettes (GNF)
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.revenue_total|number_format(0, '.', ',')|default('4,567,000') }} GNF</div>
+                                    <div class="text-xs text-gray-500">Moyenne: 101,489/contrôle</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-cash-stack fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Team Performance -->
+            <div class="row">
+                <div class="col-xl-8 col-lg-7">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-primary">Performance de l'Équipe</h6>
+                            <div class="dropdown no-arrow">
+                                <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-three-dots-vertical fa-sm fa-fw text-gray-400"></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right shadow">
+                                    <a class="dropdown-item" href="#">Aujourd'hui</a>
+                                    <a class="dropdown-item" href="#">Cette semaine</a>
+                                    <a class="dropdown-item" href="#">Ce mois</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-area">
+                                <canvas id="teamPerformanceChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-4 col-lg-5">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Top Performeurs</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="bi bi-trophy-fill text-warning me-2"></i>
+                                        Agent Mamadou Diallo
+                                    </div>
+                                    <span class="badge bg-success">12 contrôles</span>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="bi bi-award text-info me-2"></i>
+                                        Agent Oumar Touré
+                                    </div>
+                                    <span class="badge bg-info">10 contrôles</span>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="bi bi-star text-primary me-2"></i>
+                                        Agent Sékou Condé
+                                    </div>
+                                    <span class="badge bg-primary">8 contrôles</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Team Management Table -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Gestion de l'Équipe</h6>
+                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#assignAgentModal">
+                        <i class="bi bi-person-plus me-1"></i>Affecter Agent
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Agent</th>
+                                    <th>Grade</th>
+                                    <th>Contrôles/Jour</th>
+                                    <th>Infractions</th>
+                                    <th>Taux Succès</th>
+                                    <th>Statut</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Mamadou Diallo</td>
+                                    <td>Brigadier-Chef</td>
+                                    <td>12</td>
+                                    <td>5</td>
+                                    <td>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 95%">95%</div>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-success">Actif</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button>
+                                        <button class="btn btn-sm btn-outline-info"><i class="bi bi-chat-dots"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Oumar Touré</td>
+                                    <td>Adjudant</td>
+                                    <td>10</td>
+                                    <td>3</td>
+                                    <td>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-info" role="progressbar" style="width: 88%">88%</div>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-success">Actif</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button>
+                                        <button class="btn btn-sm btn-outline-info"><i class="bi bi-chat-dots"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Sékou Condé</td>
+                                    <td>Brigadier</td>
+                                    <td>8</td>
+                                    <td>4</td>
+                                    <td>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-warning" role="progressbar" style="width: 72%">72%</div>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-success">Actif</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button>
+                                        <button class="btn btn-sm btn-outline-info"><i class="bi bi-chat-dots"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Alpha Camara</td>
+                                    <td>Agent</td>
+                                    <td>6</td>
+                                    <td>2</td>
+                                    <td>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-warning" role="progressbar" style="width: 65%">65%</div>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-warning">En formation</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button>
+                                        <button class="btn btn-sm btn-outline-warning"><i class="bi bi-mortarboard"></i></button>
+                                    </td>
+                                </tr>
+                                <tr class="table-warning">
+                                    <td>Mamadou Bah</td>
+                                    <td>Agent</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-danger" role="progressbar" style="width: 0%">0%</div>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-danger">Absent</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-warning"><i class="bi bi-telephone"></i></button>
+                                        <button class="btn btn-sm btn-outline-danger"><i class="bi bi-exclamation-triangle"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Brigade Activities -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Activités Récentes de la Brigade</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Date/Heure</th>
+                                    <th>Agent</th>
+                                    <th>Type Contrôle</th>
+                                    <th>Localisation</th>
+                                    <th>Véhicules</th>
+                                    <th>Infractions</th>
+                                    <th>Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>08/01/2026 14:30</td>
+                                    <td>Mamadou Diallo</td>
+                                    <td>Contrôle vitesse</td>
+                                    <td>Avenue du Général De Gaulle</td>
+                                    <td>15</td>
+                                    <td>3</td>
+                                    <td><span class="badge bg-success">Complété</span></td>
+                                </tr>
+                                <tr>
+                                    <td>08/01/2026 14:15</td>
+                                    <td>Oumar Touré</td>
+                                    <td>Contrôle documentation</td>
+                                    <td>Carrefour du 8 Novembre</td>
+                                    <td>12</td>
+                                    <td>2</td>
+                                    <td><span class="badge bg-success">Complété</span></td>
+                                </tr>
+                                <tr>
+                                    <td>08/01/2026 13:45</td>
+                                    <td>Sékou Condé</td>
+                                    <td>Contrôle alcoolémie</td>
+                                    <td>Pont du 8 Novembre</td>
+                                    <td>8</td>
+                                    <td>1</td>
+                                    <td><span class="badge bg-warning">En cours</span></td>
+                                </tr>
+                                <tr>
+                                    <td>08/01/2026 13:20</td>
+                                    <td>Alpha Camara</td>
+                                    <td>Contrôle équipement</td>
+                                    <td>Route de Friguiagbé</td>
+                                    <td>10</td>
+                                    <td>0</td>
+                                    <td><span class="badge bg-success">Complété</span></td>
+                                </tr>
+                                <tr>
+                                    <td>08/01/2026 12:50</td>
+                                    <td>Chef Brigade</td>
+                                    <td>Rapport journalier</td>
+                                    <td>Poste de contrôle</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td><span class="badge bg-info">Soumis</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- New Control Modal -->
+<div class="modal fade" id="newControlModal" tabindex="-1" aria-labelledby="newControlModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="newControlModalLabel">Nouveau Contrôle Routier</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="controlType" class="form-label">Type de Contrôle</label>
+                            <select class="form-select" id="controlType">
+                                <option selected>Sélectionner...</option>
+                                <option value="vitesse">Contrôle vitesse</option>
+                                <option value="documentation">Contrôle documentation</option>
+                                <option value="alcool">Contrôle alcoolémie</option>
+                                <option value="equipement">Contrôle équipement</option>
+                                <option value="chargement">Contrôle chargement</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="location" class="form-label">Localisation</label>
+                            <input type="text" class="form-control" id="location" placeholder="Ex: Avenue du Général De Gaulle">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="agent1" class="form-label">Agent 1</label>
+                            <select class="form-select" id="agent1">
+                                <option selected>Sélectionner...</option>
+                                <option value="1">Mamadou Diallo</option>
+                                <option value="2">Oumar Touré</option>
+                                <option value="3">Sékou Condé</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="agent2" class="form-label">Agent 2</label>
+                            <select class="form-select" id="agent2">
+                                <option selected>Sélectionner...</option>
+                                <option value="1">Mamadou Diallo</option>
+                                <option value="2">Oumar Touré</option>
+                                <option value="3">Sékou Condé</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="startTime" class="form-label">Heure Début</label>
+                            <input type="time" class="form-control" id="startTime">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="observations" class="form-label">Observations</label>
+                        <textarea class="form-control" id="observations" rows="3" placeholder="Notes sur le contrôle..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary">Démarrer Contrôle</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Assign Agent Modal -->
+<div class="modal fade" id="assignAgentModal" tabindex="-1" aria-labelledby="assignAgentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="assignAgentModalLabel">Affecter un Agent</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="agentSelect" class="form-label">Sélectionner un Agent</label>
+                        <select class="form-select" id="agentSelect">
+                            <option selected>Sélectionner un agent disponible...</option>
+                            <option value="1">Agent Mohamed Camara - Adjudant</option>
+                            <option value="2">Agent Abdoulaye Bah - Brigadier</option>
+                            <option value="3">Agent Fatoumata Touré - Agent</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="assignmentDate" class="form-label">Date d'Affectation</label>
+                        <input type="date" class="form-control" id="assignmentDate">
+                    </div>
+                    <div class="mb-3">
+                        <label for="assignmentNotes" class="form-label">Notes d'Affectation</label>
+                        <textarea class="form-control" id="assignmentNotes" rows="3" placeholder="Notes sur l'affectation..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary">Affecter l'Agent</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://127.0.0.1:8000/assets/js/dashboard.js"></script>
+{% endblock %}

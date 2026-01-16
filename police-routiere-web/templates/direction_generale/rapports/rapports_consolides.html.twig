@@ -1,0 +1,286 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Rapports Consolidés - Direction Générale{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                    <span>Direction Générale</span>
+                </h6>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_dashboard') }}">
+                            <i class="fas fa-tachometer-alt"></i> Tableau de Bord
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_statistiques') }}">
+                            <i class="fas fa-chart-bar"></i> Statistiques Nationales
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_supervision') }}">
+                            <i class="fas fa-eye"></i> Supervision Régions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ path('app_direction_generale_rapports') }}">
+                            <i class="fas fa-file-alt"></i> Rapports Consolidés
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_performance') }}">
+                            <i class="fas fa-chart-line"></i> Performance
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_planification') }}">
+                            <i class="fas fa-calendar-alt"></i> Planification
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Rapports Consolidés</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <a href="{{ path('app_direction_generale_rapports_nouveau') }}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-plus"></i> Nouveau Rapport
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtres -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Filtres de Recherche</h6>
+                        </div>
+                        <div class="card-body">
+                            <form method="get" class="row g-3">
+                                <div class="col-md-3">
+                                    <label for="type" class="form-label">Type</label>
+                                    <select class="form-select" id="type" name="type">
+                                        <option value="">Tous les types</option>
+                                        <option value="mensuel">Mensuel</option>
+                                        <option value="trimestriel">Trimestriel</option>
+                                        <option value="annuel">Annuel</option>
+                                        <option value="special">Spécial</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="period" class="form-label">Période</label>
+                                    <input type="text" class="form-control" id="period" name="period" placeholder="Ex: 2026-01">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="status" class="form-label">Status</label>
+                                    <select class="form-select" id="status" name="status">
+                                        <option value="">Tous les status</option>
+                                        <option value="termine">Terminé</option>
+                                        <option value="en_cours">En cours</option>
+                                        <option value="brouillon">Brouillon</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">&nbsp;</label>
+                                    <div class="d-grid">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-search"></i> Rechercher
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Liste des rapports -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-primary">Liste des Rapports</h6>
+                            <div class="dropdown no-arrow">
+                                <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="rapportsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Titre</th>
+                                            <th>Type</th>
+                                            <th>Période</th>
+                                            <th>Status</th>
+                                            <th>Date de Création</th>
+                                            <th>Taille</th>
+                                            <th>Téléchargements</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for rapport in rapports %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ rapport.title }}</strong>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-{{ rapport.type == 'Annuel' ? 'primary' : rapport.type == 'Trimestriel' ? 'info' : rapport.type == 'Mensuel' ? 'success' : 'warning' }}">
+                                                    {{ rapport.type }}
+                                                </span>
+                                            </td>
+                                            <td>{{ rapport.period }}</td>
+                                            <td>
+                                                <span class="badge bg-{{ rapport.status == 'Terminé' ? 'success' : 'warning' }}">
+                                                    {{ rapport.status }}
+                                                </span>
+                                            </td>
+                                            <td>{{ rapport.created_date }}</td>
+                                            <td>{{ rapport.file_size }}</td>
+                                            <td>{{ rapport.download_count }}</td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <a href="{{ path('app_direction_generale_rapports_details', {'id': rapport.id}) }}" class="btn btn-sm btn-info" title="Voir détails">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a href="{{ path('app_direction_generale_rapports_export', {'id': rapport.id, 'format': 'pdf'}) }}" class="btn btn-sm btn-danger" title="Exporter PDF">
+                                                        <i class="fas fa-file-pdf"></i>
+                                                    </a>
+                                                    <a href="{{ path('app_direction_generale_rapports_export', {'id': rapport.id, 'format': 'excel'}) }}" class="btn btn-sm btn-success" title="Exporter Excel">
+                                                        <i class="fas fa-file-excel"></i>
+                                                    </a>
+                                                    <button class="btn btn-sm btn-warning" title="Partager">
+                                                        <i class="fas fa-share"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistiques des rapports -->
+            <div class="row">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-primary shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        Total Rapports
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ rapports|length }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-file-alt fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-success shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                        Rapports Terminés
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                        {{ rapports|filter(r => r.status == 'Terminé')|length }}
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-info shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                        Total Téléchargements
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                        {{ rapports|map(r => r.download_count)|reduce((acc, val) => acc + val, 0) }}
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-download fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-warning shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                        Espace Utilisé
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                        {{ (rapports|map(r => r.file_size)|reduce((acc, val) => acc + val, 0) / 1024 / 1024)|number_format(1) }} MB
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-hdd fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+    // Initialiser DataTable pour le tableau des rapports
+    $(document).ready(function() {
+        $('#rapportsTable').DataTable({
+            "pageLength": 10,
+            "order": [[ 3, "desc" ]], // Trier par date de création
+            "language": {
+                "search": "Rechercher:",
+                "lengthMenu": "Afficher _MENU_ entrées",
+                "info": "Affichant _START_ à _END_ sur _TOTAL_ entrées",
+                "paginate": {
+                    "first": "Premier",
+                    "last": "Dernier",
+                    "next": "Suivant",
+                    "previous": "Précédent"
+                }
+            }
+        });
+    });
+</script>
+
+{% endblock %}

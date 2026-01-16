@@ -1,0 +1,102 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouveau Contrôle - Police Routière{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-plus-circle"></i> Nouveau Contrôle Routier
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {{ form_start(form) }}
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.dateControle) }}
+                            {{ form_widget(form.dateControle, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.dateControle) }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.lieuControle) }}
+                            {{ form_widget(form.lieuControle, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Avenue Patrice Lumumba, Kinshasa'}}) }}
+                            {{ form_errors(form.lieuControle) }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.marqueVehicule) }}
+                            {{ form_widget(form.marqueVehicule, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Toyota, Renault, BMW'}}) }}
+                            {{ form_errors(form.marqueVehicule) }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.immatriculation) }}
+                            {{ form_widget(form.immatriculation, {'attr': {'class': 'form-control', 'placeholder': 'Ex: CG-123-AB'}}) }}
+                            {{ form_errors(form.immatriculation) }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.nomConducteur) }}
+                            {{ form_widget(form.nomConducteur, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.nomConducteur) }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.prenomConducteur) }}
+                            {{ form_widget(form.prenomConducteur, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.prenomConducteur) }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.noConducteur) }}
+                            {{ form_widget(form.noConducteur, {'attr': {'class': 'form-control', 'placeholder': 'Numéro du permis de conduire'}}) }}
+                            {{ form_errors(form.noConducteur) }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.agent) }}
+                            {{ form_widget(form.agent, {'attr': {'class': 'form-select'}}) }}
+                            {{ form_errors(form.agent) }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.brigade) }}
+                            {{ form_widget(form.brigade, {'attr': {'class': 'form-select'}}) }}
+                            {{ form_errors(form.brigade) }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.observation) }}
+                            {{ form_widget(form.observation, {'attr': {'class': 'form-control', 'rows': 3}}) }}
+                            {{ form_errors(form.observation) }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="d-flex justify-content-between">
+                                <a href="{{ path('app_controle_index') }}" class="btn btn-secondary">
+                                    <i class="bi bi-arrow-left"></i> Retour
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-circle"></i> Enregistrer le contrôle
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

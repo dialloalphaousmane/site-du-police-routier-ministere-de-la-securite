@@ -1,0 +1,134 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Inscription - Police Routière{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg">
+                <div class="card-body p-5">
+                    <h1 class="card-title text-center mb-4">
+                        <i class="bi bi-person-plus"></i> Inscription
+                    </h1>
+
+                    {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'class': 'needs-validation'}}) }}
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form_row(form.email, {
+                                'attr': {'class': 'form-control'}
+                            }) }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form_row(form.roleCode, {
+                                'attr': {'class': 'form-control', 'id': 'roleCode'}
+                            }) }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form_row(form.nom, {
+                                'attr': {'class': 'form-control'}
+                            }) }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form_row(form.prenom, {
+                                'attr': {'class': 'form-control'}
+                            }) }}
+                        </div>
+                    </div>
+
+                    <div class="row" id="regionField" style="display: none;">
+                        <div class="col-md-12 mb-3">
+                            {{ form_row(form.region, {
+                                'attr': {'class': 'form-control', 'id': 'region'}
+                            }) }}
+                        </div>
+                    </div>
+
+                    <div class="row" id="brigadeField" style="display: none;">
+                        <div class="col-md-12 mb-3">
+                            {{ form_row(form.brigade, {
+                                'attr': {'class': 'form-control', 'id': 'brigade'}
+                            }) }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form_row(form.plainPassword.first, {
+                                'attr': {'class': 'form-control'}
+                            }) }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form_row(form.plainPassword.second, {
+                                'attr': {'class': 'form-control'}
+                            }) }}
+                        </div>
+                    </div>
+
+                    <small class="text-muted d-block mb-3">
+                        <i class="bi bi-info-circle"></i> Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial (@$!%*?&)
+                    </small>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-check-circle"></i> S'inscrire
+                        </button>
+                    </div>
+
+                    {{ form_end(form) }}
+
+                    <hr class="my-4">
+
+                    <div class="text-center">
+                        <p class="text-muted">Déjà inscrit ?</p>
+                        <a href="{{ path('app_login') }}" class="btn btn-outline-primary">
+                            <i class="bi bi-box-arrow-in-right"></i> Se connecter
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const roleCodeSelect = document.getElementById('roleCode');
+    const regionField = document.getElementById('regionField');
+    const brigadeField = document.getElementById('brigadeField');
+
+    function updateFields() {
+        const selectedRole = roleCodeSelect.value;
+        
+        if (['ROLE_DIRECTION_REGIONALE', 'ROLE_CHEF_BRIGADE', 'ROLE_AGENT'].includes(selectedRole)) {
+            regionField.style.display = 'block';
+        } else {
+            regionField.style.display = 'none';
+        }
+
+        if (['ROLE_CHEF_BRIGADE', 'ROLE_AGENT'].includes(selectedRole)) {
+            brigadeField.style.display = 'block';
+        } else {
+            brigadeField.style.display = 'none';
+        }
+    }
+
+    roleCodeSelect.addEventListener('change', updateFields);
+    updateFields();
+</script>
+
+<style>
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+    }
+    
+    .card {
+        border: none;
+        border-radius: 10px;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,224 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Export de Données - Police Routière Guinée{% endblock %}
+
+{% block stylesheets %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_dashboard_admin') }}">
+                            <i class="bi bi-speedometer2 me-2"></i>Tableau de bord
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_region_index') }}">
+                            <i class="bi bi-geo-alt me-2"></i>Régions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_brigade_index') }}">
+                            <i class="bi bi-shield me-2"></i>Brigades
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_report_index') }}">
+                            <i class="bi bi-file-text me-2"></i>Rapports
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ path('app_admin_export_users') }}">
+                            <i class="bi bi-download me-2"></i>Export
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Export de Données</h1>
+            </div>
+
+            <!-- Export Cards -->
+            <div class="row">
+                <!-- Export Utilisateurs -->
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="bi bi-people display-4 text-primary mb-3"></i>
+                            <h5 class="card-title">Export Utilisateurs</h5>
+                            <p class="card-text">Exporter tous les utilisateurs avec leurs rôles et statuts</p>
+                            <a href="{{ path('app_admin_export_users') }}" class="btn btn-primary">
+                                <i class="bi bi-download me-1"></i>Export CSV
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Export Contrôles -->
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="bi bi-clipboard-check display-4 text-success mb-3"></i>
+                            <h5 class="card-title">Export Contrôles</h5>
+                            <p class="card-text">Exporter tous les contrôles et leurs détails</p>
+                            <a href="{{ path('app_admin_export_controls') }}" class="btn btn-success">
+                                <i class="bi bi-download me-1"></i>Export CSV
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Export Infractions -->
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="bi bi-exclamation-triangle display-4 text-warning mb-3"></i>
+                            <h5 class="card-title">Export Infractions</h5>
+                            <p class="card-text">Exporter toutes les infractions et montants</p>
+                            <a href="{{ path('app_admin_export_infractions') }}" class="btn btn-warning">
+                                <i class="bi bi-download me-1"></i>Export CSV
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Export Amendes -->
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="bi bi-cash-coin display-4 text-info mb-3"></i>
+                            <h5 class="card-title">Export Amendes</h5>
+                            <p class="card-text">Exporter toutes les amendes et paiements</p>
+                            <a href="{{ path('app_admin_export_amendes') }}" class="btn btn-info">
+                                <i class="bi bi-download me-1"></i>Export CSV
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Export Régions -->
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="bi bi-geo-alt display-4 text-danger mb-3"></i>
+                            <h5 class="card-title">Export Régions</h5>
+                            <p class="card-text">Exporter toutes les régions et leurs statistiques</p>
+                            <a href="{{ path('app_admin_export_regions') }}" class="btn btn-danger">
+                                <i class="bi bi-download me-1"></i>Export CSV
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Export Brigades -->
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="bi bi-shield display-4 text-secondary mb-3"></i>
+                            <h5 class="card-title">Export Brigades</h5>
+                            <p class="card-text">Exporter toutes les brigades et leurs agents</p>
+                            <a href="{{ path('app_admin_export_brigades') }}" class="btn btn-secondary">
+                                <i class="bi bi-download me-1"></i>Export CSV
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Export Rapports -->
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="bi bi-file-text display-4 text-dark mb-3"></i>
+                            <h5 class="card-title">Export Rapports</h5>
+                            <p class="card-text">Exporter tous les rapports et validations</p>
+                            <a href="{{ path('app_admin_export_rapports') }}" class="btn btn-dark">
+                                <i class="bi bi-download me-1"></i>Export CSV
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Export Statistiques -->
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="bi bi-graph-up display-4 text-primary mb-3"></i>
+                            <h5 class="card-title">Export Statistiques</h5>
+                            <p class="card-text">Exporter les statistiques générales du système</p>
+                            <a href="{{ path('app_admin_export_statistics') }}" class="btn btn-primary">
+                                <i class="bi bi-download me-1"></i>Export CSV
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Export Excel -->
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="bi bi-file-earmark-excel display-4 text-success mb-3"></i>
+                            <h5 class="card-title">Export Excel</h5>
+                            <p class="card-text">Export général compatible Excel</p>
+                            <a href="{{ path('app_admin_export_excel') }}" class="btn btn-success">
+                                <i class="bi bi-download me-1"></i>Export Excel
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Information Section -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="bi bi-info-circle me-2"></i>Informations sur les exports
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6><i class="bi bi-check-circle text-success me-2"></i>Formats disponibles</h6>
+                                    <ul class="list-unstyled">
+                                        <li><strong>CSV:</strong> Compatible avec Excel, LibreOffice</li>
+                                        <li><strong>Excel:</strong> Format optimisé pour Microsoft Excel</li>
+                                        <li><strong>UTF-8:</strong> Support des caractères spéciaux</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6><i class="bi bi-clock text-info me-2"></i>Délais d'export</h6>
+                                    <ul class="list-unstyled">
+                                        <li><strong>Petits exports:</strong> < 10 secondes</li>
+                                        <li><strong>Exports moyens:</strong> 10-30 secondes</li>
+                                        <li><strong>Exports complets:</strong> 30-60 secondes</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="alert alert-info mt-3">
+                                <i class="bi bi-lightbulb me-2"></i>
+                                <strong>Conseil:</strong> Les exports sont automatiquement datés dans le nom du fichier pour faciliter le suivi.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

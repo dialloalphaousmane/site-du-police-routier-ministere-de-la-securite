@@ -1,0 +1,309 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Statistiques Nationales - Direction Générale{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                    <span>Direction Générale</span>
+                </h6>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_dashboard') }}">
+                            <i class="fas fa-tachometer-alt"></i> Tableau de Bord
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ path('app_direction_generale_statistiques') }}">
+                            <i class="fas fa-chart-bar"></i> Statistiques Nationales
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_supervision') }}">
+                            <i class="fas fa-eye"></i> Supervision Régions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_rapports') }}">
+                            <i class="fas fa-file-alt"></i> Rapports Consolidés
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_performance') }}">
+                            <i class="fas fa-chart-line"></i> Performance
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_planification') }}">
+                            <i class="fas fa-calendar-alt"></i> Planification
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Statistiques Nationales</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-download"></i> Exporter
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistiques globales -->
+            <div class="row mb-4">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-primary shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        Total Agents
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ nationalStats.total_agents }}</div>
+                                    <div class="text-xs text-muted">{{ nationalStats.active_agents }} actifs</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-users fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-success shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                        Total Contrôles
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ nationalStats.total_controls }}</div>
+                                    <div class="text-xs text-muted">{{ nationalStats.monthly_controls }} ce mois</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-clipboard-check fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-info shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                        Total Infractions
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ nationalStats.total_infractions }}</div>
+                                    <div class="text-xs text-muted">{{ nationalStats.monthly_infractions }} ce mois</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-warning shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                        Revenus Totaux
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ nationalStats.total_revenue|number_format(0, ',', ' ') }} GNF</div>
+                                    <div class="text-xs text-muted">{{ nationalStats.monthly_revenue|number_format(0, ',', ' ') }} GNF ce mois</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-money-bill-wave fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Taux de conformité -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Taux de Conformité National</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-4">
+                                    <div class="text-center">
+                                        <div class="h1 mb-0 font-weight-bold text-primary">{{ nationalStats.compliance_rate }}%</div>
+                                        <div class="text-muted">Taux de conformité global</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="progress mb-3" style="height: 25px;">
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ nationalStats.compliance_rate }}%" aria-valuenow="{{ nationalStats.compliance_rate }}" aria-valuemin="0" aria-valuemax="100">
+                                            {{ nationalStats.compliance_rate }}%
+                                        </div>
+                                    </div>
+                                    <div class="text-muted">
+                                        <i class="fas fa-info-circle"></i> Le taux de conformité représente le pourcentage de véhicules contrôlés qui respectent la réglementation
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistiques par région -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-primary">Statistiques par Région</h6>
+                            <div class="dropdown no-arrow">
+                                <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="regionsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Région</th>
+                                            <th>Agents</th>
+                                            <th>Contrôles</th>
+                                            <th>Infractions</th>
+                                            <th>Revenus</th>
+                                            <th>Performance</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for region in regionsStats %}
+                                        <tr>
+                                            <td>{{ region.name }}</td>
+                                            <td>{{ region.agents }}</td>
+                                            <td>{{ region.controls }}</td>
+                                            <td>{{ region.infractions }}</td>
+                                            <td>{{ region.revenue|number_format(0, ',', ' ') }} GNF</td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="progress mr-2" style="width: 50px; height: 10px;">
+                                                        <div class="progress-bar bg-{{ region.performance >= 90 ? 'success' : region.performance >= 80 ? 'info' : region.performance >= 70 ? 'warning' : 'danger' }}" 
+                                                             style="width: {{ region.performance }}%"></div>
+                                                    </div>
+                                                    <span>{{ region.performance }}%</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <a href="{{ path('app_direction_generale_statistiques_region', {'region': region.name}) }}" class="btn btn-sm btn-info">
+                                                    <i class="fas fa-eye"></i> Détails
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Évolution mensuelle -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Évolution Mensuelle</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-area">
+                                <canvas id="monthlyEvolutionChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Évolution mensuelle
+    const evolutionCtx = document.getElementById('monthlyEvolutionChart').getContext('2d');
+    new Chart(evolutionCtx, {
+        type: 'line',
+        data: {
+            labels: {{ monthlyEvolution.labels|json_encode()|raw }},
+            datasets: [
+                {
+                    label: 'Contrôles',
+                    data: {{ monthlyEvolution.controls|json_encode()|raw }},
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    yAxisID: 'y',
+                    tension: 0.1
+                },
+                {
+                    label: 'Infractions',
+                    data: {{ monthlyEvolution.infractions|json_encode()|raw }},
+                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    yAxisID: 'y',
+                    tension: 0.1
+                },
+                {
+                    label: 'Revenus (Millions GNF)',
+                    data: {{ monthlyEvolution.revenue|json_encode()|raw }},
+                    borderColor: 'rgb(255, 159, 64)',
+                    backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                    yAxisID: 'y1',
+                    tension: 0.1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            scales: {
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    grid: {
+                        drawOnChartArea: false,
+                    },
+                },
+            }
+        }
+    });
+</script>
+
+{% endblock %}

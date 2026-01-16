@@ -1,0 +1,534 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tableau de Bord Direction Régionale - Police Routière Guinée{% endblock %}
+
+{% block stylesheets %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://127.0.0.1:8000/assets/css/dashboard.css" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+            <i class="bi bi-shield-check me-2"></i>
+            Police Routière Guinée - Direction Régionale
+        </a>
+        
+        <div class="navbar-nav ms-auto">
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                    <i class="bi bi-person-circle me-1"></i>
+                    {{ app.user.email }}
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profil</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Paramètres</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{{ path('app_logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Déconnexion</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ path('app_dashboard_direction_regionale') }}">
+                            <i class="bi bi-speedometer2 me-2"></i>Tableau de bord
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_agent_index') }}">
+                            <i class="bi bi-people me-2"></i>Agents
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_controle_index') }}">
+                            <i class="bi bi-shield-check me-2"></i>Contrôles
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_infraction_index') }}">
+                            <i class="bi bi-exclamation-triangle me-2"></i>Infractions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_amende_index') }}">
+                            <i class="bi bi-cash-stack me-2"></i>Amendes
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_brigade_index') }}">
+                            <i class="bi bi-geo-alt me-2"></i>Brigades
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_rapport_index') }}">
+                            <i class="bi bi-file-text me-2"></i>Rapports
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_dashboard') }}">
+                            <i class="bi bi-house me-2"></i>Accueil
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_logout') }}">
+                            <i class="bi bi-box-arrow-right me-2"></i>Déconnexion
+                        </a>
+                    </li>
+                </ul>
+                            <i class="bi bi-people me-2"></i>Gestion agents
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#controls">
+                            <i class="bi bi-clipboard-check me-2"></i>Contrôles régionaux
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#reports">
+                            <i class="bi bi-file-text me-2"></i>Rapports région
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#brigades">
+                            <i class="bi bi-shield me-2"></i>Brigades
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#statistics">
+                            <i class="bi bi-graph-up me-2"></i>Statistiques
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Tableau de Bord Direction Régionale</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <a href="{{ path('app_admin_export_controls') }}" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-download me-1"></i>Exporter Contrôles
+                        </a>
+                        <a href="{{ path('app_admin_export_infractions') }}" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-download me-1"></i>Exporter Infractions
+                        </a>
+                    </div>
+                    <a href="{{ path('app_rapport_new') }}" class="btn btn-sm btn-primary">
+                        <i class="bi bi-plus-circle me-1"></i>Nouveau Rapport
+                    </a>
+                </div>
+            </div>
+
+            <!-- Regional Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-primary shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        Agents Région
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.agents_count|default(234) }}</div>
+                                    <div class="text-xs text-gray-500">Actifs: {{ stats.agents_actifs|default(224) }} (95.7%)</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-people-fill fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-success shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                        Contrôles Mois
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.controls_month|default(1234) }}</div>
+                                    <div class="text-xs text-gray-500">+15.2% vs mois dernier</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-clipboard-data fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-info shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                        Infractions
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.infractions_count|default(456) }}</div>
+                                    <div class="text-xs text-gray-500">36.9% des contrôles</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-exclamation-triangle fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-warning shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                        Recettes (GNF)
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.revenue_total|number_format(0, '.', ',')|default('123,456,000') }} GNF</div>
+                                    <div class="text-xs text-gray-500">+8.7% vs mois dernier</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-cash-stack fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Brigade Performance -->
+            <div class="row">
+                <div class="col-xl-8 col-lg-7">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-primary">Performance des Brigades</h6>
+                            <div class="dropdown no-arrow">
+                                <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-three-dots-vertical fa-sm fa-fw text-gray-400"></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right shadow">
+                                    <a class="dropdown-item" href="#">Cette semaine</a>
+                                    <a class="dropdown-item" href="#">Ce mois</a>
+                                    <a class="dropdown-item" href="#">Ce trimestre</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-area">
+                                <canvas id="brigadePerformanceChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-4 col-lg-5">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Types d'Infractions</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-pie pt-4">
+                                <canvas id="infractionTypesChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Brigades Management Table -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Gestion des Brigades</h6>
+                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addBrigadeModal">
+                        <i class="bi bi-plus-circle me-1"></i>Nouvelle Brigade
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Brigade</th>
+                                    <th>Chef</th>
+                                    <th>Effectif</th>
+                                    <th>Contrôles/Jour</th>
+                                    <th>Zone Couverture</th>
+                                    <th>Performance</th>
+                                    <th>Statut</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Brigade Centre</td>
+                                    <td>Chef Mamadou Diallo</td>
+                                    <td>12</td>
+                                    <td>45</td>
+                                    <td>Centre-ville + Quartiers Nord</td>
+                                    <td>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 89%">89%</div>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-success">Actif</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button>
+                                        <button class="btn btn-sm btn-outline-info"><i class="bi bi-pencil"></i></button>
+                                        <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-chat-dots"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Brigade Nord</td>
+                                    <td>Chef Oumar Touré</td>
+                                    <td>8</td>
+                                    <td>32</td>
+                                    <td>Quartiers Nord + Banlieue</td>
+                                    <td>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-info" role="progressbar" style="width: 76%">76%</div>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-success">Actif</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button>
+                                        <button class="btn btn-sm btn-outline-info"><i class="bi bi-pencil"></i></button>
+                                        <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-chat-dots"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Brigade Sud</td>
+                                    <td>Chef Sékou Condé</td>
+                                    <td>10</td>
+                                    <td>28</td>
+                                    <td>Quartiers Sud + Zone Industrielle</td>
+                                    <td>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-warning" role="progressbar" style="width: 62%">62%</div>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-warning">En cours</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button>
+                                        <button class="btn btn-sm btn-outline-info"><i class="bi bi-pencil"></i></button>
+                                        <button class="btn btn-sm btn-outline-warning"><i class="bi bi-exclamation-triangle"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Brigade Est</td>
+                                    <td>Chef Alpha Camara</td>
+                                    <td>6</td>
+                                    <td>18</td>
+                                    <td>Zone Est + Sorties Ville</td>
+                                    <td>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-danger" role="progressbar" style="width: 41%">41%</div>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-danger">Alerte</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button>
+                                        <button class="btn btn-sm btn-outline-info"><i class="bi bi-pencil"></i></button>
+                                        <button class="btn btn-sm btn-outline-danger"><i class="bi bi-exclamation-triangle-fill"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Regional Activities -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Activités Récentes de la Région</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Date/Heure</th>
+                                    <th>Agent</th>
+                                    <th>Action</th>
+                                    <th>Brigade</th>
+                                    <th>Localisation</th>
+                                    <th>Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>08/01/2026 14:30</td>
+                                    <td>Agent Mamadou Bah</td>
+                                    <td>Contrôle routier</td>
+                                    <td>Brigade Centre</td>
+                                    <td>Avenue du Général De Gaulle</td>
+                                    <td><span class="badge bg-success">Complété</span></td>
+                                </tr>
+                                <tr>
+                                    <td>08/01/2026 14:15</td>
+                                    <td>Chef Brigade Diallo</td>
+                                    <td>Validation rapport</td>
+                                    <td>Brigade Nord</td>
+                                    <td>Poste de contrôle Nord</td>
+                                    <td><span class="badge bg-success">Validé</span></td>
+                                </tr>
+                                <tr>
+                                    <td>08/01/2026 13:45</td>
+                                    <td>Agent Touré</td>
+                                    <td>Infraction vitesse</td>
+                                    <td>Brigade Sud</td>
+                                    <td>Pont du 8 Novembre</td>
+                                    <td><span class="badge bg-warning">En cours</span></td>
+                                </tr>
+                                <tr>
+                                    <td>08/01/2026 13:20</td>
+                                    <td>Agent Condé</td>
+                                    <td>Contrôle documentation</td>
+                                    <td>Brigade Est</td>
+                                    <td>Route de Friguiagbé</td>
+                                    <td><span class="badge bg-success">Complété</span></td>
+                                </tr>
+                                <tr>
+                                    <td>08/01/2026 12:50</td>
+                                    <td>Chef Brigade Camara</td>
+                                    <td>Rapport journalier</td>
+                                    <td>Brigade Centre</td>
+                                    <td>Siège régional</td>
+                                    <td><span class="badge bg-info">Soumis</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Add Brigade Modal -->
+<div class="modal fade" id="addBrigadeModal" tabindex="-1" aria-labelledby="addBrigadeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addBrigadeModalLabel">Ajouter une Nouvelle Brigade</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="brigadeName" class="form-label">Nom de la Brigade</label>
+                        <input type="text" class="form-control" id="brigadeName" placeholder="Ex: Brigade Centre">
+                    </div>
+                    <div class="mb-3">
+                        <label for="chiefName" class="form-label">Chef de Brigade</label>
+                        <select class="form-select" id="chiefName">
+                            <option selected>Sélectionner un agent...</option>
+                            <option value="1">Agent Mamadou Diallo</option>
+                            <option value="2">Agent Oumar Touré</option>
+                            <option value="3">Agent Sékou Condé</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="zoneCoverage" class="form-label">Zone de Couverture</label>
+                        <textarea class="form-control" id="zoneCoverage" rows="3" placeholder="Décrire la zone géographique couverte..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary">Créer la Brigade</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Données des graphiques depuis le contrôleur
+const brigadePerformanceData = {{ brigades|json_encode|raw }};
+const regionalStatsData = {{ stats|json_encode|raw }};
+
+// Graphique de performance des brigades
+const ctxBrigade = document.getElementById('brigadePerformanceChart').getContext('2d');
+const brigadePerformanceChart = new Chart(ctxBrigade, {
+    type: 'bar',
+    data: {
+        labels: brigadePerformanceData.labels || ['Brigade Centre', 'Brigade Nord', 'Brigade Sud', 'Brigade Est', 'Brigade Ouest'],
+        datasets: [{
+            label: 'Contrôles',
+            data: brigadePerformanceData.controls || [145, 132, 128, 156, 139],
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: false
+            },
+            title: {
+                display: true,
+                text: 'Performance des Brigades'
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+// Graphique des infractions par type
+const ctxInfractions = document.getElementById('infractionsChart').getContext('2d');
+const infractionsChart = new Chart(ctxInfractions, {
+    type: 'doughnut',
+    data: {
+        labels: ['Excès de vitesse', 'Défaut de ceinture', 'Téléphone au volant', 'Défaut de casque', 'Autres'],
+        datasets: [{
+            data: [156, 89, 67, 45, 99],
+            backgroundColor: [
+                '#FF6384',
+                '#36A2EB',
+                '#FFCE56',
+                '#4BC0C0',
+                '#9966FF'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'right',
+            },
+            title: {
+                display: true,
+                text: 'Types d\'Infractions'
+            }
+        }
+    }
+});
+</script>
+{% endblock %}
