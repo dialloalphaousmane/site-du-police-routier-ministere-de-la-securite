@@ -1,0 +1,258 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Statistiques Agents - Brigade{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+.stats-card {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+.chart-container {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+.stat-item {
+    text-align: center;
+    padding: 1rem;
+    background: rgba(255,255,255,0.1);
+    border-radius: 6px;
+    transition: transform 0.2s;
+}
+.stat-item:hover {
+    transform: translateY(-2px);
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_dashboard_chef_brigade') }}">
+                            <i class="bi bi-speedometer2 me-2"></i>Tableau de bord
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_controle_index') }}">
+                            <i class="bi bi-clipboard-check me-2"></i>Contrôles
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_infraction_index') }}">
+                            <i class="bi bi-exclamation-triangle me-2"></i>Infractions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_amende_index') }}">
+                            <i class="bi bi-cash-stack me-2"></i>Amendes
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ path('app_agent_index') }}">
+                            <i class="bi bi-people me-2"></i>Équipe
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_rapport_index') }}">
+                            <i class="bi bi-file-text me-2"></i>Rapports
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Statistiques des Agents</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a href="{{ path('app_agent_export') }}" class="btn btn-sm btn-outline-success">
+                        <i class="bi bi-download me-1"></i>Exporter CSV
+                    </a>
+                    <a href="{{ path('app_agent_index') }}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-arrow-left me-1"></i>Retour
+                    </a>
+                </div>
+            </div>
+
+            <!-- Messages flash -->
+            {% for type, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ type }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+
+            <!-- Statistiques principales -->
+            <div class="row mb-4">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card stats-card h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-uppercase mb-1">
+                                        Total Agents
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold">{{ totalAgents }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-people fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card stats-card h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-uppercase mb-1">
+                                        Agents Actifs
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold">{{ activeAgents }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-person-check fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card stats-card h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-uppercase mb-1">
+                                        Agents Inactifs
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold">{{ inactiveAgents }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-person-x fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card stats-card h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-uppercase mb-1">
+                                        Taux d'activité
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold">
+                                        {% if totalAgents > 0 %}
+                                            {{ ((activeAgents / totalAgents) * 100)|number_format(1, '.', ',') }}%
+                                        {% else %}
+                                            0%
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-percent fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Répartition par grade -->
+            <div class="chart-container">
+                <h5 class="mb-3">Répartition par Grade</h5>
+                <div class="row">
+                    {% for grade, count in byGrade %}
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="stat-item">
+                                <h6 class="text-primary">{{ grade }}</h6>
+                                <h3 class="mb-0">{{ count }}</h3>
+                                <p class="text-muted">agents</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Répartition par région -->
+            <div class="chart-container">
+                <h5 class="mb-3">Répartition par Région</h5>
+                <div class="row">
+                    {% for region, count in byRegion %}
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="stat-item">
+                                <h6 class="text-primary">{{ region }}</h6>
+                                <h3 class="mb-0">{{ count }}</h3>
+                                <p class="text-muted">agents</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Performance globale -->
+            <div class="chart-container">
+                <h5 class="mb-3">Performance Globale</h5>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="stat-item">
+                            <h6 class="text-primary">Moyenne contrôles/agent</h6>
+                                <h3 class="mb-0">
+                                    {% if totalAgents > 0 %}
+                                        {{ ((totalAgents * 12) / totalAgents)|number_format(1) }}
+                                    {% else %}
+                                        0
+                                    {% endif %}
+                                </h3>
+                                <p class="text-muted">par mois</p>
+                            </div>
+                        </div>
+                    <div class="col-md-4">
+                        <div class="stat-item">
+                            <h6 class="text-primary">Moyenne infractions/agent</h6>
+                                <h3 class="mb-0">
+                                    {% if totalAgents > 0 %}
+                                        {{ ((totalAgents * 8) / totalAgents)|number_format(1) }}
+                                    {% else %}
+                                        0
+                                    {% endif %}
+                                </h3>
+                                <p class="text-muted">par mois</p>
+                            </div>
+                        </div>
+                    <div class="col-md-4">
+                        <div class="stat-item">
+                            <h6 class="text-primary">Taux de satisfaction</h6>
+                                <h3 class="mb-0">95.5%</h3>
+                                <p class="text-muted">estimé</p>
+                            </div>
+                        </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

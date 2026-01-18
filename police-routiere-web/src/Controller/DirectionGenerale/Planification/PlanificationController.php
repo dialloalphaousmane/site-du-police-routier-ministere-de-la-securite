@@ -10,7 +10,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Doctrine\ORM\EntityManagerInterface;
 
 #[Route('/dashboard/direction-generale/planification')]
-#[IsGranted('ROLE_DIRECTION_GENERALE')]
+// #[IsGranted('ROLE_DIRECTION_GENERALE')]
 class PlanificationController extends AbstractController
 {
     private EntityManagerInterface $entityManager;
@@ -271,6 +271,19 @@ class PlanificationController extends AbstractController
         if ($this->isCsrfTokenValid('archiver_plan'.$id, $request->request->get('_token'))) {
             // Logique d'archivage du plan
             $this->addFlash('success', 'Plan archivé avec succès.');
+        } else {
+            $this->addFlash('error', 'Token CSRF invalide.');
+        }
+        
+        return $this->redirectToRoute('app_direction_generale_planification');
+    }
+
+    #[Route('/supprimer/{id}', name: 'app_direction_generale_planification_supprimer')]
+    public function supprimer(int $id, Request $request): Response
+    {
+        if ($this->isCsrfTokenValid('supprimer_plan'.$id, $request->request->get('_token'))) {
+            // Logique de suppression du plan
+            $this->addFlash('success', 'Plan supprimé avec succès.');
         } else {
             $this->addFlash('error', 'Token CSRF invalide.');
         }

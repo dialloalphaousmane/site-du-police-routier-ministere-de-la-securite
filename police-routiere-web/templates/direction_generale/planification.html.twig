@@ -1,0 +1,564 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Planification - Direction Générale{% endblock %}
+
+{% block stylesheets %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+.border-left-primary { border-left: 0.25rem solid #0c2261ff !important; }
+.border-left-success { border-left: 0.25rem solid #1cc88a !important; }
+.border-left-info { border-left: 0.25rem solid #36b9cc !important; }
+.border-left-warning { border-left: 0.25rem solid #f6c23e !important; }
+.text-xs { font-size: 0.7rem; }
+.font-weight-bold { font-weight: 700 !important; }
+.text-gray-800 { color: #5a5c69 !important; }
+.text-gray-300 { color: #dddfeb !important; }
+.text-gray-500 { color: #858796 !important; }
+.sidebar {
+    background-color: #f8f9fc;
+    min-height: calc(100vh - 56px);
+}
+main {
+    padding-top: 56px;
+}
+.calendar-container {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+            <i class="bi bi-shield-check me-2"></i>
+            Police Routière de Guinée - Direction Générale
+        </a>
+        
+        <div class="navbar-nav ms-auto">
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                    <i class="bi bi-person-circle me-1"></i>
+                    {{ app.user.email }}
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profil</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Paramètres</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{{ path('app_logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Déconnexion</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_dashboard') }}">
+                            <i class="bi bi-speedometer2 me-2"></i>Vue d'ensemble
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_statistiques') }}">
+                            <i class="bi bi-graph-up me-2"></i>Statistiques nationales
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_supervision') }}">
+                            <i class="bi bi-geo-alt me-2"></i>Supervision régions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_rapports') }}">
+                            <i class="bi bi-file-text me-2"></i>Rapports consolidés
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_performance') }}">
+                            <i class="bi bi-trophy me-2"></i>Performance
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ path('app_direction_generale_planification') }}">
+                            <i class="bi bi-calendar3 me-2"></i>Planification
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Planification des Opérations</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="showNewPlanModal()">
+                            <i class="bi bi-plus-circle me-1"></i>Nouveau Plan
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-download me-1"></i>Exporter
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Planning Summary Cards -->
+            <div class="row mb-4">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-primary shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        Plans Actifs
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">12</div>
+                                    <div class="text-xs text-gray-500">Ce mois</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-calendar-check fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-success shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                        Opérations Planifiées
+                                    </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">45</div>
+                                    <div class="text-xs text-gray-500">Cette semaine</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-clipboard-data fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-info shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                        Agents Déployés
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">234</div>
+                                    <div class="text-xs text-gray-500">Sur le terrain</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-people-fill fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-warning shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                        Taux d'Exécution
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">87%</div>
+                                    <div class="text-xs text-gray-500">Objectif atteint</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-graph-up-arrow fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calendar and Planning -->
+            <div class="row">
+                <div class="col-xl-8">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-primary">Calendrier des Opérations</h6>
+                            <div class="btn-group btn-group-sm">
+                                <button type="button" class="btn btn-outline-secondary" onclick="changeView('month')">Mois</button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="changeView('week')">Semaine</button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="changeView('day')">Jour</button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="calendar-container p-3">
+                                <div id="calendar">
+                                    <!-- Calendar Grid -->
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Dimanche</th>
+                                                    <th>Lundi</th>
+                                                    <th>Mardi</th>
+                                                    <th>Mercredi</th>
+                                                    <th>Jeudi</th>
+                                                    <th>Vendredi</th>
+                                                    <th>Samedi</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td class="text-muted">29</td>
+                                                    <td class="text-muted">30</td>
+                                                    <td class="text-muted">31</td>
+                                                    <td>1</td>
+                                                    <td>2</td>
+                                                    <td>3</td>
+                                                    <td>4</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>5</td>
+                                                    <td>6</td>
+                                                    <td>7</td>
+                                                    <td>8</td>
+                                                    <td>9</td>
+                                                    <td>10</td>
+                                                    <td>11</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>12</td>
+                                                    <td>13</td>
+                                                    <td>14</td>
+                                                    <td>15</td>
+                                                    <td>16</td>
+                                                    <td>17</td>
+                                                    <td>18</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>19</td>
+                                                    <td>20</td>
+                                                    <td>21</td>
+                                                    <td>22</td>
+                                                    <td>23</td>
+                                                    <td>24</td>
+                                                    <td>25</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>26</td>
+                                                    <td>27</td>
+                                                    <td>28</td>
+                                                    <td>29</td>
+                                                    <td>30</td>
+                                                    <td>31</td>
+                                                    <td class="text-muted">1</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-4">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Opérations du Jour</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">Contrôle Routier - Conakry</h6>
+                                        <small>08:00</small>
+                                    </div>
+                                    <p class="mb-1">Axe Nord: Contrôle de vitesse et documents</p>
+                                    <small>12 agents prévus</small>
+                                </div>
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">Opération Spéciale - Kindia</h6>
+                                        <small>10:00</small>
+                                    </div>
+                                    <p class="mb-1">Contrôle alcoolémie et ceintures</p>
+                                    <small>8 agents prévus</small>
+                                </div>
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">Formation - Labé</h6>
+                                        <small>14:00</small>
+                                    </div>
+                                    <p class="mb-1">Formation sur nouveaux procédures</p>
+                                    <small>15 participants</small>
+                                </div>
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">Réunion Coordination</h6>
+                                        <small>16:00</small>
+                                    </div>
+                                    <p class="mb-1">Point hebdomadaire directions régionales</p>
+                                    <small>Visioconférence</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Planning Table -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Plans d'Opération Actifs</h6>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-funnel me-1"></i>Filtrer
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Tous les plans</a></li>
+                            <li><a class="dropdown-item" href="#">En cours</a></li>
+                            <li><a class="dropdown-item" href="#">À venir</a></li>
+                            <li><a class="dropdown-item" href="#">Terminés</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Plan</th>
+                                    <th>Type</th>
+                                    <th>Région</th>
+                                    <th>Date Début</th>
+                                    <th>Date Fin</th>
+                                    <th>Statut</th>
+                                    <th>Progression</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Contrôle Vacances</td>
+                                    <td><span class="badge bg-primary">Routier</span></td>
+                                    <td>Conakry</td>
+                                    <td>15/12/2024</td>
+                                    <td>15/01/2025</td>
+                                    <td><span class="badge bg-success">En cours</span></td>
+                                    <td>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 75%">75%</div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button>
+                                            <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></button>
+                                            <button class="btn btn-sm btn-outline-success"><i class="bi bi-check-circle"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Opération Sobriété</td>
+                                    <td><span class="badge bg-warning">Spécial</span></td>
+                                    <td>Kindia</td>
+                                    <td>10/01/2025</td>
+                                    <td>20/01/2025</td>
+                                    <td><span class="badge bg-success">En cours</span></td>
+                                    <td>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-info" role="progressbar" style="width: 40%">40%</div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button>
+                                            <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></button>
+                                            <button class="btn btn-sm btn-outline-success"><i class="bi bi-check-circle"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Formation Continue</td>
+                                    <td><span class="badge bg-info">Formation</span></td>
+                                    <td>Labé</td>
+                                    <td>05/01/2025</td>
+                                    <td>25/01/2025</td>
+                                    <td><span class="badge bg-success">En cours</span></td>
+                                    <td>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-warning" role="progressbar" style="width: 60%">60%</div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button>
+                                            <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></button>
+                                            <button class="btn btn-sm btn-outline-success"><i class="bi bi-check-circle"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Maintenance Équipements</td>
+                                    <td><span class="badge bg-secondary">Maintenance</span></td>
+                                    <td>National</td>
+                                    <td>01/02/2025</td>
+                                    <td>15/02/2025</td>
+                                    <td><span class="badge bg-secondary">À venir</span></td>
+                                    <td>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-secondary" role="progressbar" style="width: 0%">0%</div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button>
+                                            <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></button>
+                                            <button class="btn btn-sm btn-outline-warning"><i class="bi bi-play-circle"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Modal Nouveau Plan -->
+<div class="modal fade" id="newPlanModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Créer un Nouveau Plan d'Opération</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="newPlanForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="planName" class="form-label">Nom du Plan</label>
+                            <input type="text" class="form-control" id="planName" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="planType" class="form-label">Type d'Opération</label>
+                            <select class="form-control" id="planType" required>
+                                <option value="">Sélectionner...</option>
+                                <option value="routier">Contrôle Routier</option>
+                                <option value="special">Opération Spéciale</option>
+                                <option value="formation">Formation</option>
+                                <option value="maintenance">Maintenance</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="region" class="form-label">Région</label>
+                            <select class="form-control" id="region" required>
+                                <option value="">Sélectionner...</option>
+                                <option value="conakry">Conakry</option>
+                                <option value="kindia">Kindia</option>
+                                <option value="labe">Labé</option>
+                                <option value="faranah">Faranah</option>
+                                <option value="nzerekore">N'Zérékoré</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="priority" class="form-label">Priorité</label>
+                            <select class="form-control" id="priority" required>
+                                <option value="high">Haute</option>
+                                <option value="medium">Moyenne</option>
+                                <option value="low">Basse</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="startDate" class="form-label">Date de Début</label>
+                            <input type="date" class="form-control" id="startDate" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="endDate" class="form-label">Date de Fin</label>
+                            <input type="date" class="form-control" id="endDate" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="agents" class="form-label">Nombre d'Agents</label>
+                            <input type="number" class="form-control" id="agents" min="1" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="budget" class="form-label">Budget (GNF)</label>
+                            <input type="number" class="form-control" id="budget" min="0" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" rows="3" placeholder="Description détaillée du plan..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" onclick="saveNewPlan()">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function showNewPlanModal() {
+    new bootstrap.Modal(document.getElementById('newPlanModal')).show();
+}
+
+function saveNewPlan() {
+    const form = document.getElementById('newPlanForm');
+    const formData = new FormData(form);
+    
+    // Simuler la sauvegarde
+    alert('Plan créé avec succès!');
+    bootstrap.Modal.getInstance(document.getElementById('newPlanModal')).hide();
+    location.reload();
+}
+
+function changeView(view) {
+    console.log('Changing view to:', view);
+    // Implémenter le changement de vue du calendrier
+}
+
+// Mettre en évidence les jours avec des opérations
+document.addEventListener('DOMContentLoaded', function() {
+    // Ajouter des indicateurs visuels pour les jours avec des opérations
+    const daysWithOperations = [5, 8, 12, 15, 19, 22, 26, 29];
+    const calendarCells = document.querySelectorAll('#calendar tbody td');
+    
+    calendarCells.forEach((cell, index) => {
+        const dayNumber = parseInt(cell.textContent);
+        if (daysWithOperations.includes(dayNumber)) {
+            cell.style.backgroundColor = '#e3f2fd';
+            cell.style.fontWeight = 'bold';
+        }
+    });
+});
+</script>
+{% endblock %}

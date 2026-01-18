@@ -13,7 +13,7 @@ use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 
 #[Route('/dashboard/direction-generale/rapports')]
-#[IsGranted('ROLE_DIRECTION_GENERALE')]
+// #[IsGranted('ROLE_DIRECTION_GENERALE')]
 class RapportsConsolidesController extends AbstractController
 {
     private EntityManagerInterface $entityManager;

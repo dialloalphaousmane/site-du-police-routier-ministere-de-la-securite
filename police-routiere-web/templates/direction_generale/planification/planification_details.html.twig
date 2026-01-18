@@ -1,0 +1,252 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails du Plan - {{ plan.title }}{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+.plan-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem 0;
+}
+.progress-custom {
+    height: 25px;
+}
+.objective-card {
+    transition: transform 0.2s;
+}
+.objective-card:hover {
+    transform: translateY(-2px);
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+            <i class="bi bi-shield-check me-2"></i>
+            Police Routière Guinée - Direction Générale
+        </a>
+        
+        <div class="navbar-nav ms-auto">
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                    <i class="bi bi-person-circle me-1"></i>
+                    {{ app.user.email }}
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profil</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Paramètres</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{{ path('app_logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Déconnexion</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Plan Header -->
+<div class="plan-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-5 fw-bold">{{ plan.title }}</h1>
+                <p class="lead">Période: {{ plan.start_date|date('d/m/Y') }} - {{ plan.end_date|date('d/m/Y') }}</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <span class="badge bg-{{ plan.status == 'En cours' ? 'success' : (plan.status == 'Terminé' ? 'primary' : 'warning') }} fs-6">
+                    {{ plan.status }}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="container mt-4">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_dashboard') }}">
+                            <i class="bi bi-speedometer2 me-2"></i>Vue d'ensemble
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_statistiques') }}">
+                            <i class="bi bi-graph-up me-2"></i>Statistiques nationales
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_supervision') }}">
+                            <i class="bi bi-geo-alt me-2"></i>Supervision régions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_rapports') }}">
+                            <i class="bi bi-file-text me-2"></i>Rapports consolidés
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_performance') }}">
+                            <i class="bi bi-trophy me-2"></i>Performance
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ path('app_direction_generale_planification') }}">
+                            <i class="bi bi-calendar3 me-2"></i>Planification
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ path('app_direction_generale_planification') }}">Planification</a></li>
+                    <li class="breadcrumb-item active">{{ plan.title }}</li>
+                </ol>
+            </nav>
+
+            <!-- Progress Overview -->
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Progression Globale</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>{{ objectives|filter(obj => obj.status == 'Terminé')|length }}/{{ objectives|length }} objectifs complétés</span>
+                                <span class="fw-bold">{{ plan.progress }}%</span>
+                            </div>
+                            <div class="progress progress-custom">
+                                <div class="progress-bar bg-{{ plan.progress >= 80 ? 'success' : (plan.progress >= 50 ? 'warning' : 'danger') }}" 
+                                     role="progressbar" style="width: {{ plan.progress }}%">
+                                    {{ plan.progress }}%
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Budget</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-2">
+                                <small class="text-muted">Budget total</small>
+                                <h6>{{ plan.budget|number_format(0, ',', ' ') }} GNF</h6>
+                            </div>
+                            <div class="mb-2">
+                                <small class="text-muted">Utilisé</small>
+                                <h6 class="text-{{ plan.budget_used > plan.budget ? 'danger' : 'success' }}">
+                                    {{ plan.budget_used|number_format(0, ',', ' ') }} GNF
+                                </h6>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-{{ plan.budget_used > plan.budget ? 'danger' : 'info' }}" 
+                                     style="width: {{ (plan.budget_used / plan.budget * 100)|round(0) }}%">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Objectives -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Objectifs du Plan</h5>
+                    <button class="btn btn-sm btn-primary">
+                        <i class="bi bi-plus-circle me-1"></i>Ajouter un objectif
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for objective in objectives %}
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div class="card objective-card h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="card-title">{{ objective.title }}</h6>
+                                        <span class="badge bg-{{ objective.status == 'Terminé' ? 'success' : (objective.status == 'En cours' ? 'warning' : 'secondary') }}">
+                                            {{ objective.status }}
+                                        </span>
+                                    </div>
+                                    <p class="card-text small text-muted">{{ objective.description }}</p>
+                                    <div class="mb-2">
+                                        <div class="d-flex justify-content-between small">
+                                            <span>Progression</span>
+                                            <span>{{ objective.progress }}%</span>
+                                        </div>
+                                        <div class="progress" style="height: 8px;">
+                                            <div class="progress-bar" style="width: {{ objective.progress }}%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-between small text-muted">
+                                        <span><i class="bi bi-calendar me-1"></i>{{ objective.deadline|date('d/m/Y') }}</span>
+                                        <span><i class="bi bi-person me-1"></i>Non assigné</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-outline-primary">
+                            <i class="bi bi-pencil me-1"></i>Modifier le plan
+                        </button>
+                        <button class="btn btn-outline-success">
+                            <i class="bi bi-check-circle me-1"></i>Marquer comme terminé
+                        </button>
+                        <button class="btn btn-outline-info">
+                            <i class="bi bi-download me-1"></i>Exporter le rapport
+                        </button>
+                        <button class="btn btn-outline-warning">
+                            <i class="bi bi-pause-circle me-1"></i>Mettre en pause
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+// Fonctionnalités interactives
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation des cartes d'objectifs
+    const cards = document.querySelectorAll('.objective-card');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+        });
+        card.addEventListener('mouseleave', function() {
+            this.style.boxShadow = '';
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,386 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Performance - Direction Générale{% endblock %}
+
+{% block stylesheets %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+.border-left-primary { border-left: 0.25rem solid #4e73df !important; }
+.border-left-success { border-left: 0.25rem solid #1cc88a !important; }
+.border-left-info { border-left: 0.25rem solid #36b9cc !important; }
+.border-left-warning { border-left: 0.25rem solid #f6c23e !important; }
+.text-xs { font-size: 0.7rem; }
+.font-weight-bold { font-weight: 700 !important; }
+.text-gray-800 { color: #5a5c69 !important; }
+.text-gray-300 { color: #dddfeb !important; }
+.text-gray-500 { color: #858796 !important; }
+.sidebar {
+    background-color: #f8f9fc;
+    min-height: calc(100vh - 56px);
+}
+main {
+    padding-top: 56px;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+            <i class="bi bi-shield-check me-2"></i>
+            Police Routière Guinée - Direction Générale
+        </a>
+        
+        <div class="navbar-nav ms-auto">
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                    <i class="bi bi-person-circle me-1"></i>
+                    {{ app.user.email }}
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profil</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Paramètres</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{{ path('app_logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Déconnexion</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_dashboard') }}">
+                            <i class="bi bi-speedometer2 me-2"></i>Vue d'ensemble
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_statistiques') }}">
+                            <i class="bi bi-graph-up me-2"></i>Statistiques nationales
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_supervision') }}">
+                            <i class="bi bi-geo-alt me-2"></i>Supervision régions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_rapports') }}">
+                            <i class="bi bi-file-text me-2"></i>Rapports consolidés
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ path('app_direction_generale_performance') }}">
+                            <i class="bi bi-trophy me-2"></i>Performance
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_planification') }}">
+                            <i class="bi bi-calendar3 me-2"></i>Planification
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Tableau de Performance</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-download me-1"></i>Exporter
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-arrow-clockwise me-1"></i>Actualiser
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Cards -->
+            <div class="row mb-4">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-primary shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        Performance Globale
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">78%</div>
+                                    <div class="text-xs text-gray-500">Moyenne nationale</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-speedometer2 fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-success shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                        Meilleure Région
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">Conakry</div>
+                                    <div class="text-xs text-gray-500">92% de performance</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-trophy fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-info shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                        Objectif Mensuel
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">85%</div>
+                                    <div class="text-xs text-gray-500">À atteindre</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-bullseye fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-warning shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                        Régions Critiques
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">2</div>
+                                    <div class="text-xs text-gray-500">En dessous de 50%</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-exclamation-triangle fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Charts -->
+            <div class="row">
+                <div class="col-xl-8 col-lg-7">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Évolution de la Performance</h6>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="performanceEvolutionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-4 col-lg-5">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Classement des Régions</h6>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="rankingChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Table -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Détail de Performance par Région</h6>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-funnel me-1"></i>Filtrer
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Toutes les régions</a></li>
+                            <li><a class="dropdown-item" href="#">Excellent (>80%)</a></li>
+                            <li><a class="dropdown-item" href="#">Bon (60-80%)</a></li>
+                            <li><a class="dropdown-item" href="#">Moyen (40-60%)</a></li>
+                            <li><a class="dropdown-item" href="#">Faible (<40%)</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Rang</th>
+                                    <th>Région</th>
+                                    <th>Performance</th>
+                                    <th>Contrôles</th>
+                                    <th>Infractions</th>
+                                    <th>Recettes</th>
+                                    <th>Tendance</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for performance in regionalPerformance %}
+                                <tr>
+                                    <td><span class="badge bg-warning">{{ loop.index }}</span></td>
+                                    <td>{{ performance.name }}</td>
+                                    <td>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-{{ performance.overall_rate > 80 ? 'success' : (performance.overall_rate > 60 ? 'warning' : 'danger') }}" role="progressbar" style="width: {{ performance.overall_rate }}%">{{ performance.overall_rate|round(1) }}%</div>
+                                        </div>
+                                    </td>
+                                    <td>{{ performance.controls_efficiency|round(0) }}</td>
+                                    <td>{{ performance.infraction_detection_rate|round(1) }}</td>
+                                    <td>{{ performance.revenue_per_control|number_format(0, ',', ' ') }}</td>
+                                    <td>
+                                        {% if performance.trend > 0 %}
+                                            <i class="bi bi-arrow-up text-success"></i> +{{ performance.trend|round(1) }}%
+                                        {% elseif performance.trend < 0 %}
+                                            <i class="bi bi-arrow-down text-danger"></i> {{ performance.trend|round(1) }}%
+                                        {% else %}
+                                            <i class="bi bi-dash text-warning"></i> 0%
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button>
+                                        <button class="btn btn-sm btn-outline-success"><i class="bi bi-award"></i></button>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="8" class="text-center">Aucune donnée de performance disponible</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// Données par défaut
+const performanceData = {
+    labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
+    datasets: [
+        {
+            label: 'Conakry',
+            data: [85, 87, 86, 88, 90, 89, 91, 92, 91, 93, 92, 92],
+            borderColor: 'rgb(75, 192, 192)',
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            tension: 0.1
+        },
+        {
+            label: 'Kindia',
+            data: [75, 76, 74, 77, 78, 77, 79, 78, 77, 79, 78, 78],
+            borderColor: 'rgb(54, 162, 235)',
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            tension: 0.1
+        },
+        {
+            label: 'Labé',
+            data: [65, 66, 64, 67, 66, 65, 64, 63, 64, 65, 64, 65],
+            borderColor: 'rgb(255, 206, 86)',
+            backgroundColor: 'rgba(255, 206, 86, 0.2)',
+            tension: 0.1
+        }
+    ]
+};
+
+const rankingData = {
+    labels: ['Conakry', 'Faranah', 'Kindia', 'Labé', 'N\'Zérékoré'],
+    datasets: [{
+        label: 'Performance (%)',
+        data: [92, 88, 78, 65, 45],
+        backgroundColor: [
+            'rgba(40, 167, 69, 0.8)',
+            'rgba(40, 167, 69, 0.8)',
+            'rgba(23, 162, 184, 0.8)',
+            'rgba(255, 193, 7, 0.8)',
+            'rgba(220, 53, 69, 0.8)'
+        ]
+    }]
+};
+
+// Graphique d'évolution
+const ctxEvolution = document.getElementById('performanceEvolutionChart').getContext('2d');
+const performanceEvolutionChart = new Chart(ctxEvolution, {
+    type: 'line',
+    data: performanceData,
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'top',
+            },
+            title: {
+                display: true,
+                text: 'Évolution de la performance par région'
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 100
+            }
+        }
+    }
+});
+
+// Graphique de classement
+const ctxRanking = document.getElementById('rankingChart').getContext('2d');
+const rankingChart = new Chart(ctxRanking, {
+    type: 'bar',
+    data: rankingData,
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: false
+            },
+            title: {
+                display: true,
+                text: 'Classement actuel'
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 100
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

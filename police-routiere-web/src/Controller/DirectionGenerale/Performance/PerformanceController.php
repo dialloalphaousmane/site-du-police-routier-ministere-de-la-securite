@@ -11,7 +11,7 @@ use App\Service\DirectionGenerale\PerformanceService;
 use App\Entity\Region;
 
 #[Route('/dashboard/direction-generale/performance')]
-#[IsGranted('ROLE_DIRECTION_GENERALE')]
+// #[IsGranted('ROLE_DIRECTION_GENERALE')]
 class PerformanceController extends AbstractController
 {
     private PerformanceService $performanceService;

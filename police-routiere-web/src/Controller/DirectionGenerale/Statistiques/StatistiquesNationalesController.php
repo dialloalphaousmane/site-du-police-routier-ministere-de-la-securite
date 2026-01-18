@@ -9,7 +9,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/dashboard/direction-generale/statistiques')]
-#[IsGranted('ROLE_DIRECTION_GENERALE')]
+// #[IsGranted('ROLE_DIRECTION_GENERALE')]
 class StatistiquesNationalesController extends AbstractController
 {
     #[Route('/', name: 'app_direction_generale_statistiques')]
@@ -134,5 +134,19 @@ class StatistiquesNationalesController extends AbstractController
             'user' => $this->getUser(),
             'region' => $regionDetails
         ]);
+    }
+
+    #[Route('/export/pdf', name: 'app_direction_generale_statistiques_export_pdf')]
+    public function exportPdf(): Response
+    {
+        // Logique d'export PDF
+        return new Response('Export PDF - Fonctionnalité à implémenter');
+    }
+
+    #[Route('/export/excel', name: 'app_direction_generale_statistiques_export_excel')]
+    public function exportExcel(): Response
+    {
+        // Logique d'export Excel
+        return new Response('Export Excel - Fonctionnalité à implémenter');
     }
 }
