@@ -1,0 +1,371 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier le Plan - Direction Générale{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+.plan-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem 0;
+}
+.form-section {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+.form-label {
+    font-weight: 600;
+    color: #333;
+}
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+}
+.btn-primary:hover {
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+            <i class="bi bi-shield-check me-2"></i>
+            Police Routière Guinée - Direction Générale
+        </a>
+        
+        <div class="navbar-nav ms-auto">
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                    <i class="bi bi-person-circle me-1"></i>
+                    {{ app.user.email }}
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profil</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Paramètres</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="/logout" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                        <i class="bi bi-box-arrow-right me-2"></i>Déconnexion
+                    </a></li>
+                    <form id="logout-form" action="/logout" method="POST" style="display: none;">
+                        <input type="hidden" name="_token" value="{{ csrf_token('logout') }}">
+                    </form>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Plan Header -->
+<div class="plan-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-5 fw-bold">Modifier le Plan #{{ planId }}</h1>
+                <p class="lead">Mettez à jour les informations du plan existant</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="{{ path('app_direction_generale_planification') }}" class="btn btn-outline-light">
+                    <i class="bi bi-arrow-left me-1"></i>Retour à la liste
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="container mt-4">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_dashboard') }}">
+                            <i class="bi bi-speedometer2 me-2"></i>Vue d'ensemble
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_statistiques') }}">
+                            <i class="bi bi-graph-up me-2"></i>Statistiques nationales
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_supervision') }}">
+                            <i class="bi bi-geo-alt me-2"></i>Supervision régions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_rapports') }}">
+                            <i class="bi bi-file-text me-2"></i>Rapports consolidés
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_direction_generale_performance') }}">
+                            <i class="bi bi-trophy me-2"></i>Performance
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ path('app_direction_generale_planification') }}">
+                            <i class="bi bi-calendar3 me-2"></i>Planification
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <!-- Messages flash -->
+            {% for type, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ type }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+
+            <!-- Formulaire de modification -->
+            <div class="form-section">
+                <h4 class="mb-4">
+                    <i class="bi bi-pencil-square me-2"></i>Informations générales
+                </h4>
+                
+                <form method="POST" action="{{ path('app_direction_generale_planification_modifier', {'id': planId}) }}">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label for="titre" class="form-label">Titre du plan</label>
+                                <input type="text" class="form-control" id="titre" name="titre" 
+                                       value="Plan de Contrôle Renforcé - Conakry" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="statut" class="form-label">Statut</label>
+                                <select class="form-select" id="statut" name="statut">
+                                    <option value="En cours" selected>En cours</option>
+                                    <option value="Terminé">Terminé</option>
+                                    <option value="En pause">En pause</option>
+                                    <option value="Annulé">Annulé</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3">Plan de contrôle intensifié dans la zone de Conakry pour réduire les infractions et améliorer la sécurité routière.</textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="date_debut" class="form-label">Date de début</label>
+                                <input type="date" class="form-control" id="date_debut" name="date_debut" 
+                                       value="2026-01-01" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="date_fin" class="form-label">Date de fin</label>
+                                <input type="date" class="form-control" id="date_fin" name="date_fin" 
+                                       value="2026-03-31" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h4 class="mb-4">
+                        <i class="bi bi-cash-stack me-2"></i>Budget et ressources
+                    </h4>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="budget_total" class="form-label">Budget total (GNF)</label>
+                                <input type="number" class="form-control" id="budget_total" name="budget_total" 
+                                       value="50000000" min="0">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="budget_utilise" class="form-label">Budget utilisé (GNF)</label>
+                                <input type="number" class="form-control" id="budget_utilise" name="budget_utilise" 
+                                       value="32500000" min="0">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="personnel" class="form-label">Personnel affecté</label>
+                                <input type="number" class="form-control" id="personnel" name="personnel" 
+                                       value="25" min="1">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h4 class="mb-4">
+                        <i class="bi bi-bullseye me-2"></i>Objectifs
+                    </h4>
+                    
+                    <div class="mb-3">
+                        <label for="objectifs" class="form-label">Objectifs du plan</label>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="obj1" name="objectifs[]" value="1" checked>
+                                    <label class="form-check-label" for="obj1">
+                                        Augmenter les contrôles de 30%
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="obj2" name="objectifs[]" value="2" checked>
+                                    <label class="form-check-label" for="obj2">
+                                        Réduire les accidents de 20%
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="obj3" name="objectifs[]" value="3" checked>
+                                    <label class="form-check-label" for="obj3">
+                                        Former 50 agents
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="obj4" name="objectifs[]" value="4">
+                                    <label class="form-check-label" for="obj4">
+                                        Installer 10 nouveaux radars
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h4 class="mb-4">
+                        <i class="bi bi-geo-alt me-2"></i>Zones d'intervention
+                    </h4>
+                    
+                    <div class="mb-3">
+                        <label for="zones" class="form-label">Régions concernées</label>
+                        <div class="row">
+                            <div class="col-md-4 mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="zone1" name="zones[]" value="Conakry" checked>
+                                    <label class="form-check-label" for="zone1">Conakry</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="zone2" name="zones[]" value="Kindia">
+                                    <label class="form-check-label" for="zone2">Kindia</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="zone3" name="zones[]" value="Boké">
+                                    <label class="form-check-label" for="zone3">Boké</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="d-flex justify-content-between">
+                    <a href="{{ path('app_direction_generale_planification') }}" class="btn btn-secondary">
+                        <i class="bi bi-x-circle me-1"></i>Annuler
+                    </a>
+                    <div>
+                        <button type="button" class="btn btn-outline-warning me-2" onclick="confirmSuppression()">
+                            <i class="bi bi-trash me-1"></i>Supprimer
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-1"></i>Enregistrer les modifications
+                        </button>
+                    </div>
+                </div>
+                </form>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Modal de confirmation de suppression -->
+<div class="modal fade" id="suppressionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmation de suppression</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer ce plan ? Cette action est irréversible.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-danger" onclick="supprimerPlan()">
+                    <i class="bi bi-trash me-1"></i>Supprimer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function confirmSuppression() {
+    var modal = new bootstrap.Modal(document.getElementById('suppressionModal'));
+    modal.show();
+}
+
+function supprimerPlan() {
+    // Rediriger vers la route de suppression
+    window.location.href = '{{ path('app_direction_generale_planification_supprimer', {'id': planId}) }}';
+}
+
+// Validation du formulaire
+document.querySelector('form').addEventListener('submit', function(e) {
+    var dateDebut = new Date(document.getElementById('date_debut').value);
+    var dateFin = new Date(document.getElementById('date_fin').value);
+    
+    if (dateFin < dateDebut) {
+        e.preventDefault();
+        alert('La date de fin doit être postérieure à la date de début.');
+        return false;
+    }
+    
+    var budgetTotal = parseFloat(document.getElementById('budget_total').value);
+    var budgetUtilise = parseFloat(document.getElementById('budget_utilise').value);
+    
+    if (budgetUtilise > budgetTotal) {
+        e.preventDefault();
+        alert('Le budget utilisé ne peut pas dépasser le budget total.');
+        return false;
+    }
+});
+</script>
+{% endblock %}

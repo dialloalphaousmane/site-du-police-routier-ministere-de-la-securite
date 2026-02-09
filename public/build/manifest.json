@@ -1,0 +1,21 @@
+{
+  "name": "Police Routière Guinée",
+  "short_name": "Police Routière",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1e3a8a",
+  "theme_color": "#1e3a8a",
+  "description": "Système de gestion routière pour la Police Nationale Guinée",
+  "icons": [
+    {
+      "src": "/assets/images/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/images/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

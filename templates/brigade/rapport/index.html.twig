@@ -1,0 +1,154 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Rapports - Brigade{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+.rapport-card {
+    transition: transform 0.2s;
+    border-left: 4px solid #6c757d;
+}
+.rapport-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+.stats-card {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+    color: white;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_dashboard_chef_brigade') }}">
+                            <i class="bi bi-speedometer2 me-2"></i>Tableau de bord
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_controle_index') }}">
+                            <i class="bi bi-clipboard-check me-2"></i>Contrôles
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_infraction_index') }}">
+                            <i class="bi bi-exclamation-triangle me-2"></i>Infractions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_amende_index') }}">
+                            <i class="bi bi-cash-stack me-2"></i>Amendes
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_agent_index') }}">
+                            <i class="bi bi-people me-2"></i>Équipe
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ path('app_rapport_index') }}">
+                            <i class="bi bi-file-text me-2"></i>Rapports
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Rapports de la Brigade</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <a href="{{ path('app_rapport_statistics') }}" class="btn btn-sm btn-outline-info">
+                            <i class="bi bi-bar-chart me-1"></i>Statistiques
+                        </a>
+                        <a href="{{ path('app_rapport_export') }}" class="btn btn-sm btn-outline-success">
+                            <i class="bi bi-download me-1"></i>Exporter CSV
+                        </a>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title">Contrôles du jour</h6>
+                            <p class="card-text text-muted small">
+                                Rapport des contrôles effectués aujourd'hui dans la zone de la brigade.
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">Il y a 2 heures</small>
+                                <div>
+                                    <a href="#" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-download"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rapport 2 -->
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card rapport-card h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">Rapport Hebdomadaire</h6>
+                            <span class="badge bg-info">En cours</span>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title">Bilan semaine 45</h6>
+                            <p class="card-text text-muted small">
+                                Synthèse des activités de la brigade pour la semaine écoulée.
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">Il y a 1 jour</small>
+                                <div>
+                                    <a href="#" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-download"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rapport 3 -->
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card rapport-card h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">Rapport Spécial</h6>
+                            <span class="badge bg-warning">Brouillon</span>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title">Opération spéciale</h6>
+                            <p class="card-text text-muted small">
+                                Rapport concernant l'opération de contrôle renforcé.
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">Il y a 3 jours</small>
+                                <div>
+                                    <a href="#" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-download"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

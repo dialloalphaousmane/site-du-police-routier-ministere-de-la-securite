@@ -1,0 +1,254 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Infractions - Brigade{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+.infraction-card {
+    transition: transform 0.2s;
+    border-left: 4px solid #dc3545;
+}
+.infraction-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+.stats-card {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+}
+.amount-card {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_dashboard_chef_brigade') }}">
+                            <i class="bi bi-speedometer2 me-2"></i>Tableau de bord
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_controle_index') }}">
+                            <i class="bi bi-clipboard-check me-2"></i>Contrôles
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ path('app_infraction_index') }}">
+                            <i class="bi bi-exclamation-triangle me-2"></i>Infractions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_amende_index') }}">
+                            <i class="bi bi-cash-stack me-2"></i>Amendes
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_agent_index') }}">
+                            <i class="bi bi-people me-2"></i>Équipe
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_rapport_index') }}">
+                            <i class="bi bi-file-text me-2"></i>Rapports
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Infractions de la Brigade</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <a href="{{ path('app_infraction_statistics') }}" class="btn btn-sm btn-outline-info">
+                            <i class="bi bi-bar-chart me-1"></i>Statistiques
+                        </a>
+                        <a href="{{ path('app_infraction_export') }}" class="btn btn-sm btn-outline-success">
+                            <i class="bi bi-download me-1"></i>Exporter CSV
+                        </a>
+                    </div>
+                    <a href="{{ path('app_infraction_new') }}" class="btn btn-danger">
+                        <i class="bi bi-plus-circle me-1"></i>Nouvelle Infraction
+                    </a>
+                </div>
+            </div>
+
+            <!-- Messages flash -->
+            {% for type, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ type }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+
+            <!-- Statistiques -->
+            <div class="row mb-4">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card stats-card h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-uppercase mb-1">
+                                        Total Infractions
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold">{{ infractions|length }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-exclamation-triangle fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card amount-card h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-uppercase mb-1">
+                                        Montant Total
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold">
+                                        {% set total = infractions|reduce((carry, i) => carry + (i.montantAmende|default(0)), 0) %}
+                                        {{ total|number_format(0, '.', ' ') }} GNF
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-cash-stack fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card stats-card h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-uppercase mb-1">
+                                        Non Payées
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold">
+                                        {{ infractions|filter(i => i.statut == 'NON_PAYEE')|length }}
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-clock fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card stats-card h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-uppercase mb-1">
+                                        Payées
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold">
+                                        {{ infractions|filter(i => i.statut == 'PAYEE')|length }}
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-check-circle fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tableau des infractions -->
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-danger">Liste des Infractions</h6>
+                </div>
+                <div class="card-body">
+                    {% if infractions|length > 0 %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Référence</th>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Montant</th>
+                                    <th>Statut</th>
+                                    <th>Contrôle</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for infraction in infractions %}
+                                <tr>
+                                    <td>{{ infraction.reference }}</td>
+                                    <td>{{ infraction.createdAt|date('d/m/Y H:i') }}</td>
+                                    <td>{{ infraction.libelle }}</td>
+                                    <td>{{ infraction.montantAmende|number_format(0, '.', ' ') }} GNF</td>
+                                    <td>
+                                        <span class="badge bg-{{ infraction.statut == 'PAYEE' ? 'success' : 'warning' }}">
+                                            {{ infraction.statut == 'PAYEE' ? 'Payée' : 'Non payée' }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{{ path('app_controle_show', {'id': infraction.controle.id}) }}" class="btn btn-sm btn-outline-primary">
+                                            #{{ infraction.controle.id }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="{{ path('app_infraction_show', {'id': infraction.id}) }}" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="{{ path('app_infraction_edit', {'id': infraction.id}) }}" class="btn btn-sm btn-outline-secondary">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <form method="POST" action="{{ path('app_infraction_delete', {'id': infraction.id}) }}" style="display: inline;">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ infraction.id) }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette infraction ?');">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-shield-check fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">Aucune infraction enregistrée</h5>
+                        <p class="text-muted">Aucune infraction n'a été enregistrée pour le moment.</p>
+                        <a href="{{ path('app_infraction_new') }}" class="btn btn-danger">
+                            <i class="bi bi-plus-circle me-1"></i>Enregistrer une infraction
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

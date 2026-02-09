@@ -1,0 +1,131 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier le Contrôle - Police Routière{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="bi bi-pencil"></i> Modifier le Contrôle
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {{ form_start(form) }}
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.dateControle) }}
+                            {{ form_widget(form.dateControle, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.dateControle) }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.lieuControle) }}
+                            {{ form_widget(form.lieuControle, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Avenue Patrice Lumumba, Kinshasa'}}) }}
+                            {{ form_errors(form.lieuControle) }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.marqueVehicule) }}
+                            {{ form_widget(form.marqueVehicule, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Toyota, Renault, BMW'}}) }}
+                            {{ form_errors(form.marqueVehicule) }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.immatriculation) }}
+                            {{ form_widget(form.immatriculation, {'attr': {'class': 'form-control', 'placeholder': 'Ex: CG-123-AB'}}) }}
+                            {{ form_errors(form.immatriculation) }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.nomConducteur) }}
+                            {{ form_widget(form.nomConducteur, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.nomConducteur) }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.prenomConducteur) }}
+                            {{ form_widget(form.prenomConducteur, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.prenomConducteur) }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.noConducteur) }}
+                            {{ form_widget(form.noConducteur, {'attr': {'class': 'form-control', 'placeholder': 'Numéro du permis de conduire'}}) }}
+                            {{ form_errors(form.noConducteur) }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.agent) }}
+                            {{ form_widget(form.agent, {'attr': {'class': 'form-select'}}) }}
+                            {{ form_errors(form.agent) }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.brigade) }}
+                            {{ form_widget(form.brigade, {'attr': {'class': 'form-select'}}) }}
+                            {{ form_errors(form.brigade) }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.observation) }}
+                            {{ form_widget(form.observation, {'attr': {'class': 'form-control', 'rows': 3}}) }}
+                            {{ form_errors(form.observation) }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="d-flex justify-content-between">
+                                <a href="{{ path('app_controle_show', {'id': controle.id}) }}" class="btn btn-secondary">
+                                    <i class="bi bi-x-circle"></i> Annuler
+                                </a>
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="bi bi-check-circle"></i> Mettre à jour
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Informations supplémentaires -->
+    <div class="row mt-4">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-info-circle"></i> Informations du Contrôle
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tr>
+                            <td><strong>ID:</strong></td>
+                            <td>{{ controle.id }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Créé le:</strong></td>
+                            <td>{{ controle.createdAt|date('d/m/Y H:i') }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Dernière modification:</strong></td>
+                            <td>{{ controle.updatedAt|date('d/m/Y H:i') }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

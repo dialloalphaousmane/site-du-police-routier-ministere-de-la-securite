@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accès Refusé - Police Routière{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-danger shadow">
+                <div class="card-body text-center p-5">
+                    <h1 class="display-1 text-danger">
+                        <i class="bi bi-exclamation-triangle"></i>
+                    </h1>
+                    <h2 class="card-title text-danger">Accès Refusé</h2>
+                    <p class="card-text text-muted">
+                        Vous n'avez pas les permissions nécessaires pour accéder à cette ressource.
+                    </p>
+                    
+                    <div class="alert alert-info mt-4">
+                        <h6>Raisons possibles:</h6>
+                        <ul class="mb-0 text-start">
+                            <li>Votre rôle ne vous autorise pas à accéder cette page</li>
+                            <li>Vous n'avez pas accès à cette région/brigade</li>
+                            <li>Votre compte n'est pas activé</li>
+                        </ul>
+                    </div>
+
+                    <div class="mt-4">
+                        <a href="{{ path('app_dashboard') }}" class="btn btn-primary me-2">
+                            <i class="bi bi-house"></i> Retour au tableau de bord
+                        </a>
+                        <a href="{{ path('app_logout') }}" class="btn btn-danger">
+                            <i class="bi bi-box-arrow-right"></i> Déconnexion
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

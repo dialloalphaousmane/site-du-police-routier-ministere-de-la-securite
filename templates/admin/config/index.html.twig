@@ -1,0 +1,312 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Configuration Système - Police Routière Guinée{% endblock %}
+
+{% block stylesheets %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+    .config-section {
+        margin-bottom: 30px;
+    }
+    .config-card {
+        transition: transform 0.2s;
+    }
+    .config-card:hover {
+        transform: translateY(-2px);
+    }
+    .config-value {
+        font-family: 'Courier New', monospace;
+        background: #f8f9fa;
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+    .config-type {
+        font-size: 0.8em;
+        opacity: 0.7;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_dashboard_admin') }}">
+                            <i class="bi bi-speedometer2 me-2"></i>Tableau de bord
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_region_index') }}">
+                            <i class="bi bi-geo-alt me-2"></i>Régions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_brigade_index') }}">
+                            <i class="bi bi-shield me-2"></i>Brigades
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_report_index') }}">
+                            <i class="bi bi-file-text me-2"></i>Rapports
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_export_users') }}">
+                            <i class="bi bi-download me-2"></i>Export
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_admin_log_index') }}">
+                            <i class="bi bi-journal-text me-2"></i>Logs
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ path('app_admin_config_index') }}">
+                            <i class="bi bi-gear me-2"></i>Configuration
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Configuration Système</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <a href="{{ path('app_admin_config_new') }}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-1"></i>Nouvelle configuration
+                        </a>
+                    </div>
+                    <div class="btn-group me-2">
+                        <a href="{{ path('app_admin_config_export') }}" class="btn btn-success">
+                            <i class="bi bi-download me-1"></i>Export CSV
+                        </a>
+                    </div>
+                    <div class="btn-group me-2">
+                        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#resetModal">
+                            <i class="bi bi-arrow-clockwise me-1"></i>Réinitialiser
+                        </button>
+                    </div>
+                    <div class="btn-group me-2">
+                        <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#initModal">
+                            <i class="bi bi-play-circle me-1"></i>Initialiser
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flash Messages -->
+            {% for type, messages in app.session.flashbag.all() %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ type == 'error' ? 'danger' : type }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+
+            <!-- Search Bar -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="text" id="searchInput" class="form-control" placeholder="Rechercher une configuration...">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-funnel"></i>
+                                </span>
+                                <select id="categoryFilter" class="form-select">
+                                    <option value="">Toutes les catégories</option>
+                                    {% for categorie in categories %}
+                                        <option value="{{ categorie }}">{{ categorie|title }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configuration Sections -->
+            <div id="configContainer">
+                {% for categorie, configs in configurations %}
+                    <div class="config-section">
+                        <h3 class="mb-3">
+                            <i class="bi bi-folder me-2"></i>{{ categorie|title }}
+                            <span class="badge bg-secondary ms-2">{{ configs|length }}</span>
+                        </h3>
+                        <div class="row">
+                            {% for config in configs %}
+                                <div class="col-md-6 col-lg-4 mb-3">
+                                    <div class="card config-card h-100">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <h6 class="card-title mb-0">{{ config.cle }}</h6>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="{{ path('app_admin_config_edit', {'id': config.id}) }}" class="btn btn-outline-warning btn-sm" title="Modifier">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <form method="post" action="{{ path('app_admin_config_toggle', {'id': config.id}) }}" style="display: inline;">
+                                                        <input type="hidden" name="_token" value="{{ csrf_token('toggle' ~ config.id) }}">
+                                                        <button type="submit" class="btn btn-outline-{{ config.actif ? 'secondary' : 'success' }} btn-sm" title="{{ config.actif ? 'Désactiver' : 'Activer' }}">
+                                                            <i class="bi bi-{{ config.actif ? 'pause' : 'play' }}"></i>
+                                                        </button>
+                                                    </form>
+                                                    <form method="post" action="{{ path('app_admin_config_delete', {'id': config.id}) }}" style="display: inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette configuration ?');">
+                                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ config.id) }}">
+                                                        <button type="submit" class="btn btn-outline-danger btn-sm" title="Supprimer">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <div class="config-value mb-2">{{ config.valeur }}</div>
+                                            <div class="config-type text-muted mb-2">{{ config.type }}</div>
+                                            {% if config.description %}
+                                                <small class="text-muted">{{ config.description|slice(0, 100) }}{% if config.description|length > 100 %}...{% endif %}</small>
+                                            {% endif %}
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="badge bg-{{ config.actif ? 'success' : 'secondary' }}">
+                                                    {{ config.actif ? 'Actif' : 'Inactif' }}
+                                                </span>
+                                                <small class="text-muted">
+                                                    Créé le {{ config.createdAt|date('d/m/Y') }}
+                                                    {% if config.updatedAt != config.createdAt %}
+                                                        • Modifié le {{ config.updatedAt|date('d/m/Y') }}
+                                                    {% endif %}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Reset Modal -->
+<div class="modal fade" id="resetModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Réinitialiser la configuration</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir réinitialiser toute la configuration ?</p>
+                <p class="text-danger">Cette action supprimera toutes les configurations existantes et les remplacera par les valeurs par défaut.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <form method="post" action="{{ path('app_admin_config_reset') }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('reset') }}">
+                    <button type="submit" class="btn btn-danger">Réinitialiser</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Initialize Modal -->
+<div class="modal fade" id="initModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Initialiser la configuration</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Cette action va créer les configurations par défaut si elles n'existent pas déjà.</p>
+                <p>Les configurations existantes ne seront pas modifiées.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <form method="post" action="{{ path('app_admin_config_init') }}">
+                    <button type="submit" class="btn btn-info">Initialiser</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const configContainer = document.getElementById('configContainer');
+    
+    if (searchInput && categoryFilter && configContainer) {
+        function filterConfigs() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const selectedCategory = categoryFilter.value.toLowerCase();
+            
+            const sections = configContainer.querySelectorAll('.config-section');
+            
+            sections.forEach(section => {
+                const sectionTitle = section.querySelector('h3').textContent.toLowerCase();
+                const cards = section.querySelectorAll('.config-card');
+                
+                let sectionVisible = true;
+                
+                // Filter by category
+                if (selectedCategory && !sectionTitle.includes(selectedCategory)) {
+                    sectionVisible = false;
+                }
+                
+                // Filter by search term
+                if (sectionVisible && searchTerm) {
+                    let hasVisibleCard = false;
+                    cards.forEach(card => {
+                        const text = card.textContent.toLowerCase();
+                        if (text.includes(searchTerm)) {
+                            hasVisibleCard = true;
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                    
+                    if (!hasVisibleCard) {
+                        sectionVisible = false;
+                    } else {
+                        cards.forEach(card => {
+                            card.style.display = '';
+                        });
+                    }
+                } else if (sectionVisible) {
+                    cards.forEach(card => {
+                        card.style.display = '';
+                    });
+                }
+                
+                section.style.display = sectionVisible ? '' : 'none';
+            });
+        }
+        
+        searchInput.addEventListener('input', filterConfigs);
+        categoryFilter.addEventListener('change', filterConfigs);
+    }
+});
+</script>
+{% endblock %}

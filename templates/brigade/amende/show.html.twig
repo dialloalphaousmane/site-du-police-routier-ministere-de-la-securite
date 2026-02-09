@@ -1,0 +1,218 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails Amende - Brigade{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+.detail-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+.status-badge {
+    font-size: 0.875rem;
+    padding: 0.375rem 0.75rem;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_dashboard_chef_brigade') }}">
+                            <i class="bi bi-speedometer2 me-2"></i>Tableau de bord
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_controle_index') }}">
+                            <i class="bi bi-clipboard-check me-2"></i>Contrôles
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_infraction_index') }}">
+                            <i class="bi bi-exclamation-triangle me-2"></i>Infractions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ path('app_amende_index') }}">
+                            <i class="bi bi-cash-stack me-2"></i>Amendes
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_agent_index') }}">
+                            <i class="bi bi-people me-2"></i>Équipe
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_rapport_index') }}">
+                            <i class="bi bi-file-text me-2"></i>Rapports
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Détails de l'Amende</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a href="{{ path('app_amende_edit', {'id': amende.id}) }}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-pencil"></i> Modifier
+                    </a>
+                    <a href="{{ path('app_amende_index') }}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-arrow-left"></i> Retour
+                    </a>
+                </div>
+            </div>
+
+            <!-- Messages flash -->
+            {% for type, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ type }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+
+            <!-- Détails de l'amende -->
+            <div class="detail-card">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 class="mb-3">Informations générales</h5>
+                        <table class="table table-borderless">
+                            <tr>
+                                <td><strong>Référence:</strong></td>
+                                <td>{{ amende.reference }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Date de paiement:</strong></td>
+                                <td>
+                                    {% if amende.datePaiement %}
+                                        {{ amende.datePaiement|date('d/m/Y H:i') }}
+                                    {% else %}
+                                        <span class="text-muted">Non payée</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Statut:</strong></td>
+                                <td>
+                                    <span class="badge status-badge bg-{{ amende.statut == 'VALIDE' ? 'success' : amende.statut == 'EN_ATTENTE' ? 'warning' : 'secondary' }}">
+                                        {{ amende.statut == 'VALIDE' ? 'Validée' : amende.statut == 'EN_ATTENTE' ? 'En attente' : 'Autre' }}
+                                    </span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="mb-3">Montants</h5>
+                        <table class="table table-borderless">
+                            <tr>
+                                <td><strong>Montant total:</strong></td>
+                                <td>{{ amende.montantTotal|number_format(0, '.', ' ') }} GNF</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Montant payé:</strong></td>
+                                <td>{{ amende.montantPaye|number_format(0, '.', ' ') }} GNF</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Reste à payer:</strong></td>
+                                <td class="text-danger">
+                                    {{ (amende.montantTotal - amende.montantPaye)|number_format(0, '.', ' ') }} GNF
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Infraction associée -->
+            <div class="detail-card">
+                <h5 class="mb-3">Infraction associée</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>Référence</th>
+                            <td>{{ amende.infraction.reference }}</td>
+                        </tr>
+                        <tr>
+                            <th>Type</th>
+                            <td>{{ amende.infraction.libelle }}</td>
+                        </tr>
+                        <tr>
+                            <th>Montant de l'amende</th>
+                            <td>{{ amende.infraction.montantAmende|number_format(0, '.', ' ') }} GNF</td>
+                        </tr>
+                        <tr>
+                            <th>Description</th>
+                            <td>{{ amende.infraction.description|default('Non spécifiée') }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Contrôle associé -->
+            <div class="detail-card">
+                <h5 class="mb-3">Contrôle associé</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>Date du contrôle</th>
+                            <td>{{ amende.infraction.controle.dateControle|date('d/m/Y H:i') }}</td>
+                        </tr>
+                        <tr>
+                            <th>Lieu</th>
+                            <td>{{ amende.infraction.controle.lieuControle }}</td>
+                        </tr>
+                        <tr>
+                            <th>Véhicule</th>
+                            <td>{{ amende.infraction.controle.marqueVehicule }} {{ amende.infraction.controle.immatriculation }}</td>
+                        </tr>
+                        <tr>
+                            <th>Conducteur</th>
+                            <td>{{ amende.infraction.controle.nomConducteur }} {{ amende.infraction.controle.prenomConducteur }}</td>
+                        </tr>
+                        <tr>
+                            <th>Agent</th>
+                            <td>{{ amende.infraction.controle.agent.nom }} {{ amende.infraction.controle.agent.prenom }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{{ path('app_amende_index') }}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Retour à la liste
+                </a>
+                <div class="btn-group">
+                    <a href="{{ path('app_amende_edit', {'id': amende.id}) }}" class="btn btn-primary">
+                        <i class="bi bi-pencil"></i> Modifier
+                    </a>
+                    <form method="POST" action="{{ path('app_amende_delete', {'id': amende.id}) }}" style="display: inline;">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ amende.id) }}">
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette amende ?');">
+                            <i class="bi bi-trash"></i> Supprimer
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}
