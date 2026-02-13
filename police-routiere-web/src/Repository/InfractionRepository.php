@@ -18,6 +18,25 @@ class InfractionRepository extends ServiceEntityRepository
         parent::__construct($registry, Infraction::class);
     }
 
+    public function countByRegion(int|Region $region): int
+    {
+        $qb = $this->createQueryBuilder('i')
+            ->select('COUNT(i.id)')
+            ->join('i.controle', 'c')
+            ->join('c.brigade', 'b')
+            ->join('b.region', 'r');
+
+        if (is_int($region)) {
+            $qb->andWhere('r.id = :regionId')
+                ->setParameter('regionId', $region);
+        } else {
+            $qb->andWhere('b.region = :region')
+                ->setParameter('region', $region);
+        }
+
+        return (int) $qb->getQuery()->getSingleScalarResult();
+    }
+
     public function findByRegion(Region $region): array
     {
         return $this->createQueryBuilder('i')

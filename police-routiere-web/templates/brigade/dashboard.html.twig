@@ -1,0 +1,110 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tableau de Bord Brigade {% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1><i class="bi bi-shield me-2"></i>Brigade {{ brigade.code }}</h1>
+            <small class="text-muted">{{ brigade.localite }}, {{ brigade.region.nom }}</small>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-primary">
+                <div class="card-body text-center">
+                    <h2 class="text-primary">{{ stats.agents_count }}</h2>
+                    <small class="text-muted">Agents</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-success">
+                <div class="card-body text-center">
+                    <h2 class="text-success">{{ stats.controls_count }}</h2>
+                    <small class="text-muted">Contrôles</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-warning">
+                <div class="card-body text-center">
+                    <h2 class="text-warning">{{ stats.infractions_count }}</h2>
+                    <small class="text-muted">Infractions</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-danger">
+                <div class="card-body text-center">
+                    <h2 class="text-danger">{{ stats.amendes_pending }}</h2>
+                    <small class="text-muted">Amendes en attente</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions Rapides -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="btn-group w-100" role="group">
+                <a href="{{ path('app_brigade_agents') }}" class="btn btn-outline-primary">
+                    <i class="bi bi-people me-1"></i>Agents
+                </a>
+                <a href="{{ path('app_brigade_controls') }}" class="btn btn-outline-success">
+                    <i class="bi bi-list me-1"></i>Contrôles
+                </a>
+                <a href="{{ path('app_brigade_infractions') }}" class="btn btn-outline-warning">
+                    <i class="bi bi-exclamation me-1"></i>Infractions
+                </a>
+                <a href="{{ path('app_brigade_amendes') }}" class="btn btn-outline-danger">
+                    <i class="bi bi-cash me-1"></i>Amendes
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Derniers contrôles -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">Derniers Contrôles</h6>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Date</th>
+                                <th>Lieu</th>
+                                <th>Immatriculation</th>
+                                <th>Conducteur</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for control in recent_controls %}
+                                <tr>
+                                    <td><small>{{ control.controleDate|date('d/m H:i') }}</small></td>
+                                    <td>{{ control.lieu }}</td>
+                                    <td><strong>{{ control.immatriculation }}</strong></td>
+                                    <td>{{ control.nomConducteur }}</td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-3 text-muted">Aucun contrôle récent</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ path('app_brigade_controls') }}" class="btn btn-sm btn-link">Voir tous les contrôles →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

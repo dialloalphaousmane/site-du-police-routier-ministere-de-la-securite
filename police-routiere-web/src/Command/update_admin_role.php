@@ -24,7 +24,6 @@ if ($adminUser) {
     echo "Admin user updated successfully!\n";
     echo "Email: " . $adminUser->getEmail() . "\n";
     echo "Security Roles: " . json_encode($adminUser->getRoles()) . "\n";
-    echo "ORM Role: " . ($adminUser->getRole() ? $adminUser->getRole()->getCode() : 'NULL') . "\n";
 } else {
     echo "Admin user not found!\n";
 }

@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\ControleRepository;
+use App\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -38,6 +39,15 @@ class Controle
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $observation = null;
+
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $statut = null;
+
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    private ?User $validatedBy = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $dateValidation = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
@@ -210,6 +220,42 @@ class Controle
                 $infraction->setControle(null);
             }
         }
+        return $this;
+    }
+
+    public function getStatut(): ?string
+    {
+        return $this->statut;
+    }
+
+    public function setStatut(?string $statut): static
+    {
+        $this->statut = $statut;
+
+        return $this;
+    }
+
+    public function getValidatedBy(): ?User
+    {
+        return $this->validatedBy;
+    }
+
+    public function setValidatedBy(?User $validatedBy): static
+    {
+        $this->validatedBy = $validatedBy;
+
+        return $this;
+    }
+
+    public function getDateValidation(): ?\DateTimeImmutable
+    {
+        return $this->dateValidation;
+    }
+
+    public function setDateValidation(?\DateTimeImmutable $dateValidation): static
+    {
+        $this->dateValidation = $dateValidation;
+
         return $this;
     }
 }

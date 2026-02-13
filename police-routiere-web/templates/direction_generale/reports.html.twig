@@ -1,0 +1,122 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Rapports - Direction Générale{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1><i class="bi bi-file-text me-2"></i>Rapports et Statistiques</h1>
+        </div>
+        <div class="col-md-4">
+            <form method="GET" class="d-flex gap-2">
+                <select name="period" class="form-select form-select-sm">
+                    <option value="week" {% if selected_period == 'week' %}selected{% endif %}>Dernière semaine</option>
+                    <option value="month" {% if selected_period == 'month' %}selected{% endif %}>Dernier mois</option>
+                    <option value="quarter" {% if selected_period == 'quarter' %}selected{% endif %}>Dernier trimestre</option>
+                    <option value="year" {% if selected_period == 'year' %}selected{% endif %}>Dernière année</option>
+                </select>
+                <select name="region" class="form-select form-select-sm">
+                    <option value="">-- Toutes les régions --</option>
+                    {% for region in regions %}
+                        <option value="{{ region.id }}" {% if selected_region == region.id %}selected{% endif %}>
+                            {{ region.nom }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-sm btn-primary">Générer</button>
+            </form>
+        </div>
+    </div>
+
+    {% if report_data %}
+        <!-- Summary Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card border-primary">
+                    <div class="card-body">
+                        <h6 class="card-title">Contrôles</h6>
+                        <h2 class="text-primary">{{ report_data.controls_count }}</h2>
+                        <small class="text-muted">Période: {{ report_data.start_date|date('d/m') }} - {{ report_data.end_date|date('d/m/Y') }}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-warning">
+                    <div class="card-body">
+                        <h6 class="card-title">Infractions</h6>
+                        <h2 class="text-warning">{{ report_data.infractions_count }}</h2>
+                        <small class="text-muted">Détectées</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-danger">
+                    <div class="card-body">
+                        <h6 class="card-title">Amendes</h6>
+                        <h2 class="text-danger">{{ report_data.amendes_count }}</h2>
+                        <small class="text-muted">Émises</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-success">
+                    <div class="card-body">
+                        <h6 class="card-title">Montant Total</h6>
+                        <h2 class="text-success">{{ (report_data.amendes_total_amount / 1000000)|number_format(1, ',', ' ') }}M</h2>
+                        <small class="text-muted">GNF</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Revenue Analysis -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="card-title mb-0">Recouvrement des Amendes</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="progress mb-2">
+                            {% set percentage = (report_data.amendes_paid_amount / report_data.amendes_total_amount * 100)|round %}
+                            <div class="progress-bar" style="width: {{ percentage }}%"></div>
+                        </div>
+                        <small class="text-muted">
+                            Payées: {{ (report_data.amendes_paid_amount|number_format(0, ',', ' ')) }} GNF ({{ percentage }}%)
+                        </small>
+                        <br>
+                        <small class="text-muted">
+                            En attente: {{ ((report_data.amendes_total_amount - report_data.amendes_paid_amount)|number_format(0, ',', ' ')) }} GNF
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="card-title mb-0">Indicateurs de Performance</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6 border-end">
+                                <h5 class="text-info">{{ (report_data.controls_count > 0 ? (report_data.infractions_count / report_data.controls_count * 100)|round : 0) }}%</h5>
+                                <small class="text-muted">Taux d'infraction</small>
+                            </div>
+                            <div class="col-6">
+                                <h5 class="text-success">{{ (report_data.amendes_count > 0 ? (report_data.amendes_paid_amount / report_data.amendes_total_amount * 100)|round : 0) }}%</h5>
+                                <small class="text-muted">Taux de recouvrement</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            <i class="bi bi-info-circle me-2"></i>Sélectionnez une période et une région pour générer un rapport
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -99,10 +99,10 @@ main {
                 <h1 class="h2">Tableau de Performance</h1>
                 <div class="btn-toolbar mb-2 mb-md-0">
                     <div class="btn-group me-2">
-                        <button type="button" class="btn btn-sm btn-outline-secondary">
+                        <a class="btn btn-sm btn-outline-secondary" href="{{ path('app_direction_generale_performance_export', {'format': 'pdf', 'type': 'global'}) }}">
                             <i class="bi bi-download me-1"></i>Exporter
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-primary">
+                        </a>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="refreshPerformanceDashboard()">
                             <i class="bi bi-arrow-clockwise me-1"></i>Actualiser
                         </button>
                     </div>
@@ -268,8 +268,15 @@ main {
                                         {% endif %}
                                     </td>
                                     <td>
-                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button>
-                                        <button class="btn btn-sm btn-outline-success"><i class="bi bi-award"></i></button>
+                                        <a class="btn btn-sm btn-outline-primary" href="{{ path('app_direction_generale_performance_region', {'id': performance.id}) }}" title="Voir">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a class="btn btn-sm btn-outline-secondary" href="{{ path('app_direction_generale_supervision', {'q': performance.name, 'status': 'all'}) }}" title="Modifier">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <button class="btn btn-sm btn-outline-danger" type="button" onclick="deleteRegionFromPerformance({{ performance.id }})" title="Supprimer">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
                                     </td>
                                 </tr>
                                 {% else %}
@@ -290,6 +297,35 @@ main {
 {% block javascripts %}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+const dgRegionCsrfToken = '{{ csrf_token('dg_supervision_region') }}';
+
+function refreshPerformanceDashboard() {
+    window.location.reload();
+}
+
+function deleteRegionFromPerformance(id) {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cette région ?')) {
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('_token', dgRegionCsrfToken);
+
+    fetch(`{{ path('app_direction_generale_supervision_region_delete', {id: 0}) }}`.replace('/0', `/${id}`), {
+        method: 'POST',
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data && data.success) {
+            window.location.reload();
+            return;
+        }
+        alert('Erreur: ' + ((data && data.message) ? data.message : 'Suppression impossible'));
+    })
+    .catch(() => alert('Erreur: Suppression impossible'));
+}
+
 // Données par défaut
 const performanceData = {
     labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],

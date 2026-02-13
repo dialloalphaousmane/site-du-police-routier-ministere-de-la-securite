@@ -15,8 +15,6 @@ services:
     # this creates a service per class whose id is the fully-qualified class name
     App\:
         resource: '../src/'
-        exclude:
-            - '../src/Service/StatisticsService.php'
 
     # NotificationService manuel
     App\Service\NotificationService:

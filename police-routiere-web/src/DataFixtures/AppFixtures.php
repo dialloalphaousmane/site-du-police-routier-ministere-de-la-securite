@@ -7,6 +7,10 @@ use App\Entity\Region;
 use App\Entity\Brigade;
 use App\Entity\User;
 use App\Entity\Agent;
+use App\Entity\Controle;
+use App\Entity\Infraction;
+use App\Entity\Amende;
+use App\Entity\Rapport;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -150,6 +154,7 @@ class AppFixtures extends Fixture
 
         // Create Agent Users with corresponding Agents
         $agentCounter = 0;
+        $agentObjectsByBrigade = [];
         foreach ($brigadeObjects as $brigadeCode => $brigade) {
             for ($i = 1; $i <= 3; $i++) {
                 $agentCounter++;
@@ -165,6 +170,9 @@ class AppFixtures extends Fixture
                 $agent->setIsActif(true);
                 $manager->persist($agent);
 
+                $agentObjectsByBrigade[$brigadeCode] ??= [];
+                $agentObjectsByBrigade[$brigadeCode][] = $agent;
+
                 // Create User for Agent
                 $userAgent = new User();
                 $userAgent->setEmail('agent-' . strtolower($brigadeCode) . '-' . $i . '@police-routiere.gn');
@@ -176,6 +184,53 @@ class AppFixtures extends Fixture
                 $userAgent->setIsActive(true);
                 $userAgent->setPassword($this->passwordHasher->hashPassword($userAgent, 'Agent@123456'));
                 $manager->persist($userAgent);
+            }
+        }
+
+        // Create sample Controls and Infractions
+        $today = new \DateTimeImmutable();
+
+        foreach ($brigadeObjects as $brigadeCode => $brigade) {
+            for ($j = 0; $j < 2; $j++) {
+                $brigadeAgents = $agentObjectsByBrigade[$brigadeCode] ?? [];
+                if ($brigadeAgents === []) {
+                    continue;
+                }
+                $agentForControle = $brigadeAgents[array_rand($brigadeAgents)];
+
+                $controle = new Controle();
+                $controle->setDateControle((clone $today)->modify("-$j days"));
+                $controle->setLieuControle('Route ' . $brigadeCode);
+                $controle->setMarqueVehicule(['Toyota', 'Nissan', 'Peugeot', 'Renault'][rand(0, 3)]);
+                $controle->setImmatriculation('CKY-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT));
+                $controle->setNomConducteur('Conducteur Test');
+                $controle->setPrenomConducteur('Prenom Test');
+                $controle->setNoConducteur('TEL-' . str_pad((string) rand(1, 99999999), 8, '0', STR_PAD_LEFT));
+                $controle->setObservation('Contrôle de routine');
+                $controle->setBrigade($brigade);
+                $controle->setAgent($agentForControle);
+                $manager->persist($controle);
+
+                // Add infractions
+                if (rand(0, 1)) {
+                    $infraction = new Infraction();
+                    $infraction->setReference('INF-' . date('Ymd') . '-' . str_pad((string) rand(1, 9999), 4, '0', STR_PAD_LEFT));
+                    $infraction->setLibelle('Violation du code de la route');
+                    $infraction->setCode('VT-' . rand(100, 500));
+                    $infraction->setDescription('Violation du code de la route');
+                    $infraction->setMontantAmende('50000.00');
+                    $infraction->setControle($controle);
+                    $manager->persist($infraction);
+
+                    // Add amende
+                    $amende = new Amende();
+                    $amende->setReference('AMD-' . date('Ymd') . '-' . str_pad((string) rand(1, 9999), 4, '0', STR_PAD_LEFT));
+                    $amende->setMontantTotal('50000.00');
+                    $amende->setMontantPaye(rand(0, 1) ? '50000.00' : '0.00');
+                    $amende->setStatut(['EN_ATTENTE', 'PAYEE', 'REJETEE'][rand(0, 2)]);
+                    $amende->setInfraction($infraction);
+                    $manager->persist($amende);
+                }
             }
         }
 

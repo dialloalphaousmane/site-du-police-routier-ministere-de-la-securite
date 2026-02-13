@@ -211,19 +211,28 @@
                     <h5 class="mb-0">Actions</h5>
                 </div>
                 <div class="card-body">
-                    <div class="btn-group" role="group">
-                        <button class="btn btn-outline-primary">
+                    <div class="d-flex flex-wrap gap-2">
+                        <a class="btn btn-outline-primary" href="{{ path('app_direction_generale_planification_modifier', {'id': plan.id}) }}">
                             <i class="bi bi-pencil me-1"></i>Modifier le plan
-                        </button>
-                        <button class="btn btn-outline-success">
-                            <i class="bi bi-check-circle me-1"></i>Marquer comme terminé
-                        </button>
-                        <button class="btn btn-outline-info">
+                        </a>
+
+                        <form method="post" action="{{ path('app_direction_generale_planification_terminer', {'id': plan.id}) }}" class="d-inline">
+                            <input type="hidden" name="_token" value="{{ csrf_token('plan_status' ~ plan.id) }}">
+                            <button type="submit" class="btn btn-outline-success">
+                                <i class="bi bi-check-circle me-1"></i>Marquer comme terminé
+                            </button>
+                        </form>
+
+                        <a class="btn btn-outline-info" href="{{ path('app_direction_generale_planification_export', {'plan': plan.id, 'format': 'pdf'}) }}">
                             <i class="bi bi-download me-1"></i>Exporter le rapport
-                        </button>
-                        <button class="btn btn-outline-warning">
-                            <i class="bi bi-pause-circle me-1"></i>Mettre en pause
-                        </button>
+                        </a>
+
+                        <form method="post" action="{{ path('app_direction_generale_planification_pause', {'id': plan.id}) }}" class="d-inline">
+                            <input type="hidden" name="_token" value="{{ csrf_token('plan_status' ~ plan.id) }}">
+                            <button type="submit" class="btn btn-outline-warning">
+                                <i class="bi bi-pause-circle me-1"></i>Mettre en pause
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>

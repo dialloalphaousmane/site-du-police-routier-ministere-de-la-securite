@@ -1,0 +1,110 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Amendes - Brigade {{ brigade.code }}{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1><i class="bi bi-cash-coin me-2"></i>Amendes - {{ brigade.nom }}</h1>
+        </div>
+        <div class="col-md-4">
+            <form method="GET" class="d-flex gap-2">
+                <select name="statut" class="form-select form-select-sm">
+                    <option value="">-- Tous les statuts --</option>
+                    <option value="EN_ATTENTE" {% if app.request.query.get('statut') == 'EN_ATTENTE' %}selected{% endif %}>En Attente</option>
+                    <option value="PAYEE" {% if app.request.query.get('statut') == 'PAYEE' %}selected{% endif %}>Payée</option>
+                    <option value="REJETEE" {% if app.request.query.get('statut') == 'REJETEE' %}selected{% endif %}>Rejetée</option>
+                </select>
+                <button type="submit" class="btn btn-sm btn-primary">Filtrer</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>N° Amende</th>
+                        <th>Infraction</th>
+                        <th>Montant</th>
+                        <th>Statut</th>
+                        <th>Date Émission</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if amendes|length > 0 %}
+                        {% for amende in amendes %}
+                            <tr>
+                                <td>
+                                    <span class="badge bg-dark">{{ amende.numeroAmende }}</span>
+                                </td>
+                                <td>
+                                    {% if amende.infraction %}
+                                        {{ amende.infraction.code }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <strong class="text-danger">{{ amende.montant|number_format(0, ',', ' ') }} GNF</strong>
+                                </td>
+                                <td>
+                                    {% if amende.statutPaiement == 'PAYEE' %}
+                                        <span class="badge bg-success">Payée</span>
+                                    {% elseif amende.statutPaiement == 'EN_ATTENTE' %}
+                                        <span class="badge bg-warning">En Attente</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Rejetée</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <small>{{ amende.dateEmission|date('d/m/Y') }}</small>
+                                </td>
+                                <td class="text-end">
+                                    <a href="{{ path('app_amende_show', {id: amende.id}) }}" class="btn btn-sm btn-info">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">Aucune amende</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if pagination.total_pages > 1 %}
+        <nav aria-label="Pagination" class="mt-3">
+            <ul class="pagination justify-content-center">
+                {% if pagination.current_page > 1 %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ pagination.current_page - 1 }}">Précédent</a>
+                    </li>
+                {% endif %}
+                {% for i in 1..pagination.total_pages %}
+                    <li class="page-item {% if i == pagination.current_page %}active{% endif %}">
+                        <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                    </li>
+                {% endfor %}
+                {% if pagination.current_page < pagination.total_pages %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ pagination.current_page + 1 }}">Suivant</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+
+    <div class="mt-3">
+        <a href="{{ path('app_brigade_dashboard') }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Retour
+        </a>
+    </div>
+</div>
+{% endblock %}

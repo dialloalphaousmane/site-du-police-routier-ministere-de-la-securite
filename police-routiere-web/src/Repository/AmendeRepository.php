@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Amende;
 use App\Entity\Region;
 use App\Entity\Brigade;
+use App\Util\PoliceConstants;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -151,5 +152,49 @@ class AmendeRepository extends ServiceEntityRepository
             ->setParameter('brigade', $brigade)
             ->getQuery()
             ->getSingleScalarResult() ?? 0;
+    }
+
+    public function countPendingByRegion(int|Region $region): int
+    {
+        $qb = $this->createQueryBuilder('a')
+            ->join('a.infraction', 'i')
+            ->join('i.controle', 'c')
+            ->join('c.brigade', 'b')
+            ->join('b.region', 'r')
+            ->select('COUNT(a.id)')
+            ->andWhere('a.statut = :statut')
+            ->setParameter('statut', PoliceConstants::AMENDE_STATUS_PENDING);
+
+        if (is_int($region)) {
+            $qb->andWhere('r.id = :regionId')
+                ->setParameter('regionId', $region);
+        } else {
+            $qb->andWhere('b.region = :region')
+                ->setParameter('region', $region);
+        }
+
+        return (int) ($qb->getQuery()->getSingleScalarResult() ?? 0);
+    }
+
+    public function countPaidByRegion(int|Region $region): int
+    {
+        $qb = $this->createQueryBuilder('a')
+            ->join('a.infraction', 'i')
+            ->join('i.controle', 'c')
+            ->join('c.brigade', 'b')
+            ->join('b.region', 'r')
+            ->select('COUNT(a.id)')
+            ->andWhere('a.statut = :statut')
+            ->setParameter('statut', PoliceConstants::AMENDE_STATUS_PAID);
+
+        if (is_int($region)) {
+            $qb->andWhere('r.id = :regionId')
+                ->setParameter('regionId', $region);
+        } else {
+            $qb->andWhere('b.region = :region')
+                ->setParameter('region', $region);
+        }
+
+        return (int) ($qb->getQuery()->getSingleScalarResult() ?? 0);
     }
 }

@@ -265,6 +265,32 @@ class PlanificationController extends AbstractController
         return $this->redirectToRoute('app_direction_generale_planification');
     }
 
+    #[Route('/terminer/{id}', name: 'app_direction_generale_planification_terminer', methods: ['POST'])]
+    public function terminer(int $id, Request $request): Response
+    {
+        if (!$this->isCsrfTokenValid('plan_status'.$id, (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token CSRF invalide.');
+            return $this->redirectToRoute('app_direction_generale_planification_details', ['id' => $id]);
+        }
+
+        $this->addFlash('success', 'Plan marqué comme terminé.');
+
+        return $this->redirectToRoute('app_direction_generale_planification_details', ['id' => $id]);
+    }
+
+    #[Route('/pause/{id}', name: 'app_direction_generale_planification_pause', methods: ['POST'])]
+    public function pause(int $id, Request $request): Response
+    {
+        if (!$this->isCsrfTokenValid('plan_status'.$id, (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token CSRF invalide.');
+            return $this->redirectToRoute('app_direction_generale_planification_details', ['id' => $id]);
+        }
+
+        $this->addFlash('success', 'Plan mis en pause.');
+
+        return $this->redirectToRoute('app_direction_generale_planification_details', ['id' => $id]);
+    }
+
     #[Route('/archiver/{id}', name: 'app_direction_generale_planification_archiver', methods: ['POST'])]
     public function archiver(int $id, Request $request): Response
     {

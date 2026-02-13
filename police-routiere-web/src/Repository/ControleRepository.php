@@ -18,6 +18,24 @@ class ControleRepository extends ServiceEntityRepository
         parent::__construct($registry, Controle::class);
     }
 
+    public function countByRegion(int|Region $region): int
+    {
+        $qb = $this->createQueryBuilder('c')
+            ->select('COUNT(c.id)')
+            ->join('c.brigade', 'b')
+            ->join('b.region', 'r');
+
+        if (is_int($region)) {
+            $qb->andWhere('r.id = :regionId')
+                ->setParameter('regionId', $region);
+        } else {
+            $qb->andWhere('b.region = :region')
+                ->setParameter('region', $region);
+        }
+
+        return (int) $qb->getQuery()->getSingleScalarResult();
+    }
+
     public function findByRegion(Region $region): array
     {
         return $this->createQueryBuilder('c')

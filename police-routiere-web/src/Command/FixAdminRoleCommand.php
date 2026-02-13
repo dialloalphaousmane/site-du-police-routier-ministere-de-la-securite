@@ -47,7 +47,6 @@ class FixAdminRoleCommand extends Command
             [
                 ['Email', $adminUser->getEmail()],
                 ['Security Roles', implode(', ', $adminUser->getRoles())],
-                ['ORM Role', $adminUser->getRole() ? $adminUser->getRole()->getCode() : 'NULL'],
                 ['Is Active', $adminUser->isActive() ? 'Yes' : 'No']
             ]
         );

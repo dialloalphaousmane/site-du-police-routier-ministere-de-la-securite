@@ -1,0 +1,79 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Statistiques Personnelles{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h3">📊 Statistiques Personnelles</h1>
+            {% if stats.role %}
+                <p class="text-muted">Rôle: <strong>{{ stats.role }}</strong></p>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if stats %}
+        <div class="row">
+            {% if stats.name %}
+                <div class="col-md-6 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">👤 Informations Personnelles</h5>
+                            <p><strong>Nom:</strong> {{ stats.name }}</p>
+                            <p><strong>Email:</strong> {{ stats.email }}</p>
+                            {% if stats.brigade %}
+                                <p><strong>Brigade:</strong> {{ stats.brigade }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="col-md-6 mb-3">
+                <div class="card border-primary">
+                    <div class="card-body">
+                        <h5 class="card-title">📋 Contrôles</h5>
+                        <h2 class="text-primary">{{ stats.total_controles | default(0) }}</h2>
+                        <small class="text-muted">Contrôles enregistrés</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <div class="card border-warning">
+                    <div class="card-body">
+                        <h5 class="card-title">⚠️ Infractions</h5>
+                        <h2 class="text-warning">{{ stats.total_infractions | default(0) }}</h2>
+                        <small class="text-muted">Infractions détectées</small>
+                    </div>
+                </div>
+            </div>
+
+            {% if stats.total_agents %}
+                <div class="col-md-6 mb-3">
+                    <div class="card border-info">
+                        <div class="card-body">
+                            <h5 class="card-title">👥 Agents</h5>
+                            <h2 class="text-info">{{ stats.total_agents }}</h2>
+                            <small class="text-muted">Agents dans la brigade</small>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <a href="{{ path('app_controle_index') }}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Retour aux Contrôles
+                </a>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-warning" role="alert">
+            Aucune donnée disponible. Assurez-vous d'être affecté à une brigade.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

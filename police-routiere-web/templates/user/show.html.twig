@@ -209,7 +209,7 @@
                                 </tr>
                                 <tr>
                                     <td><strong>Rôle principal:</strong></td>
-                                    <td>{{ user.role ? user.role.libelle : 'Non défini' }}</td>
+                                    <td>{{ user.roles is defined and user.roles|length ? user.roles|join(', ') : 'Non défini' }}</td>
                                 </tr>
                                 <tr>
                                     <td><strong>Statut:</strong></td>

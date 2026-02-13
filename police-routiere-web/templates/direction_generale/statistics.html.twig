@@ -1,0 +1,221 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Statistiques Nationales - Direction Générale{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1><i class="bi bi-graph-up me-2"></i>Statistiques Nationales</h1>
+            <small class="text-muted">Vue d'ensemble du système de police routière</small>
+        </div>
+    </div>
+
+    <!-- Global Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-2">
+            <div class="card text-center border-primary">
+                <div class="card-body">
+                    <h2 class="text-primary">{{ stats.total_users }}</h2>
+                    <small class="text-muted">Utilisateurs</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card text-center border-info">
+                <div class="card-body">
+                    <h2 class="text-info">{{ stats.total_agents }}</h2>
+                    <small class="text-muted">Agents</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card text-center border-success">
+                <div class="card-body">
+                    <h2 class="text-success">{{ stats.total_controls }}</h2>
+                    <small class="text-muted">Contrôles</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card text-center border-warning">
+                <div class="card-body">
+                    <h2 class="text-warning">{{ stats.total_infractions }}</h2>
+                    <small class="text-muted">Infractions</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card text-center border-danger">
+                <div class="card-body">
+                    <h2 class="text-danger">{{ stats.total_amendes }}</h2>
+                    <small class="text-muted">Amendes</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card text-center border-dark">
+                <div class="card-body">
+                    <h2 class="text-dark">{{ stats.total_regions }}</h2>
+                    <small class="text-muted">Régions</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Amendes Status -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">Statut des Amendes</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Payées</span>
+                            <strong class="text-success">{{ stats.amendes_paid }}</strong>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-success" style="width: {{ (stats.amendes_paid / stats.total_amendes * 100)|round(0) }}%"></div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>En Attente</span>
+                            <strong class="text-warning">{{ stats.amendes_pending }}</strong>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-warning" style="width: {{ (stats.amendes_pending / stats.total_amendes * 100)|round(0) }}%"></div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Rejetées</span>
+                            <strong class="text-danger">{{ stats.amendes_rejected }}</strong>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-danger" style="width: {{ (stats.amendes_rejected / stats.total_amendes * 100)|round(0) }}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">Résumé des Performances</h6>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm mb-0">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <small class="text-muted">Taux de conformité</small>
+                                </td>
+                                <td class="text-end">
+                                    <strong>
+                                        {% if stats.total_controls > 0 %}
+                                            {{ ((stats.total_controls - stats.total_infractions) / stats.total_controls * 100)|round(1) }}%
+                                        {% else %}
+                                            0%
+                                        {% endif %}
+                                    </strong>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <small class="text-muted">Taux d'infraction</small>
+                                </td>
+                                <td class="text-end">
+                                    <strong>
+                                        {% if stats.total_controls > 0 %}
+                                            {{ (stats.total_infractions / stats.total_controls * 100)|round(1) }}%
+                                        {% else %}
+                                            0%
+                                        {% endif %}
+                                    </strong>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <small class="text-muted">Taux de recouvrement</small>
+                                </td>
+                                <td class="text-end">
+                                    <strong>
+                                        {% if stats.total_amendes > 0 %}
+                                            {{ (stats.amendes_paid / stats.total_amendes * 100)|round(1) }}%
+                                        {% else %}
+                                            0%
+                                        {% endif %}
+                                    </strong>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <small class="text-muted">Contrôles par agent</small>
+                                </td>
+                                <td class="text-end">
+                                    <strong>
+                                        {% if stats.total_agents > 0 %}
+                                            {{ (stats.total_controls / stats.total_agents)|round(1) }}
+                                        {% else %}
+                                            0
+                                        {% endif %}
+                                    </strong>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Regional Statistics -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">Statistiques par Région</h6>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Région</th>
+                                <th class="text-end">Brigades</th>
+                                <th class="text-end">Contrôles</th>
+                                <th class="text-end">Infractions</th>
+                                <th class="text-end">Amendes (GNF)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if regional_stats|length > 0 %}
+                                {% for stat in regional_stats %}
+                                    <tr>
+                                        <td><strong>{{ stat.region.nom }}</strong></td>
+                                        <td class="text-end">{{ stat.brigades_count }}</td>
+                                        <td class="text-end">{{ stat.controls_count }}</td>
+                                        <td class="text-end">{{ stat.infractions_count }}</td>
+                                        <td class="text-end">
+                                            <strong>{{ stat.amendes_total|number_format(0, ',', ' ') }}</strong>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">
+                                        Aucune donnée régionale disponible
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

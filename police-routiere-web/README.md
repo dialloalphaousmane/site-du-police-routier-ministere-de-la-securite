@@ -37,6 +37,7 @@ php bin/console doctrine:fixtures:load
 
 # Démarrer le serveur
 symfony server:start
+symfony server:start --port=8001
 ```
 
 ---
