@@ -1,0 +1,206 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails Infraction - Police Routière{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="bi bi-exclamation-triangle"></i> Détails de l'Infraction
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Référence:</strong>
+                            <span class="badge bg-secondary">{{ infraction.reference }}</span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Code:</strong>
+                            <span class="badge bg-warning">{{ infraction.codeInfraction }}</span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <strong>Description:</strong>
+                            <p class="mt-2">{{ infraction.description }}</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <strong>Montant Amende:</strong>
+                            <span class="text-danger fw-bold">{{ infraction.montantAmende|number_format(0, ',', ' ') }} GNF</span>
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Catégorie:</strong>
+                            <span class="badge bg-info">{{ infraction.categorie }}</span>
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Statut:</strong>
+                            {% if infraction.statut == 'NON_PAYEE' %}
+                                <span class="badge bg-danger">Non Payée</span>
+                            {% elseif infraction.statut == 'PARTIELLEMENT_PAYEE' %}
+                                <span class="badge bg-warning">Partiellement Payée</span>
+                            {% elseif infraction.statut == 'PAYEE' %}
+                                <span class="badge bg-success">Payée</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Date Infraction:</strong>
+                            {{ infraction.createdAt ? infraction.createdAt|date('d/m/Y H:i') : 'N/A' }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Dernière Modification:</strong>
+                            {{ infraction.updatedAt ? infraction.updatedAt|date('d/m/Y H:i') : 'N/A' }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informations du contrôle -->
+            <div class="card mt-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-card-checklist"></i> Contrôle Associé
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Date Contrôle:</strong>
+                            {{ infraction.controle.dateControle|date('d/m/Y H:i') }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Lieu:</strong>
+                            {{ infraction.controle.lieuControle }}
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-6">
+                            <strong>Véhicule:</strong>
+                            {{ infraction.controle.marqueVehicule }} ({{ infraction.controle.immatriculation }})
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Conducteur:</strong>
+                            {{ infraction.controle.nomConducteur }} {{ infraction.controle.prenomConducteur }}
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-6">
+                            <strong>Agent:</strong>
+                            {{ infraction.controle.agent.nom }} {{ infraction.controle.agent.prenom }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Brigade:</strong>
+                            {{ infraction.controle.brigade.nom }}
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <a href="{{ path('app_controle_show', {'id': infraction.controle.id}) }}" 
+                               class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-eye"></i> Voir le contrôle complet
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Actions -->
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-gear"></i> Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        {% if is_granted('ROLE_AGENT') %}
+                            <a href="{{ path('app_infraction_edit', {'id': infraction.id}) }}" 
+                               class="btn btn-warning">
+                                <i class="bi bi-pencil"></i> Modifier
+                            </a>
+                            <a href="{{ path('app_amende_new', {'infractionId': infraction.id}) }}" 
+                               class="btn btn-success">
+                                <i class="bi bi-cash"></i> Créer Amende
+                            </a>
+                        {% endif %}
+                        
+                        {% if infraction.statut != 'PAYEE' %}
+                            <a href="{{ path('app_infraction_payer', {'id': infraction.id}) }}" 
+                               class="btn btn-info">
+                                <i class="bi bi-credit-card"></i> Enregistrer Paiement
+                            </a>
+                        {% endif %}
+
+                        <a href="{{ path('app_infraction_index') }}" 
+                           class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Retour
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Amendes associées -->
+            <div class="card mt-3">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-cash-stack"></i> Amendes ({{ infraction.amendes|length }})
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if infraction.amendes|length > 0 %}
+                        {% for amende in infraction.amendes %}
+                            <div class="border-bottom pb-2 mb-2">
+                                <div class="d-flex justify-content-between">
+                                    <span class="badge bg-secondary">{{ amende.reference }}</span>
+                                    <span class="fw-bold">{{ amende.montantPaye|number_format(0, ',', ' ') }} GNF</span>
+                                </div>
+                                <small class="text-muted">
+                                    {% if amende.statut == 'EN_ATTENTE' %}
+                                        <span class="badge bg-warning">En Attente</span>
+                                    {% elseif amende.statut == 'PAYEE' %}
+                                        <span class="badge bg-success">Payée</span>
+                                    {% endif %}
+                                    - {{ amende.dateEmission|date('d/m/Y') }}
+                                </small>
+                                <div class="mt-1">
+                                    <a href="{{ path('app_amende_show', {'id': amende.id}) }}" 
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i> Voir
+                                    </a>
+                                    <a href="{{ path('app_amende_recu', {'id': amende.id}) }}" 
+                                       class="btn btn-sm btn-outline-success">
+                                        <i class="bi bi-receipt"></i> Reçu
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center">
+                            <i class="bi bi-inbox"></i><br>
+                            Aucune amende enregistrée
+                        </p>
+                        {% if is_granted('ROLE_AGENT') %}
+                            <a href="{{ path('app_amende_new', {'infractionId': infraction.id}) }}" 
+                               class="btn btn-success btn-sm w-100">
+                                <i class="bi bi-plus-circle"></i> Créer la première amende
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

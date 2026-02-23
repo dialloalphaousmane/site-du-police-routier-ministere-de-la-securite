@@ -1,0 +1,66 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Amende #{{ amende.id }} - {{ region.libelle }}{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <div class="row mb-3">
+        <div class="col-md-8">
+            <h1 class="h4 mb-0"><i class="bi bi-eye me-2"></i>Détails Amende</h1>
+            <div class="text-muted">{{ region.libelle }}</div>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{{ path('app_direction_regionale_amendes') }}" class="btn btn-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>Retour
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <div class="text-muted small">Référence</div>
+                    <div class="fw-bold"><span class="badge bg-dark">{{ amende.reference }}</span></div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-muted small">Date émission</div>
+                    <div class="fw-bold">{{ amende.createdAt ? amende.createdAt|date('d/m/Y H:i') : '-' }}</div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-muted small">Montant total</div>
+                    <div class="fw-bold">{{ amende.montantTotal|number_format(0, ',', ' ') }} GNF</div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-muted small">Statut</div>
+                    <div class="fw-bold">{{ amende.statut }}</div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="text-muted small">Infraction</div>
+                    <div class="fw-bold">{{ amende.infraction ? amende.infraction.code : '-' }}</div>
+                </div>
+                <div class="col-md-6">
+                    <div class="text-muted small">Brigade</div>
+                    <div class="fw-bold">{{ amende.infraction and amende.infraction.controle ? amende.infraction.controle.brigade.code : '-' }}</div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="text-muted small">Contrôle</div>
+                    <div class="fw-bold">
+                        {% if amende.infraction and amende.infraction.controle %}
+                            <a href="{{ path('app_direction_regionale_control_show', {id: amende.infraction.controle.id}) }}">#{{ amende.infraction.controle.id }}</a>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="text-muted small">Date paiement</div>
+                    <div class="fw-bold">{{ amende.datePaiement ? amende.datePaiement|date('d/m/Y H:i') : '-' }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

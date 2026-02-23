@@ -21,11 +21,13 @@ class RapportController extends AbstractController
 {
     private EntityManagerInterface $entityManager;
     private RapportRepository $rapportRepository;
+    private AgentRepository $agentRepository;
 
-    public function __construct(EntityManagerInterface $entityManager, RapportRepository $rapportRepository)
+    public function __construct(EntityManagerInterface $entityManager, RapportRepository $rapportRepository, AgentRepository $agentRepository)
     {
         $this->entityManager = $entityManager;
         $this->rapportRepository = $rapportRepository;
+        $this->agentRepository = $agentRepository;
     }
 
     #[Route('/', name: 'app_rapport_index')]

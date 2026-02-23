@@ -6,6 +6,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Region;
 use App\Entity\Controle;
 use App\Entity\Infraction;
+use App\Entity\Amende;
 use App\Entity\Rapport;
 
 class StatisticsService
@@ -23,6 +24,7 @@ class StatisticsService
             $regionRepository = $this->entityManager->getRepository(Region::class);
             $controleRepository = $this->entityManager->getRepository(Controle::class);
             $infractionRepository = $this->entityManager->getRepository(Infraction::class);
+            $amendeRepository = $this->entityManager->getRepository(Amende::class);
             
             // Statistiques réelles depuis la base de données
             $totalRegions = $regionRepository->count(['actif' => true]);
@@ -37,14 +39,15 @@ class StatisticsService
                 ->getQuery()
                 ->getSingleScalarResult();
             
-            // Revenus du jour (calculé depuis les infractions)
-            $todayRevenue = $infractionRepository->createQueryBuilder('i')
-                ->join('i.controle', 'c')
-                ->where('c.dateControle >= :today')
+            // Revenus du jour (amendes payées)
+            $todayRevenue = $amendeRepository->createQueryBuilder('a')
+                ->select('COALESCE(SUM(a.montantPaye), 0)')
+                ->where('a.datePaiement >= :today')
+                ->andWhere('a.statut = :statut')
                 ->setParameter('today', new \DateTimeImmutable('today'))
-                ->select('SUM(i.montantAmende)')
+                ->setParameter('statut', 'PAYEE')
                 ->getQuery()
-                ->getSingleScalarResult() ?? 0;
+                ->getSingleScalarResult();
             
             // Agents actifs
             $activeAgents = $this->entityManager->createQueryBuilder()
@@ -59,20 +62,19 @@ class StatisticsService
                 'total_controls' => $totalControls,
                 'total_infractions' => $totalInfractions,
                 'today_controls' => $todayControls,
-                'today_revenue' => $todayRevenue,
+                'today_revenue' => (int) $todayRevenue,
                 'active_agents' => $activeAgents,
                 'compliance_rate' => $totalControls > 0 ? (($totalControls - $totalInfractions) / $totalControls) * 100 : 0
             ];
         } catch (\Exception $e) {
-            // En cas d'erreur, retourner des données par défaut
             return [
-                'total_regions' => 8,
-                'total_controls' => 15467,
-                'total_infractions' => 1234,
-                'today_controls' => 156,
-                'today_revenue' => 2345678,
-                'active_agents' => 2156,
-                'compliance_rate' => 92.1
+                'total_regions' => 0,
+                'total_controls' => 0,
+                'total_infractions' => 0,
+                'today_controls' => 0,
+                'today_revenue' => 0,
+                'active_agents' => 0,
+                'compliance_rate' => 0
             ];
         }
     }
@@ -90,73 +92,65 @@ class StatisticsService
                 ->orderBy('month', 'ASC')
                 ->getQuery()
                 ->getResult();
-            
+
+            $countsByMonth = [];
+            foreach ($controlsByMonth as $row) {
+                if (!isset($row['month'])) {
+                    continue;
+                }
+                $countsByMonth[(string) $row['month']] = (int) ($row['count'] ?? 0);
+            }
+
             $labels = [];
             $data = [];
-            
-            // Générer les 12 derniers mois
             for ($i = 11; $i >= 0; $i--) {
-                $date = new \DateTimeImmutable("-$i months");
-                $monthKey = $date->format('Y-m');
-                $labels[] = $date->format('M Y');
-                $data[] = 0;
+                $monthKey = (new \DateTimeImmutable("-$i months"))->format('Y-m');
+                $labels[] = $monthKey;
+                $data[] = $countsByMonth[$monthKey] ?? 0;
             }
-            
-            // Remplir avec les données réelles
-            foreach ($controlsByMonth as $item) {
-                foreach ($labels as $index => $label) {
-                    $labelDate = new \DateTimeImmutable($label);
-                    $itemDate = new \DateTimeImmutable($item['month'] . '-01');
-                    if ($labelDate->format('Y-m') === $itemDate->format('Y-m')) {
-                        $data[$index] = (int)$item['count'];
-                        break;
-                    }
-                }
-            }
-            
+
             return [
                 'labels' => $labels,
-                'data' => $data
+                'data' => $data,
             ];
         } catch (\Exception $e) {
-            // Données par défaut en cas d'erreur
-            $labels = [];
-            $data = [];
-            for ($i = 11; $i >= 0; $i--) {
-                $date = new \DateTimeImmutable("-$i months");
-                $labels[] = $date->format('M Y');
-                $data[] = rand(800, 1500);
-            }
             return [
-                'labels' => $labels,
-                'data' => $data
+                'labels' => [],
+                'data' => []
             ];
         }
     }
 
     public function getControlsByRegion(): array
     {
-        $regions = $this->entityManager->getRepository(Region::class)->findAll();
-        $data = [];
-        
-        foreach ($regions as $region) {
-            $controlsCount = $this->entityManager->getRepository(Controle::class)
+        try {
+            $rows = $this->entityManager->getRepository(Controle::class)
                 ->createQueryBuilder('c')
+                ->select('COUNT(c.id) as count, r.libelle as region')
                 ->join('c.brigade', 'b')
                 ->join('b.region', 'r')
-                ->where('r.id = :regionId')
-                ->setParameter('regionId', $region->getId())
-                ->select('COUNT(c.id)')
+                ->groupBy('r.id')
+                ->orderBy('count', 'DESC')
                 ->getQuery()
-                ->getSingleScalarResult();
-            
-            $data[] = [
-                'region' => $region->getLibelle(),
-                'count' => $controlsCount
+                ->getResult();
+
+            $labels = [];
+            $data = [];
+            foreach ($rows as $row) {
+                $labels[] = (string) ($row['region'] ?? '');
+                $data[] = (int) ($row['count'] ?? 0);
+            }
+
+            return [
+                'labels' => $labels,
+                'data' => $data,
+            ];
+        } catch (\Exception $e) {
+            return [
+                'labels' => [],
+                'data' => [],
             ];
         }
-        
-        return $data;
     }
 
     public function getInfractionsByType(): array
@@ -193,57 +187,43 @@ class StatisticsService
     public function getMonthlyRevenue(): array
     {
         try {
-            // Revenus mensuels sur les 12 derniers mois
-            $revenueByMonth = $this->entityManager->getRepository(Infraction::class)
-                ->createQueryBuilder('i')
-                ->join('i.controle', 'c')
-                ->select('SUM(i.montantAmende) as revenue, SUBSTRING(c.dateControle, 1, 7) as month')
-                ->where('c.dateControle >= :date')
+            // Revenus mensuels (amendes payées) sur les 12 derniers mois
+            $revenueByMonth = $this->entityManager->getRepository(Amende::class)
+                ->createQueryBuilder('a')
+                ->select('COALESCE(SUM(a.montantPaye), 0) as revenue, SUBSTRING(a.datePaiement, 1, 7) as month')
+                ->where('a.datePaiement >= :date')
+                ->andWhere('a.statut = :statut')
                 ->setParameter('date', new \DateTimeImmutable('-12 months'))
+                ->setParameter('statut', 'PAYEE')
                 ->groupBy('month')
                 ->orderBy('month', 'ASC')
                 ->getQuery()
                 ->getResult();
-            
+
+            $revenueMap = [];
+            foreach ($revenueByMonth as $row) {
+                if (!isset($row['month'])) {
+                    continue;
+                }
+                $revenueMap[(string) $row['month']] = (int) round((float) ($row['revenue'] ?? 0));
+            }
+
             $labels = [];
             $data = [];
-            
-            // Générer les 12 derniers mois
             for ($i = 11; $i >= 0; $i--) {
-                $date = new \DateTimeImmutable("-$i months");
-                $monthKey = $date->format('Y-m');
-                $labels[] = $date->format('M Y');
-                $data[] = 0;
+                $monthKey = (new \DateTimeImmutable("-$i months"))->format('Y-m');
+                $labels[] = $monthKey;
+                $data[] = $revenueMap[$monthKey] ?? 0;
             }
-            
-            // Remplir avec les données réelles
-            foreach ($revenueByMonth as $item) {
-                foreach ($labels as $index => $label) {
-                    $labelDate = new \DateTimeImmutable($label);
-                    $itemDate = new \DateTimeImmutable($item['month'] . '-01');
-                    if ($labelDate->format('Y-m') === $itemDate->format('Y-m')) {
-                        $data[$index] = (float)$item['revenue'];
-                        break;
-                    }
-                }
-            }
-            
+
             return [
                 'labels' => $labels,
-                'data' => $data
+                'data' => $data,
             ];
         } catch (\Exception $e) {
-            // Données par défaut en cas d'erreur
-            $labels = [];
-            $data = [];
-            for ($i = 11; $i >= 0; $i--) {
-                $date = new \DateTimeImmutable("-$i months");
-                $labels[] = $date->format('M Y');
-                $data[] = rand(5000000, 15000000);
-            }
             return [
-                'labels' => $labels,
-                'data' => $data
+                'labels' => [],
+                'data' => []
             ];
         }
     }
@@ -289,23 +269,26 @@ class StatisticsService
                 ->getQuery()
                 ->getSingleScalarResult();
             
-            $revenue = $this->entityManager->getRepository(Infraction::class)
-                ->createQueryBuilder('i')
+            $revenue = $this->entityManager->getRepository(Amende::class)
+                ->createQueryBuilder('a')
+                ->select('COALESCE(SUM(a.montantPaye), 0)')
+                ->join('a.infraction', 'i')
                 ->join('i.controle', 'c')
                 ->join('c.brigade', 'b')
                 ->join('b.region', 'r')
                 ->where('r.id = :regionId')
+                ->andWhere('a.statut = :statut')
                 ->setParameter('regionId', $region->getId())
-                ->select('SUM(i.montantAmende)')
+                ->setParameter('statut', 'PAYEE')
                 ->getQuery()
-                ->getSingleScalarResult() ?? 0;
+                ->getSingleScalarResult();
             
             $stats[] = [
                 'name' => $region->getLibelle(),
                 'code' => $region->getCode(),
                 'controls' => $controlsCount,
                 'infractions' => $infractionsCount,
-                'revenue' => $revenue,
+                'revenue' => (int) $revenue,
                 'agents' => $region->getAgents()->count(),
                 'performance' => $controlsCount > 0 ? (($controlsCount - $infractionsCount) / $controlsCount) * 100 : 0
             ];
@@ -371,10 +354,12 @@ class StatisticsService
 
     private function getTotalRevenue(): int
     {
-        return $this->entityManager->getRepository(Infraction::class)
-            ->createQueryBuilder('i')
-            ->select('SUM(i.montantAmende)')
+        return (int) ($this->entityManager->getRepository(Amende::class)
+            ->createQueryBuilder('a')
+            ->select('COALESCE(SUM(a.montantPaye), 0)')
+            ->andWhere('a.statut = :statut')
+            ->setParameter('statut', 'PAYEE')
             ->getQuery()
-            ->getSingleScalarResult() ?? 0;
+            ->getSingleScalarResult() ?? 0);
     }
 }

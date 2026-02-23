@@ -1,0 +1,165 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvelle Amende - Police Routière{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-plus-circle"></i> Nouvelle Amende
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if infractionId %}
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i>
+                            Amende créée pour l'infraction: <strong>{{ infractionId }}</strong>
+                        </div>
+                    {% endif %}
+
+                    {{ form_start(form) }}
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.infraction) }}
+                            {{ form_widget(form.infraction, {'attr': {'class': 'form-select'}}) }}
+                            {{ form_errors(form.infraction) }}
+                            {% if infractionId %}
+                                <input type="hidden" name="infractionId" value="{{ infractionId }}">
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.reference) }}
+                            {{ form_widget(form.reference, {'attr': {'class': 'form-control', 'readonly': true}}) }}
+                            {{ form_errors(form.reference) }}
+                            <small class="form-text text-muted">Référence auto-générée</small>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            {{ form_label(form.montantTotal) }}
+                            {{ form_widget(form.montantTotal, {'attr': {'class': 'form-control', 'placeholder': '0'}}) }}
+                            {{ form_errors(form.montantTotal) }}
+                            <small class="form-text text-muted">Montant total de l'amende (GNF)</small>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            {{ form_label(form.montantPaye) }}
+                            {{ form_widget(form.montantPaye, {'attr': {'class': 'form-control', 'placeholder': '0', 'value': '0.00'}}) }}
+                            {{ form_errors(form.montantPaye) }}
+                            <small class="form-text text-muted">Montant déjà payé (GNF)</small>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            {{ form_label(form.statut) }}
+                            {{ form_widget(form.statut, {'attr': {'class': 'form-select'}}) }}
+                            {{ form_errors(form.statut) }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.dateEmission) }}
+                            {{ form_widget(form.dateEmission, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.dateEmission) }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.dateEcheance) }}
+                            {{ form_widget(form.dateEcheance, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.dateEcheance) }}
+                            <small class="form-text text-muted">Date limite de paiement</small>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            {{ form_label(form.observations) }}
+                            {{ form_widget(form.observations, {'attr': {'class': 'form-control', 'rows': 3, 'placeholder': 'Observations éventuelles sur l\'amende...'}}) }}
+                            {{ form_errors(form.observations) }}
+                        </div>
+                    </div>
+
+                    <!-- Informations sur l'infraction sélectionnée -->
+                    <div id="infraction-info" class="alert alert-light" style="display: none;">
+                        <h6><i class="bi bi-info-circle"></i> Informations sur l'infraction</h6>
+                        <div id="infraction-details"></div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="d-flex justify-content-between">
+                                <a href="{{ path('app_amende_index') }}" class="btn btn-secondary">
+                                    <i class="bi bi-arrow-left"></i> Retour à la liste
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-circle"></i> Créer l'amende
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const infractionSelect = document.querySelector('#amende_infraction');
+    const montantTotalInput = document.querySelector('#amende_montantTotal');
+    const infractionInfo = document.getElementById('infraction-info');
+    const infractionDetails = document.getElementById('infraction-details');
+    
+    if (infractionSelect) {
+        infractionSelect.addEventListener('change', function() {
+            const infractionId = this.value;
+            
+            if (infractionId) {
+                // Récupérer les informations de l'infraction via AJAX
+                fetch(`/infraction/${infractionId}/info`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Pré-remplir le montant total avec le montant de l'infraction
+                            if (data.montantAmende && !montantTotalInput.value) {
+                                montantTotalInput.value = data.montantAmende;
+                            }
+                            
+                            // Afficher les informations de l'infraction
+                            infractionDetails.innerHTML = `
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <strong>Code:</strong> ${data.codeInfraction}<br>
+                                        <strong>Montant prévu:</strong> ${data.montantAmende} GNF<br>
+                                        <strong>Conducteur:</strong> ${data.conducteur}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Véhicule:</strong> ${data.vehicule}<br>
+                                        <strong>Contrôle:</strong> ${data.controle}<br>
+                                        <strong>Date:</strong> ${data.dateControle}
+                                    </div>
+                                </div>
+                            `;
+                            infractionInfo.style.display = 'block';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erreur:', error);
+                    });
+            } else {
+                infractionInfo.style.display = 'none';
+            }
+        });
+        
+        // Déclencher l'événement si une infraction est pré-sélectionnée
+        if (infractionSelect.value) {
+            infractionSelect.dispatchEvent(new Event('change'));
+        }
+    }
+});
+</script>
+{% endblock %}

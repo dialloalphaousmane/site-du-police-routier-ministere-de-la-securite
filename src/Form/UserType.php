@@ -58,7 +58,7 @@ class UserType extends AbstractType
                 'placeholder' => 'Sélectionner un rôle',
                 'attr' => ['class' => 'form-select'],
                 'mapped' => false,
-                'data' => $options['data']?->getRole(),
+                'data' => null,
             ])
             ->add('region', EntityType::class, [
                 'label' => 'Région',

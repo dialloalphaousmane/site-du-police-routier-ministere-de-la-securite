@@ -1,0 +1,213 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Statistiques des Agents{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Statistiques des Agents</h1>
+        <a href="{{ path('app_agent_index') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Retour
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ stats.total }}</h4>
+                            <p class="card-text">Total Agents</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-users fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ stats.actifs }}</h4>
+                            <p class="card-text">Agents Actifs</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-user-check fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ stats.inactifs }}</h4>
+                            <p class="card-text">Agents Inactifs</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-user-times fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ stats.total > 0 ? ((stats.actifs / stats.total) * 100)|round(1) : 0 }}%</h4>
+                            <p class="card-text">Taux d'activité</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-chart-line fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Répartition par Statut</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="statusChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Statistiques Clés</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <tbody>
+                            <tr>
+                                <td><strong>Agents Actifs</strong></td>
+                                <td>{{ stats.actifs }}</td>
+                                <td>{{ stats.total > 0 ? ((stats.actifs / stats.total) * 100)|round(1) : 0 }}%</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Agents Inactifs</strong></td>
+                                <td>{{ stats.inactifs }}</td>
+                                <td>{{ stats.total > 0 ? ((stats.inactifs / stats.total) * 100)|round(1) : 0 }}%</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Total</strong></td>
+                                <td>{{ stats.total }}</td>
+                                <td>100%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Actions Rapides</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <a href="{{ path('app_agent_index') }}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-list"></i> Voir tous les agents
+                            </a>
+                        </div>
+                        {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_DIRECTION_REGIONALE') or is_granted('ROLE_CHEF_BRIGADE') %}
+                        <div class="col-md-3">
+                            <a href="{{ path('app_agent_new') }}" class="btn btn-outline-success w-100">
+                                <i class="fas fa-plus"></i> Ajouter un agent
+                            </a>
+                        </div>
+                        {% endif %}
+                        {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_DIRECTION_GENERALE') %}
+                        <div class="col-md-3">
+                            <button class="btn btn-outline-info w-100" onclick="exportStats()">
+                                <i class="fas fa-download"></i> Exporter les stats
+                            </button>
+                        </div>
+                        {% endif %}
+                        <div class="col-md-3">
+                            <button class="btn btn-outline-warning w-100" onclick="window.print()">
+                                <i class="fas fa-print"></i> Imprimer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Graphique circulaire pour la répartition par statut
+    const ctx = document.getElementById('statusChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Actifs', 'Inactifs'],
+            datasets: [{
+                data: [{{ stats.actifs }}, {{ stats.inactifs }}],
+                backgroundColor: [
+                    '#28a745',
+                    '#ffc107'
+                ],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+});
+
+function exportStats() {
+    const statsData = {
+        total: {{ stats.total }},
+        actifs: {{ stats.actifs }},
+        inactifs: {{ stats.inactifs }},
+        tauxActivite: {{ stats.total > 0 ? ((stats.actifs / stats.total) * 100)|round(1) : 0 }},
+        date: new Date().toISOString()
+    };
+    
+    const dataStr = JSON.stringify(statsData, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileDefaultName = 'agents_stats_' + new Date().toISOString().slice(0,10) + '.json';
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+}
+</script>
+{% endblock %}
+{% endblock %}

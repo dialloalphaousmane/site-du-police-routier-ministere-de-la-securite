@@ -1,0 +1,120 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails de l'Agent{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Détails de l'Agent</h1>
+        <div>
+            <a href="{{ path('app_agent_index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+            {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_DIRECTION_REGIONALE') or (is_granted('ROLE_CHEF_BRIGADE') and agent.brigade == app.user.brigade) %}
+                <a href="{{ path('app_agent_edit', {'id': agent.id}) }}" class="btn btn-warning">
+                    <i class="fas fa-edit"></i> Modifier
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Informations Personnelles</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Matricule :</strong> {{ agent.matricule }}</p>
+                            <p><strong>Nom :</strong> {{ agent.nom }}</p>
+                            <p><strong>Prénom :</strong> {{ agent.prenom }}</p>
+                            <p><strong>Grade :</strong> {{ agent.grade }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Email :</strong> {{ agent.email }}</p>
+                            <p><strong>Téléphone :</strong> {{ agent.telephone }}</p>
+                            <p><strong>Date d'embauche :</strong> {{ agent.dateEmbauche ? agent.dateEmbauche|date('d/m/Y') : '-' }}</p>
+                            <p><strong>Statut :</strong> 
+                                {% if agent.isActif %}
+                                    <span class="badge bg-success">Actif</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Inactif</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <p><strong>Adresse :</strong> {{ agent.adresse }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="mb-0">Affectation</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Région :</strong> {{ agent.region ? agent.region.libelle : 'Non affectée' }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Brigade :</strong> {{ agent.brigade ? agent.brigade.nom : 'Non affectée' }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_DIRECTION_REGIONALE') or (is_granted('ROLE_CHEF_BRIGADE') and agent.brigade == app.user.brigade) %}
+                            <a href="{{ path('app_agent_edit', {'id': agent.id}) }}" class="btn btn-warning">
+                                <i class="fas fa-edit"></i> Modifier
+                            </a>
+                            
+                            <form method="post" action="{{ path('app_agent_toggle_actif', {'id': agent.id}) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('toggle' ~ agent.id) }}">
+                                <button type="submit" class="btn {{ agent.isActif ? 'btn-danger' : 'btn-success' }}">
+                                    <i class="fas {{ agent.isActif ? 'fa-ban' : 'fa-check' }}"></i> 
+                                    {{ agent.isActif ? 'Désactiver' : 'Activer' }}
+                                </button>
+                            </form>
+                        {% endif %}
+                        
+                        {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_DIRECTION_GENERALE') or is_granted('ROLE_DIRECTION_REGIONALE') %}
+                            <form method="post" action="{{ path('app_agent_delete', {'id': agent.id}) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ agent.id) }}">
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet agent ?')">
+                                    <i class="fas fa-trash"></i> Supprimer
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="mb-0">Informations Système</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>ID :</strong> {{ agent.id }}</p>
+                    <p><strong>Créé le :</strong> {{ agent.createdAt ? agent.createdAt|date('d/m/Y H:i') : '-' }}</p>
+                    <p><strong>Modifié le :</strong> {{ agent.updatedAt ? agent.updatedAt|date('d/m/Y H:i') : '-' }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

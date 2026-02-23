@@ -1,0 +1,89 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvelle Infraction - Police Routière{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="bi bi-plus-circle"></i> Nouvelle Infraction
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if controleId %}
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i>
+                            Infraction ajoutée au contrôle #{{ controleId }}
+                        </div>
+                    {% endif %}
+
+                    {{ form_start(form) }}
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.controle) }}
+                            {{ form_widget(form.controle, {'attr': {'class': 'form-select'}}) }}
+                            {{ form_errors(form.controle) }}
+                            {% if controleId %}
+                                <input type="hidden" name="controleId" value="{{ controleId }}">
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.codeInfraction) }}
+                            {{ form_widget(form.codeInfraction, {'attr': {'class': 'form-control', 'placeholder': 'Ex: C001, V002'}}) }}
+                            {{ form_errors(form.codeInfraction) }}
+                            <small class="form-text text-muted">Code unique de l'infraction</small>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            {{ form_label(form.description) }}
+                            {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 4, 'placeholder': 'Décrivez détailll\'infraction commise...'}}) }}
+                            {{ form_errors(form.description) }}
+                            <small class="form-text text-muted">Minimum 10 caractères</small>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            {{ form_label(form.montantAmende) }}
+                            {{ form_widget(form.montantAmende, {'attr': {'class': 'form-control', 'placeholder': '0'}}) }}
+                            {{ form_errors(form.montantAmende) }}
+                            <small class="form-text text-muted">Montant en GNF</small>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            {{ form_label(form.categorie) }}
+                            {{ form_widget(form.categorie, {'attr': {'class': 'form-select'}}) }}
+                            {{ form_errors(form.categorie) }}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            {{ form_label(form.statut) }}
+                            {{ form_widget(form.statut, {'attr': {'class': 'form-select'}}) }}
+                            {{ form_errors(form.statut) }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="d-flex justify-content-between">
+                                <a href="{{ path('app_infraction_index') }}" class="btn btn-secondary">
+                                    <i class="bi bi-arrow-left"></i> Retour à la liste
+                                </a>
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="bi bi-check-circle"></i> Enregistrer l'infraction
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

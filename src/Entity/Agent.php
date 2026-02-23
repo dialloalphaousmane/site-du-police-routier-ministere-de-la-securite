@@ -27,6 +27,9 @@ class Agent
     #[ORM\Column(length: 255)]
     private ?string $grade = null;
 
+    #[ORM\Column(length: 180, unique: true)]
+    private ?string $email = null;
+
     #[ORM\Column]
     private ?\DateTimeImmutable $dateEmbauche = null;
 
@@ -99,6 +102,17 @@ class Agent
     public function setGrade(string $grade): static
     {
         $this->grade = $grade;
+        return $this;
+    }
+
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    public function setEmail(string $email): static
+    {
+        $this->email = $email;
         return $this;
     }
 

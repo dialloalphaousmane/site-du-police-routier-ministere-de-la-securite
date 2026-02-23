@@ -1,0 +1,71 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Infraction #{{ infraction.id }} - {{ region.libelle }}{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <div class="row mb-3">
+        <div class="col-md-8">
+            <h1 class="h4 mb-0"><i class="bi bi-eye me-2"></i>Détails Infraction</h1>
+            <div class="text-muted">{{ region.libelle }}</div>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{{ path('app_direction_regionale_infractions') }}" class="btn btn-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>Retour
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <div class="text-muted small">Code</div>
+                    <div class="fw-bold"><span class="badge bg-warning">{{ infraction.code }}</span></div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-muted small">Référence</div>
+                    <div class="fw-bold">{{ infraction.reference }}</div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-muted small">Date</div>
+                    <div class="fw-bold">{{ infraction.createdAt ? infraction.createdAt|date('d/m/Y H:i') : '-' }}</div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-muted small">Montant</div>
+                    <div class="fw-bold">{{ infraction.montantAmende|number_format(0, ',', ' ') }} GNF</div>
+                </div>
+
+                <div class="col-12">
+                    <div class="text-muted small">Libellé</div>
+                    <div class="fw-bold">{{ infraction.libelle }}</div>
+                </div>
+
+                <div class="col-12">
+                    <div class="text-muted small">Description</div>
+                    <div class="fw-bold">{{ infraction.description ?: '-' }}</div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="text-muted small">Brigade</div>
+                    <div class="fw-bold">{{ infraction.controle ? infraction.controle.brigade.code : '-' }}</div>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-muted small">Contrôle</div>
+                    <div class="fw-bold">
+                        {% if infraction.controle %}
+                            <a href="{{ path('app_direction_regionale_control_show', {id: infraction.controle.id}) }}">#{{ infraction.controle.id }}</a>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-muted small">Statut</div>
+                    <div class="fw-bold">{{ infraction.statut }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

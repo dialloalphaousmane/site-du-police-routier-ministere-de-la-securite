@@ -120,6 +120,7 @@ class PerformanceService
             $trend = $this->calculateRegionTrend($region->getId());
             
             $performanceData[] = [
+                'id' => $region->getId(),
                 'name' => $region->getLibelle(),
                 'overall_rate' => $controlsCount > 0 ? (($controlsCount - $infractionsCount) / $controlsCount) * 100 : 0,
                 'controls_efficiency' => $controlsCount > 0 ? (($controlsCount - $infractionsCount) / $controlsCount) * 100 : 0,

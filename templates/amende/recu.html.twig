@@ -1,0 +1,205 @@
+{% extends 'base_print.html.twig' %}
+
+{% block title %}Reçu Amende - {{ amende.reference }}{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- En-tête -->
+            <div class="text-center mb-4">
+                <h2>RÉPUBLIQUE GUINÉENNE</h2>
+                <h3>MINISTÈRE DE LA SÉCURITÉ</h3>
+                <h4>DIRECTION NATIONALE DE LA POLICE ROUTIÈRE</h4>
+                <hr>
+                <h5>REÇU DE PAIEMENT D'AMENDE</h5>
+            </div>
+
+            <!-- Informations de l'amende -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">INFORMATIONS DE L'AMENDE</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Référence:</strong> {{ amende.reference }}<br>
+                            <strong>Date Émission:</strong> {{ amende.dateEmission ? amende.dateEmission|date('d/m/Y') : 'N/A' }}<br>
+                            <strong>Date Échéance:</strong> {{ amende.dateEcheance ? amende.dateEcheance|date('d/m/Y') : 'N/A' }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Statut:</strong> 
+                            {% if amende.statut == 'EN_ATTENTE' %}
+                                <span class="badge bg-warning">En Attente</span>
+                            {% elseif amende.statut == 'PAYEE' %}
+                                <span class="badge bg-success">Payée</span>
+                            {% elseif amende.statut == 'REJETEE' %}
+                                <span class="badge bg-danger">Rejetée</span>
+                            {% endif %}<br>
+                            <strong>Date Paiement:</strong> {{ amende.datePaiement ? amende.datePaiement|date('d/m/Y H:i') : 'Non payée' }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Détails du paiement -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0">DÉTAILS DU PAIEMENT</h6>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered">
+                        <tr>
+                            <td><strong>Montant Total:</strong></td>
+                            <td class="text-end">{{ amende.montantTotal|number_format(0, ',', ' ') }} GNF</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Montant Payé:</strong></td>
+                            <td class="text-end">{{ amende.montantPaye|number_format(0, ',', ' ') }} GNF</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Reste à payer:</strong></td>
+                            <td class="text-end">{{ (amende.montantTotal - amende.montantPaye)|number_format(0, ',', ' ') }} GNF</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Informations sur l'infraction -->
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h6 class="mb-0">INFRACTION ASSOCIÉE</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Référence Infraction:</strong> {{ amende.infraction.reference }}<br>
+                            <strong>Code Infraction:</strong> {{ amende.infraction.codeInfraction }}<br>
+                            <strong>Catégorie:</strong> {{ amende.infraction.categorie }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Montant Prévu:</strong> {{ amende.infraction.montantAmende|number_format(0, ',', ' ') }} GNF<br>
+                            <strong>Statut:</strong>
+                            {% if amende.infraction.statut == 'NON_PAYEE' %}
+                                <span class="badge bg-danger">Non Payée</span>
+                            {% elseif amende.infraction.statut == 'PARTIELLEMENT_PAYEE' %}
+                                <span class="badge bg-warning">Partiellement Payée</span>
+                            {% elseif amende.infraction.statut == 'PAYEE' %}
+                                <span class="badge bg-success">Payée</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <strong>Description:</strong><br>
+                            {{ amende.infraction.description }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informations sur le conducteur et le véhicule -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">CONDUCTEUR ET VÉHICULE</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Nom Conducteur:</strong> {{ amende.infraction.controle.nomConducteur }}<br>
+                            <strong>Prénom Conducteur:</strong> {{ amende.infraction.controle.prenomConducteur }}<br>
+                            <strong>N° Permis:</strong> {{ amende.infraction.controle.noConducteur }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Marque Véhicule:</strong> {{ amende.infraction.controle.marqueVehicule }}<br>
+                            <strong>Immatriculation:</strong> {{ amende.infraction.controle.immatriculation }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informations sur le contrôle -->
+            <div class="card mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h6 class="mb-0">CONTRÔLE ROUTIER</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Date Contrôle:</strong> {{ amende.infraction.controle.dateControle|date('d/m/Y H:i') }}<br>
+                            <strong>Lieu Contrôle:</strong> {{ amende.infraction.controle.lieuControle }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Agent:</strong> {{ amende.infraction.controle.agent.nom }} {{ amende.infraction.controle.agent.prenom }}<br>
+                            <strong>Brigade:</strong> {{ amende.infraction.controle.brigade.nom }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Observations -->
+            {% if amende.observations %}
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">OBSERVATIONS</h6>
+                </div>
+                <div class="card-body">
+                    {{ amende.observations }}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Footer -->
+            <div class="row mt-5">
+                <div class="col-md-4">
+                    <div class="text-center">
+                        <p>_________________________</p>
+                        <p><strong>L'Agent</strong></p>
+                        <p>{{ amende.infraction.controle.agent.nom }} {{ amende.infraction.controle.agent.prenom }}</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-center">
+                        <p>_________________________</p>
+                        <p><strong>Le Conducteur</strong></p>
+                        <p>{{ amende.infraction.controle.nomConducteur }} {{ amende.infraction.controle.prenomConducteur }}</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-center">
+                        <p>_________________________</p>
+                        <p><strong>Cachet et Signature</strong></p>
+                        <p>Brigade {{ amende.infraction.controle.brigade.nom }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Date et lieu -->
+            <div class="text-center mt-5">
+                <p><strong>Fait à:</strong> _______________________, le <strong>{{ "now"|date('d/m/Y') }}</strong></p>
+            </div>
+
+            <!-- Mention légale -->
+            <div class="alert alert-info mt-4">
+                <small>
+                    <strong>Ce reçu constitue une preuve de paiement.</strong><br>
+                    En cas de contestation, présentez ce document aux autorités compétentes.<br>
+                    La police routière se réserve le droit de vérifier l'authenticité de ce document.
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Boutons d'impression -->
+<div class="no-print">
+    <div class="text-center mt-4">
+        <button onclick="window.print()" class="btn btn-primary">
+            <i class="bi bi-printer"></i> Imprimer le Reçu
+        </button>
+        <a href="{{ path('app_amende_show', {'id': amende.id}) }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Retour
+        </a>
+    </div>
+</div>
+{% endblock %}

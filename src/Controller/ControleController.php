@@ -85,16 +85,25 @@ class ControleController extends AbstractController
         // Filtrer selon le rôle de l'utilisateur
         $user = $this->getUser();
         if ($user) {
-            if (in_array('ROLE_AGENT', $user->getRoles())) {
-                // Pour l'agent, on filtre par sa brigade si elle existe
-                // Temporairement, on ne filtre pas par agent spécifique
-                // TODO: Implémenter la relation User-Agent
-            } elseif (in_array('ROLE_CHEF_BRIGADE', $user->getRoles())) {
-                // Pour le chef de brigade, on filtre par sa brigade
-                // TODO: Implémenter la relation User-Brigade
-            } elseif (in_array('ROLE_DIRECTION_REGIONALE', $user->getRoles())) {
-                // Pour la direction régionale, on filtre par sa région
-                // TODO: Implémenter la relation User-Region
+            // ROLE_ADMIN et ROLE_DIRECTION_GENERALE voient tout
+            if (!in_array('ROLE_ADMIN', $user->getRoles()) && !in_array('ROLE_DIRECTION_GENERALE', $user->getRoles())) {
+                // ROLE_DIRECTION_REGIONALE -> restreindre par région
+                if (in_array('ROLE_DIRECTION_REGIONALE', $user->getRoles())) {
+                    $qb->andWhere('r.id = :userRegion')
+                        ->setParameter('userRegion', $user->getRegion()?->getId());
+                }
+
+                // ROLE_CHEF_BRIGADE -> restreindre par brigade
+                if (in_array('ROLE_CHEF_BRIGADE', $user->getRoles())) {
+                    $qb->andWhere('b.id = :userBrigade')
+                        ->setParameter('userBrigade', $user->getBrigade()?->getId());
+                }
+
+                // ROLE_AGENT -> restreindre par brigade de l'agent (meilleure approximation sans relation User->Agent)
+                if (in_array('ROLE_AGENT', $user->getRoles())) {
+                    $qb->andWhere('b.id = :agentBrigade')
+                        ->setParameter('agentBrigade', $user->getBrigade()?->getId());
+                }
             }
         }
         
@@ -265,5 +274,57 @@ class ControleController extends AbstractController
         }
 
         return $this->redirectToRoute('app_infraction_new', ['controleId' => $controle->getId()]);
+    }
+
+    #[Route('/stats', name: 'app_controle_stats', methods: ['GET'])]
+    public function stats(): Response
+    {
+        $user = $this->getUser();
+        $stats = [];
+
+        if ($this->isGranted('ROLE_AGENT')) {
+            // Statistiques personnelles de l'agent (par brigade)
+            $brigade = $user->getBrigade();
+            if ($brigade) {
+                $controles = $this->controleRepository->findByBrigade($brigade);
+                $infractionCount = 0;
+
+                foreach ($controles as $controle) {
+                    $infractionCount += count($controle->getInfractions());
+                }
+
+                $stats = [
+                    'role' => 'Agent',
+                    'name' => $user->getPrenom() . ' ' . $user->getNom(),
+                    'email' => $user->getEmail(),
+                    'brigade' => $brigade->getNom(),
+                    'total_controles' => count($controles),
+                    'total_infractions' => $infractionCount,
+                ];
+            }
+        } elseif ($this->isGranted('ROLE_CHEF_BRIGADE')) {
+            // Statistiques de toute la brigade
+            $brigade = $user->getBrigade();
+            if ($brigade) {
+                $controles = $this->controleRepository->findByBrigade($brigade);
+                $infractionCount = 0;
+
+                foreach ($controles as $controle) {
+                    $infractionCount += count($controle->getInfractions());
+                }
+
+                $stats = [
+                    'role' => 'Chef de Brigade',
+                    'brigade' => $brigade->getNom(),
+                    'total_controles' => count($controles),
+                    'total_infractions' => $infractionCount,
+                    'total_agents' => $this->agentRepository->count(['brigade' => $brigade]),
+                ];
+            }
+        }
+
+        return $this->render('controle/stats.html.twig', [
+            'stats' => $stats,
+        ]);
     }
 }

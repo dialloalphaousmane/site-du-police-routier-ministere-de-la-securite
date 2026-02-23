@@ -55,9 +55,9 @@
                         <button type="button" class="btn btn-sm btn-outline-secondary" onclick="refreshPerformance()">
                             <i class="fas fa-sync"></i> Actualiser
                         </button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary">
+                        <a class="btn btn-sm btn-outline-secondary" href="{{ path('app_direction_generale_performance_export', {'format': 'pdf', 'type': 'global'}) }}">
                             <i class="fas fa-download"></i> Exporter
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -184,9 +184,15 @@
                                                 {% endif %}
                                             </td>
                                             <td>
-                                                <a href="{{ path('app_direction_generale_performance_region', {'id': loop.index}) }}" class="btn btn-sm btn-info">
+                                                <a href="{{ path('app_direction_generale_performance_region', {'id': region.id}) }}" class="btn btn-sm btn-info" title="Voir">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
+                                                <a href="{{ path('app_direction_generale_supervision', {'q': region.name, 'status': 'all'}) }}" class="btn btn-sm btn-warning" title="Modifier">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <button class="btn btn-sm btn-danger" type="button" onclick="deleteRegionFromPerformance({{ region.id }})" title="Supprimer">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
                                             </td>
                                         </tr>
                                         {% endfor %}
@@ -256,7 +262,7 @@ function refreshPerformance() {
 
 // Graphique d'évolution
 const ctx = document.getElementById('performanceChart');
-if (ctx) {
+document.addEventListener('DOMContentLoaded', function() {
     new Chart(ctx, {
         type: 'line',
         data: {
@@ -293,7 +299,31 @@ if (ctx) {
             }
         }
     });
+});
+
+const dgRegionCsrfToken = '{{ csrf_token('dg_supervision_region') }}';
+
+function deleteRegionFromPerformance(id) {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cette région ?')) {
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('_token', dgRegionCsrfToken);
+
+    fetch(`{{ path('app_direction_generale_supervision_region_delete', {id: 0}) }}`.replace('/0', `/${id}`), {
+        method: 'POST',
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data && data.success) {
+            window.location.reload();
+            return;
+        }
+        alert('Erreur: ' + ((data && data.message) ? data.message : 'Suppression impossible'));
+    })
+    .catch(() => alert('Erreur: Suppression impossible'));
 }
 </script>
-
 {% endblock %}

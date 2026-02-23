@@ -15,7 +15,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/amende')]
-#[IsGranted('ROLE_AGENT')]
+#[IsGranted('IS_AUTHENTICATED_FULLY')]
 class AmendeController extends AbstractController
 {
     public function __construct(
@@ -27,6 +27,7 @@ class AmendeController extends AbstractController
     #[Route('/', name: 'app_amende_index', methods: ['GET'])]
     public function index(): Response
     {
+        /** @var \App\Entity\User $user */
         $user = $this->getUser();
         $amendes = [];
 
@@ -58,6 +59,7 @@ class AmendeController extends AbstractController
             $infraction = $this->infractionRepository->find($infractionId);
             if ($infraction) {
                 // Vérifier les permissions
+                /** @var \App\Entity\User $user */
                 $user = $this->getUser();
                 $controle = $infraction->getControle();
                 
@@ -74,7 +76,8 @@ class AmendeController extends AbstractController
                 }
                 
                 $amende->setInfraction($infraction);
-                $amende->setMontant($infraction->getMontantAmende());
+                $amende->setMontantTotal((string) ($infraction->getMontantAmende() ?? '0'));
+                $amende->setMontantPaye('0.00');
             }
         }
 
@@ -85,10 +88,18 @@ class AmendeController extends AbstractController
             // Générer une référence unique
             $amende->setReference('AMD-' . date('Y') . '-' . strtoupper(uniqid()));
             
-            // Marquer l'infraction comme payée si c'est un paiement complet
             $infraction = $amende->getInfraction();
-            if ($amende->getMontant() >= $infraction->getMontantAmende()) {
-                $infraction->setStatut('PAYEE');
+            $total = (float) ($infraction->getMontantAmende() ?? 0);
+            $paid = (float) ($amende->getMontantPaye() ?? 0);
+
+            if ($paid >= $total && $total > 0) {
+                $amende->setStatut('PAYEE');
+            } else {
+                $amende->setStatut('EN_ATTENTE');
+            }
+
+            if ($paid > 0 && !$amende->getDatePaiement()) {
+                $amende->setDatePaiement(new \DateTimeImmutable());
             }
             
             $this->entityManager->persist($amende);
@@ -113,6 +124,7 @@ class AmendeController extends AbstractController
     public function show(Amende $amende): Response
     {
         // Vérifier les permissions
+        /** @var \App\Entity\User $user */
         $user = $this->getUser();
         $infraction = $amende->getInfraction();
         $controle = $infraction->getControle();
@@ -138,6 +150,7 @@ class AmendeController extends AbstractController
     public function edit(Request $request, Amende $amende): Response
     {
         // Vérifier les permissions
+        /** @var \App\Entity\User $user */
         $user = $this->getUser();
         $infraction = $amende->getInfraction();
         $controle = $infraction->getControle();
@@ -162,7 +175,7 @@ class AmendeController extends AbstractController
             $infraction = $amende->getInfraction();
             $totalAmendes = 0;
             foreach ($infraction->getAmendes() as $otherAmende) {
-                $totalAmendes += (float) $otherAmende->getMontant();
+                $totalAmendes += (float) ($otherAmende->getMontantPaye() ?? 0);
             }
             
             if ($totalAmendes >= (float) $infraction->getMontantAmende()) {
@@ -200,7 +213,7 @@ class AmendeController extends AbstractController
             // Mettre à jour le statut de l'infraction
             $totalAmendes = 0;
             foreach ($infraction->getAmendes() as $otherAmende) {
-                $totalAmendes += (float) $otherAmende->getMontant();
+                $totalAmendes += (float) ($otherAmende->getMontantPaye() ?? 0);
             }
             
             if ($totalAmendes >= (float) $infraction->getMontantAmende()) {
@@ -222,6 +235,7 @@ class AmendeController extends AbstractController
     public function recu(Amende $amende): Response
     {
         // Vérifier les permissions
+        /** @var \App\Entity\User $user */
         $user = $this->getUser();
         $infraction = $amende->getInfraction();
         $controle = $infraction->getControle();
@@ -246,6 +260,7 @@ class AmendeController extends AbstractController
     #[Route('/stats', name: 'app_amende_stats', methods: ['GET'])]
     public function stats(): Response
     {
+        /** @var \App\Entity\User $user */
         $user = $this->getUser();
         $stats = [];
 

@@ -1,15 +1,19 @@
 /* Variables personnalisées */
 :root {
-    --primary-color: #003366;
-    --secondary-color: #FF6B35;
-    --accent-color: #00A652;
-    --success-color: #28a745;
-    --info-color: #17a2b8;
-    --warning-color: #ffc107;
-    --danger-color: #dc3545;
-    --dark-color: #1a1a1a;
-    --light-color: #f8f9fa;
-    --sidebar-width: 250px;
+    --primary-color: #0b2e5b;
+    --secondary-color: #1d4ed8;
+    --accent-color: #00a652;
+    --success-color: #16a34a;
+    --info-color: #0284c7;
+    --warning-color: #f59e0b;
+    --danger-color: #dc2626;
+    --dark-color: #0f172a;
+    --light-color: #f8fafc;
+    --sidebar-width: 272px;
+    --border-color: rgba(15, 23, 42, 0.08);
+    --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+    --shadow-md: 0 10px 30px rgba(15, 23, 42, 0.10);
+    --radius: 14px;
 }
 
 /* Reset et base */
@@ -21,19 +25,34 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f8f9fa;
+    color: var(--dark-color);
+    background:
+        radial-gradient(1200px 600px at 20% -10%, rgba(29, 78, 216, 0.10), transparent 60%),
+        radial-gradient(900px 500px at 90% 0%, rgba(0, 166, 82, 0.10), transparent 55%),
+        var(--light-color);
     padding-top: 56px; /* Height of navbar */
 }
 
 /* Navbar */
 .navbar {
-    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+    background: linear-gradient(90deg, #0b1220 0%, #0f172a 50%, #111827 100%);
+    box-shadow: var(--shadow-sm);
     z-index: 1030;
 }
 
 .navbar-brand {
     font-weight: 700;
     font-size: 1.2rem;
+    letter-spacing: 0.2px;
+}
+
+.navbar .nav-link {
+    color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.navbar .nav-link:hover,
+.navbar .nav-link:focus {
+    color: #fff !important;
 }
 
 /* Sidebar */
@@ -43,33 +62,34 @@ body {
     bottom: 0;
     left: 0;
     z-index: 100;
-    padding: 48px 0 0;
-    box-shadow: inset -1px 0 0 rgba(0,0,0,.1);
-    background-color: #fff;
-    border-right: 1px solid #dee2e6;
+    padding: 16px 12px;
+    box-shadow: inset -1px 0 0 rgba(0,0,0,.06);
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(10px);
+    border-right: 1px solid var(--border-color);
     width: var(--sidebar-width);
     transition: all 0.3s ease;
 }
 
 .sidebar .nav-link {
     font-weight: 500;
-    color: #333;
-    padding: 12px 20px;
-    border-radius: 0;
+    color: rgba(15, 23, 42, 0.78);
+    padding: 10px 12px;
+    border-radius: 12px;
     transition: all 0.3s ease;
-    border-left: 3px solid transparent;
+    border: 1px solid transparent;
 }
 
 .sidebar .nav-link:hover {
     color: var(--primary-color);
-    background-color: rgba(0, 51, 102, 0.1);
-    border-left-color: var(--primary-color);
+    background-color: rgba(29, 78, 216, 0.08);
+    border-color: rgba(29, 78, 216, 0.18);
 }
 
 .sidebar .nav-link.active {
     color: var(--primary-color);
-    background-color: rgba(0, 51, 102, 0.15);
-    border-left-color: var(--primary-color);
+    background-color: rgba(29, 78, 216, 0.10);
+    border-color: rgba(29, 78, 216, 0.22);
     font-weight: 600;
 }
 
@@ -82,28 +102,40 @@ body {
 /* Main Content */
 main {
     margin-left: var(--sidebar-width);
-    padding: 20px;
+    padding: 24px;
     min-height: calc(100vh - 56px);
+}
+
+nav.sidebar.col-md-3.col-lg-2 {
+    flex: 0 0 var(--sidebar-width);
+    max-width: var(--sidebar-width);
+}
+
+main.col-md-9.ms-sm-auto.col-lg-10.px-md-4 {
+    flex: 0 0 calc(100% - var(--sidebar-width));
+    max-width: calc(100% - var(--sidebar-width));
 }
 
 /* Cards */
 .card {
     border: none;
-    border-radius: 12px;
-    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid var(--border-color);
     transition: all 0.3s ease;
     margin-bottom: 1.5rem;
 }
 
 .card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 0.25rem 2rem 0 rgba(58, 59, 69, 0.2);
+    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.14);
 }
 
 .card-header {
-    background-color: #fff;
-    border-bottom: 1px solid #e3e6f0;
-    border-radius: 12px 12px 0 0 !important;
+    background-color: transparent;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: var(--radius) var(--radius) 0 0 !important;
     padding: 1rem 1.5rem;
     font-weight: 600;
     color: var(--dark-color);
@@ -214,7 +246,12 @@ main {
     font-weight: 500;
     padding: 0.5rem 1rem;
     transition: all 0.3s ease;
-    border: none;
+    border: 1px solid transparent;
+}
+
+.btn .bi {
+    line-height: 1;
+    font-size: 1rem;
 }
 
 .btn:hover {

@@ -42,7 +42,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?bool $isActive = true;
 
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true)]
     private ?Region $region = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true)]
     private ?Brigade $brigade = null;
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: AuditLog::class)]

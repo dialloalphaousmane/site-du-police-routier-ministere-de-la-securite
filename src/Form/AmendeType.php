@@ -25,7 +25,7 @@ class AmendeType extends AbstractType
                 'disabled' => true,
                 'help' => 'Généré automatiquement'
             ])
-            ->add('montant', NumberType::class, [
+            ->add('montantPaye', NumberType::class, [
                 'label' => 'Montant payé (GNF)',
                 'scale' => 2,
                 'attr' => [
@@ -41,24 +41,12 @@ class AmendeType extends AbstractType
                 'data' => new \DateTimeImmutable(),
                 'attr' => ['class' => 'form-control']
             ])
-            ->add('modePaiement', ChoiceType::class, [
-                'label' => 'Mode de paiement',
-                'choices' => [
-                    'Espèces' => 'ESPECES',
-                    'Carte bancaire' => 'CARTE_BANCAIRE',
-                    'Mobile Money' => 'MOBILE_MONEY',
-                    'Virement bancaire' => 'VIREMENT_BANCAIRE',
-                    'Chèque' => 'CHEQUE',
-                ],
-                'attr' => ['class' => 'form-select']
-            ])
             ->add('statut', ChoiceType::class, [
                 'label' => 'Statut du paiement',
                 'choices' => [
                     'En attente' => 'EN_ATTENTE',
-                    'Validé' => 'VALIDE',
-                    'Annulé' => 'ANNULE',
-                    'Remboursé' => 'REMBOURSE',
+                    'Payée' => 'PAYEE',
+                    'Rejetée' => 'REJETEE',
                 ],
                 'attr' => ['class' => 'form-select'],
                 'disabled' => !$options['can_edit_statut'],

@@ -30,9 +30,9 @@ if ($adminUser) {
 $users = $entityManager->getRepository(User::class)->findAll();
 
 foreach ($users as $user) {
-    $role = $user->getRole();
-    if ($role) {
-        $roleCode = $role->getCode();
+    $roles = $user->getRoles();
+    if (!empty($roles)) {
+        $roleCode = $roles[0];
         $user->setRoles([$roleCode]);
         echo "Updated roles for user: " . $user->getEmail() . " -> " . $roleCode . "\n";
     }

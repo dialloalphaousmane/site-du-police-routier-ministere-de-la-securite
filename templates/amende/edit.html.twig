@@ -1,0 +1,143 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier Amende - Police Routière{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-pencil"></i> Modifier l'Amende
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        Modification de l'amende: <strong>{{ amende.reference }}</strong>
+                    </div>
+
+                    {{ form_start(form) }}
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.infraction) }}
+                            {{ form_widget(form.infraction, {'attr': {'class': 'form-select'}}) }}
+                            {{ form_errors(form.infraction) }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.reference) }}
+                            {{ form_widget(form.reference, {'attr': {'class': 'form-control', 'readonly': true}}) }}
+                            {{ form_errors(form.reference) }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            {{ form_label(form.montantTotal) }}
+                            {{ form_widget(form.montantTotal, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.montantTotal) }}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            {{ form_label(form.montantPaye) }}
+                            {{ form_widget(form.montantPaye, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.montantPaye) }}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            {{ form_label(form.statut) }}
+                            {{ form_widget(form.statut, {'attr': {'class': 'form-select'}}) }}
+                            {{ form_errors(form.statut) }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.dateEmission) }}
+                            {{ form_widget(form.dateEmission, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.dateEmission) }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.dateEcheance) }}
+                            {{ form_widget(form.dateEcheance, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.dateEcheance) }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            {{ form_label(form.observations) }}
+                            {{ form_widget(form.observations, {'attr': {'class': 'form-control', 'rows': 3}}) }}
+                            {{ form_errors(form.observations) }}
+                        </div>
+                    </div>
+
+                    <!-- Statut de paiement actuel -->
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <div class="alert alert-light">
+                                <h6><i class="bi bi-info-circle"></i> Statut actuel du paiement</h6>
+                                <div class="progress">
+                                    {% set currentPercentage = (amende.montantPaye / amende.montantTotal) * 100 %}
+                                    <div class="progress-bar 
+                                        {% if currentPercentage == 100 %}bg-success
+                                        {% elseif currentPercentage >= 50 %}bg-warning
+                                        {% else %}bg-danger{% endif %}" 
+                                         style="width: {{ currentPercentage }}%">
+                                        {{ currentPercentage|number_format(1) }}% payé
+                                    </div>
+                                </div>
+                                <small class="text-muted">
+                                    {{ amende.montantPaye|number_format(0, ',', ' ') }} / {{ amende.montantTotal|number_format(0, ',', ' ') }} GNF
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="d-flex justify-content-between">
+                                <a href="{{ path('app_amende_show', {'id': amende.id}) }}" 
+                                   class="btn btn-secondary">
+                                    <i class="bi bi-arrow-left"></i> Annuler
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-circle"></i> Enregistrer les modifications
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const montantTotalInput = document.querySelector('#amende_montantTotal');
+    const montantPayeInput = document.querySelector('#amende_montantPaye');
+    const statutSelect = document.querySelector('#amende_statut');
+    
+    function updateStatut() {
+        const total = parseFloat(montantTotalInput.value) || 0;
+        const paye = parseFloat(montantPayeInput.value) || 0;
+        
+        if (paye >= total && total > 0) {
+            statutSelect.value = 'PAYEE';
+        } else if (paye > 0) {
+            statutSelect.value = 'EN_ATTENTE';
+        } else {
+            statutSelect.value = 'EN_ATTENTE';
+        }
+    }
+    
+    if (montantTotalInput && montantPayeInput) {
+        montantTotalInput.addEventListener('input', updateStatut);
+        montantPayeInput.addEventListener('input', updateStatut);
+    }
+});
+</script>
+{% endblock %}

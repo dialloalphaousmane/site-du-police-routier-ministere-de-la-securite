@@ -1,0 +1,106 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails Contrôle - Brigade{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_brigade_dashboard') }}">
+                            <i class="bi bi-speedometer2 me-2"></i>Tableau de bord
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ path('app_controle_index') }}">
+                            <i class="bi bi-clipboard-check me-2"></i>Contrôles
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_infraction_index') }}">
+                            <i class="bi bi-exclamation-triangle me-2"></i>Infractions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_brigade_amendes') }}">
+                            <i class="bi bi-cash-stack me-2"></i>Amendes
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_agent_index') }}">
+                            <i class="bi bi-people me-2"></i>Équipe
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Détails du contrôle</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a href="{{ path('app_controle_edit', {'id': controle.id}) }}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-pencil"></i> Modifier
+                    </a>
+                    <a href="{{ path('app_controle_index') }}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-arrow-left"></i> Retour
+                    </a>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <small class="text-muted d-block">Date</small>
+                            <strong>{{ controle.dateControle|date('d/m/Y H:i') }}</strong>
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted d-block">Lieu</small>
+                            <strong>{{ controle.lieuControle }}</strong>
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted d-block">Brigade</small>
+                            <strong>{{ controle.brigade ? controle.brigade.code : '-' }}</strong>
+                        </div>
+
+                        <div class="col-md-4">
+                            <small class="text-muted d-block">Véhicule</small>
+                            <strong>{{ controle.marqueVehicule }}</strong>
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted d-block">Immatriculation</small>
+                            <strong>{{ controle.immatriculation }}</strong>
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted d-block">Conducteur</small>
+                            <strong>{{ controle.prenomConducteur }} {{ controle.nomConducteur }}</strong>
+                            <div><small class="text-muted">N°: {{ controle.noConducteur }}</small></div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <small class="text-muted d-block">Agent</small>
+                            {% if controle.agent %}
+                                <strong>{{ controle.agent.nom }} {{ controle.agent.prenom }}</strong>
+                            {% else %}
+                                <span class="text-muted">Non assigné</span>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted d-block">Infractions</small>
+                            <strong>{{ controle.infractions|length }}</strong>
+                        </div>
+
+                        <div class="col-12">
+                            <small class="text-muted d-block">Observations</small>
+                            <div class="border rounded p-2 bg-light">{{ controle.observation|default('-') }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}

@@ -8,11 +8,11 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[Route('/brigade')]
+#[Route('/brigade-legacy')]
 #[IsGranted('ROLE_CHEF_BRIGADE')]
 class DashboardController extends AbstractController
 {
-    #[Route('/dashboard', name: 'app_dashboard_chef_brigade')]
+    #[Route('/dashboard', name: 'app_brigade_legacy_dashboard')]
     public function dashboard(): Response
     {
         return $this->render('dashboard/chef_brigade.html.twig', [
@@ -20,7 +20,7 @@ class DashboardController extends AbstractController
         ]);
     }
 
-    #[Route('/agents', name: 'app_agent_index')]
+    #[Route('/agents', name: 'app_brigade_legacy_agent_index')]
     public function agents(): Response
     {
         return $this->render('brigade/agent/index.html.twig', [
@@ -28,7 +28,7 @@ class DashboardController extends AbstractController
         ]);
     }
 
-    #[Route('/controles', name: 'app_controle_index')]
+    #[Route('/controles', name: 'app_brigade_legacy_controle_index')]
     public function controles(): Response
     {
         return $this->render('brigade/controle/index.html.twig', [
@@ -36,7 +36,7 @@ class DashboardController extends AbstractController
         ]);
     }
 
-    #[Route('/controle/new', name: 'app_controle_new')]
+    #[Route('/controle/new', name: 'app_brigade_legacy_controle_new')]
     public function newControle(Request $request): Response
     {
         return $this->render('brigade/controle/new.html.twig', [
@@ -44,7 +44,7 @@ class DashboardController extends AbstractController
         ]);
     }
 
-    #[Route('/infractions', name: 'app_infraction_index')]
+    #[Route('/infractions', name: 'app_brigade_legacy_infraction_index')]
     public function infractions(): Response
     {
         return $this->render('brigade/infraction/index.html.twig', [
@@ -52,7 +52,7 @@ class DashboardController extends AbstractController
         ]);
     }
 
-    #[Route('/amendes', name: 'app_amende_index')]
+    #[Route('/amendes', name: 'app_brigade_legacy_amende_index')]
     public function amendes(): Response
     {
         return $this->render('brigade/amende/index.html.twig', [

@@ -38,7 +38,13 @@ class InfractionController extends AbstractController
             return $this->redirectToRoute('app_dashboard');
         }
 
-        $infractions = $this->infractionRepository->findBy(['controle' => ['brigade' => $brigade]], ['id' => 'DESC']);
+        $infractions = $this->infractionRepository->createQueryBuilder('i')
+            ->join('i.controle', 'c')
+            ->where('c.brigade = :brigade')
+            ->setParameter('brigade', $brigade)
+            ->orderBy('i.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
 
         return $this->render('brigade/infraction/index.html.twig', [
             'infractions' => $infractions,
@@ -157,7 +163,12 @@ class InfractionController extends AbstractController
             return $this->redirectToRoute('app_dashboard');
         }
 
-        $infractions = $this->infractionRepository->findBy(['controle' => ['brigade' => $brigade]]);
+        $infractions = $this->infractionRepository->createQueryBuilder('i')
+            ->join('i.controle', 'c')
+            ->where('c.brigade = :brigade')
+            ->setParameter('brigade', $brigade)
+            ->getQuery()
+            ->getResult();
 
         // Calcul des statistiques
         $totalInfractions = count($infractions);
@@ -194,7 +205,13 @@ class InfractionController extends AbstractController
             return $this->redirectToRoute('app_dashboard');
         }
 
-        $infractions = $this->infractionRepository->findBy(['controle' => ['brigade' => $brigade]], ['id' => 'DESC']);
+        $infractions = $this->infractionRepository->createQueryBuilder('i')
+            ->join('i.controle', 'c')
+            ->where('c.brigade = :brigade')
+            ->setParameter('brigade', $brigade)
+            ->orderBy('i.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
 
         $csv = "Date;Type;Montant;Conducteur;Véhicule;Agent;Observations\n";
         

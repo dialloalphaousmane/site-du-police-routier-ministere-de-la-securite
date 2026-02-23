@@ -38,33 +38,28 @@
             <div class="position-sticky pt-3">
                 <ul class="nav flex-column">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ path('app_dashboard_chef_brigade') }}">
+                        <a class="nav-link" href="{{ path('app_brigade_dashboard') }}">
                             <i class="bi bi-speedometer2 me-2"></i>Tableau de bord
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ path('app_controle_index') }}">
+                        <a class="nav-link" href="{{ path('app_brigade_controls') }}">
                             <i class="bi bi-clipboard-check me-2"></i>Contrôles
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ path('app_infraction_index') }}">
+                        <a class="nav-link" href="{{ path('app_brigade_infractions') }}">
                             <i class="bi bi-exclamation-triangle me-2"></i>Infractions
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ path('app_amende_index') }}">
+                        <a class="nav-link" href="{{ path('app_brigade_amendes') }}">
                             <i class="bi bi-cash-stack me-2"></i>Amendes
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="{{ path('app_agent_index') }}">
+                        <a class="nav-link active" href="{{ path('app_brigade_agents') }}">
                             <i class="bi bi-people me-2"></i>Équipe
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ path('app_rapport_index') }}">
-                            <i class="bi bi-file-text me-2"></i>Rapports
                         </a>
                     </li>
                 </ul>
@@ -114,8 +109,8 @@
                     <div class="info-item">
                         <h6 class="text-primary">Statut</h6>
                         <p class="mb-0">
-                            <span class="badge status-badge bg-{{ agent.isActif ? 'success' : 'danger' }}">
-                                {{ agent.isActif ? 'Actif' : 'Inactif' }}
+                            <span class="badge status-badge bg-{{ agent.actif ? 'success' : 'danger' }}">
+                                {{ agent.actif ? 'Actif' : 'Inactif' }}
                             </span>
                         </p>
                     </div>

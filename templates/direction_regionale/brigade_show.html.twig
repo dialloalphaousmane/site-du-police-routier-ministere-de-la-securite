@@ -1,0 +1,73 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Brigade {{ brigade.code }} - {{ region.libelle }}{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <div class="row mb-3">
+        <div class="col-md-8">
+            <h1 class="h4 mb-0"><i class="bi bi-shield me-2"></i>Détails Brigade</h1>
+            <div class="text-muted">{{ region.libelle }}</div>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{{ path('app_direction_regionale_brigades') }}" class="btn btn-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>Retour
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <div class="text-muted small">Code</div>
+                    <div class="fw-bold"><span class="badge bg-info">{{ brigade.code }}</span></div>
+                </div>
+                <div class="col-md-5">
+                    <div class="text-muted small">Nom</div>
+                    <div class="fw-bold">{{ brigade.libelle }}</div>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-muted small">Chef</div>
+                    <div class="fw-bold">{{ brigade.chef ?: '-' }}</div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="text-muted small">Localité</div>
+                    <div class="fw-bold">{{ brigade.localite }}</div>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-muted small">Email</div>
+                    <div class="fw-bold">{{ brigade.email ?: '-' }}</div>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-muted small">Téléphone</div>
+                    <div class="fw-bold">{{ brigade.telephone ?: '-' }}</div>
+                </div>
+
+                <div class="col-12">
+                    <div class="text-muted small">Adresse</div>
+                    <div class="fw-bold">{{ brigade.adresse ?: '-' }}</div>
+                </div>
+
+                <div class="col-12">
+                    <div class="text-muted small">Statut</div>
+                    {% if brigade.actif %}
+                        <span class="badge bg-success">Actif</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Inactif</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="card-footer d-flex gap-2">
+            <a class="btn btn-sm btn-outline-success" href="{{ path('app_direction_regionale_brigade_controls', {id: brigade.id}) }}">
+                <i class="bi bi-list-check me-1"></i>Contrôles de la brigade
+            </a>
+            <a class="btn btn-sm btn-outline-primary" href="{{ path('app_direction_regionale_brigade_agents', {id: brigade.id}) }}">
+                <i class="bi bi-people me-1"></i>Agents de la brigade
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

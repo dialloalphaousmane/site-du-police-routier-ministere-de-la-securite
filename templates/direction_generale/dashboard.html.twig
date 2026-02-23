@@ -1,0 +1,189 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tableau de Bord - Direction Générale{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="mb-0">
+                <i class="bi bi-speedometer2 me-2"></i>Tableau de Bord - Direction Générale
+            </h1>
+            <small class="text-muted">Supervision nationale en temps réel</small>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-primary">
+                <div class="card-body">
+                    <h6 class="card-title text-muted">Utilisateurs</h6>
+                    <h2 class="card-text text-primary">{{ stats.total_users }}</h2>
+                    <small class="text-muted">
+                        <i class="bi bi-people me-1"></i>{{ stats.total_agents }} agents
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-success">
+                <div class="card-body">
+                    <h6 class="card-title text-muted">Contrôles</h6>
+                    <h2 class="card-text text-success">{{ stats.total_controls }}</h2>
+                    <small class="text-muted">
+                        <i class="bi bi-arrow-up me-1"></i>Augmentation
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-warning">
+                <div class="card-body">
+                    <h6 class="card-title text-muted">Infractions</h6>
+                    <h2 class="card-text text-warning">{{ stats.total_infractions }}</h2>
+                    <small class="text-muted">
+                        <i class="bi bi-exclamation-triangle me-1"></i>Détectées
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-danger">
+                <div class="card-body">
+                    <h6 class="card-title text-muted">Amendes en Attente</h6>
+                    <h2 class="card-text text-danger">{{ stats.pending_amendes }}</h2>
+                    <small class="text-muted">
+                        <i class="bi bi-clock me-1"></i>Non payées
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Secondary Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-info">
+                <div class="card-body">
+                    <h6 class="card-title text-muted">Régions</h6>
+                    <h2 class="card-text text-info">{{ stats.total_regions }}</h2>
+                    <small class="text-muted">
+                        <i class="bi bi-map me-1"></i>Couverture
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-dark">
+                <div class="card-body">
+                    <h6 class="card-title text-muted">Total Amendes</h6>
+                    <h2 class="card-text text-dark">{{ stats.total_amendes }}</h2>
+                    <small class="text-muted">
+                        <i class="bi bi-cash me-1"></i>Émises
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Actions Rapides</h6>
+                    <div class="btn-group w-100" role="group">
+                        <a href="{{ path('app_direction_generale_controls') }}" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-eye me-1"></i>Contrôles
+                        </a>
+                        <a href="{{ path('app_direction_generale_infractions') }}" class="btn btn-outline-warning btn-sm">
+                            <i class="bi bi-exclamation me-1"></i>Infractions
+                        </a>
+                        <a href="{{ path('app_direction_generale_amendes') }}" class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-cash me-1"></i>Amendes
+                        </a>
+                        <a href="{{ path('app_direction_generale_reports') }}" class="btn btn-outline-success btn-sm">
+                            <i class="bi bi-file-text me-1"></i>Rapports
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Data -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">Derniers Contrôles</h6>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Date</th>
+                                <th>Lieu</th>
+                                <th>Véhicule</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for control in recent_controls %}
+                                <tr>
+                                    <td><small>{{ control.controleDate|date('d/m H:i') }}</small></td>
+                                    <td><small>{{ control.lieu }}</small></td>
+                                    <td><small>{{ control.immatriculation }}</small></td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted py-2">Aucun contrôle récent</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ path('app_direction_generale_controls') }}" class="btn btn-sm btn-link">Voir tous les contrôles →</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">Dernières Infractions</h6>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Code</th>
+                                <th>Description</th>
+                                <th>Montant</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for infraction in recent_infractions %}
+                                <tr>
+                                    <td><small><span class="badge bg-warning">{{ infraction.code }}</span></small></td>
+                                    <td><small>{{ infraction.description|slice(0, 25) }}...</small></td>
+                                    <td><small>{{ infraction.montantAmende|number_format(0, ',', ' ')}} GNF</small></td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted py-2">Aucune infraction récente</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ path('app_direction_generale_infractions') }}" class="btn btn-sm btn-link">Voir toutes les infractions →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

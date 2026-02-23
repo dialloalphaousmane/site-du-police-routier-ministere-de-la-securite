@@ -4,7 +4,7 @@ namespace App\Controller\DirectionGenerale\Dashboard;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use App\Service\DirectionGenerale\StatisticsService;
 
@@ -28,6 +28,7 @@ class DashboardController extends AbstractController
         $controlsByRegion = $this->statisticsService->getControlsByRegion();
         $infractionsByType = $this->statisticsService->getInfractionsByType();
         $monthlyRevenue = $this->statisticsService->getMonthlyRevenue();
+        $regionsStats = $this->statisticsService->getRegionsStats();
 
         return $this->render('direction_generale/dashboard/dashboard.html.twig', [
             'user' => $this->getUser(),
@@ -35,7 +36,8 @@ class DashboardController extends AbstractController
             'controlsEvolution' => $controlsEvolution,
             'controlsByRegion' => $controlsByRegion,
             'infractionsByType' => $infractionsByType,
-            'monthlyRevenue' => $monthlyRevenue
+            'monthlyRevenue' => $monthlyRevenue,
+            'regionsStats' => $regionsStats
         ]);
     }
 

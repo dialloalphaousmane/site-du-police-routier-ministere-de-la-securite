@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Amende;
 use App\Entity\Region;
 use App\Entity\Brigade;
+use App\Util\PoliceConstants;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -59,7 +60,7 @@ class AmendeRepository extends ServiceEntityRepository
     public function getTotalMontant(): string
     {
         return $this->createQueryBuilder('a')
-            ->select('SUM(a.montant)')
+            ->select('SUM(a.montantTotal)')
             ->getQuery()
             ->getSingleScalarResult() ?? '0';
     }
@@ -70,7 +71,7 @@ class AmendeRepository extends ServiceEntityRepository
             ->join('a.infraction', 'i')
             ->join('i.controle', 'c')
             ->join('c.brigade', 'b')
-            ->select('SUM(a.montant)')
+            ->select('SUM(a.montantTotal)')
             ->where('b.region = :region')
             ->setParameter('region', $region)
             ->getQuery()
@@ -82,7 +83,7 @@ class AmendeRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('a')
             ->join('a.infraction', 'i')
             ->join('i.controle', 'c')
-            ->select('SUM(a.montant)')
+            ->select('SUM(a.montantTotal)')
             ->where('c.brigade = :brigade')
             ->setParameter('brigade', $brigade)
             ->getQuery()
@@ -92,7 +93,7 @@ class AmendeRepository extends ServiceEntityRepository
     public function getTotalMontantThisMonth(): string
     {
         return $this->createQueryBuilder('a')
-            ->select('SUM(a.montant)')
+            ->select('SUM(a.montantPaye)')
             ->where('a.datePaiement >= :firstDay')
             ->setParameter('firstDay', new \DateTime('first day of this month'))
             ->getQuery()
@@ -105,7 +106,7 @@ class AmendeRepository extends ServiceEntityRepository
             ->join('a.infraction', 'i')
             ->join('i.controle', 'c')
             ->join('c.brigade', 'b')
-            ->select('SUM(a.montant)')
+            ->select('SUM(a.montantPaye)')
             ->where('b.region = :region')
             ->andWhere('a.datePaiement >= :firstDay')
             ->setParameter('region', $region)
@@ -119,7 +120,7 @@ class AmendeRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('a')
             ->join('a.infraction', 'i')
             ->join('i.controle', 'c')
-            ->select('SUM(a.montant)')
+            ->select('SUM(a.montantPaye)')
             ->where('c.brigade = :brigade')
             ->andWhere('a.datePaiement >= :firstDay')
             ->setParameter('brigade', $brigade)
@@ -141,15 +142,87 @@ class AmendeRepository extends ServiceEntityRepository
             ->getSingleScalarResult() ?? 0;
     }
 
-    public function countByBrigade(Brigade $brigade): int
+    public function countByBrigade(int|Brigade $brigade): int
     {
-        return $this->createQueryBuilder('a')
+        $qb = $this->createQueryBuilder('a')
             ->join('a.infraction', 'i')
             ->join('i.controle', 'c')
+            ->join('c.brigade', 'b')
+            ->select('COUNT(a.id)');
+
+        if (is_int($brigade)) {
+            $qb->andWhere('b.id = :brigadeId')
+                ->setParameter('brigadeId', $brigade);
+        } else {
+            $qb->andWhere('c.brigade = :brigade')
+                ->setParameter('brigade', $brigade);
+        }
+
+        return (int) ($qb->getQuery()->getSingleScalarResult() ?? 0);
+    }
+
+    public function countPendingByBrigade(int|Brigade $brigade): int
+    {
+        $qb = $this->createQueryBuilder('a')
+            ->join('a.infraction', 'i')
+            ->join('i.controle', 'c')
+            ->join('c.brigade', 'b')
             ->select('COUNT(a.id)')
-            ->where('c.brigade = :brigade')
-            ->setParameter('brigade', $brigade)
-            ->getQuery()
-            ->getSingleScalarResult() ?? 0;
+            ->andWhere('a.statut = :statut')
+            ->setParameter('statut', PoliceConstants::AMENDE_STATUS_PENDING);
+
+        if (is_int($brigade)) {
+            $qb->andWhere('b.id = :brigadeId')
+                ->setParameter('brigadeId', $brigade);
+        } else {
+            $qb->andWhere('c.brigade = :brigade')
+                ->setParameter('brigade', $brigade);
+        }
+
+        return (int) ($qb->getQuery()->getSingleScalarResult() ?? 0);
+    }
+
+    public function countPendingByRegion(int|Region $region): int
+    {
+        $qb = $this->createQueryBuilder('a')
+            ->join('a.infraction', 'i')
+            ->join('i.controle', 'c')
+            ->join('c.brigade', 'b')
+            ->join('b.region', 'r')
+            ->select('COUNT(a.id)')
+            ->andWhere('a.statut = :statut')
+            ->setParameter('statut', PoliceConstants::AMENDE_STATUS_PENDING);
+
+        if (is_int($region)) {
+            $qb->andWhere('r.id = :regionId')
+                ->setParameter('regionId', $region);
+        } else {
+            $qb->andWhere('b.region = :region')
+                ->setParameter('region', $region);
+        }
+
+        return (int) ($qb->getQuery()->getSingleScalarResult() ?? 0);
+    }
+
+    public function countPaidByRegion(int|Region $region): int
+    {
+        $qb = $this->createQueryBuilder('a')
+            ->join('a.infraction', 'i')
+            ->join('i.controle', 'c')
+            ->join('c.brigade', 'b')
+            ->join('b.region', 'r')
+            ->select('COUNT(a.id)')
+            ->andWhere('a.statut = :statut')
+            ->setParameter('statut', PoliceConstants::AMENDE_STATUS_PAID);
+
+        if (is_int($region)) {
+            $qb->andWhere('r.id = :regionId')
+                ->setParameter('regionId', $region);
+        } else {
+            $qb->andWhere('b.region = :region')
+                ->setParameter('region', $region);
+        }
+
+        return (int) ($qb->getQuery()->getSingleScalarResult() ?? 0);
     }
 }

@@ -35,13 +35,13 @@ class FixAllRolesCommand extends Command
         $tableData = [];
 
         foreach ($users as $user) {
-            $role = $user->getRole();
-            
-            if ($role) {
-                $roleCode = $role->getCode();
+            $roles = $user->getRoles();
+
+            if (!empty($roles)) {
+                $roleCode = $roles[0];
                 $user->setRoles([$roleCode]);
                 $updatedCount++;
-                
+
                 $tableData[] = [
                     $user->getEmail(),
                     $roleCode,

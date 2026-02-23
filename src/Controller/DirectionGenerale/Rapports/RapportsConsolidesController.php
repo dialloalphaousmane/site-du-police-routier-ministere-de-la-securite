@@ -5,13 +5,14 @@ namespace App\Controller\DirectionGenerale\Rapports;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use App\Entity\Rapport;
 use App\Entity\Region;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 
+#[Route('/direction-generale/rapports')]
 #[Route('/dashboard/direction-generale/rapports')]
 // #[IsGranted('ROLE_DIRECTION_GENERALE')]
 class RapportsConsolidesController extends AbstractController
@@ -119,6 +120,64 @@ class RapportsConsolidesController extends AbstractController
         return $this->redirectToRoute('app_direction_generale_rapports');
     }
 
+    #[Route('/download/{id}', name: 'app_direction_generale_rapports_download_legacy')]
+    public function downloadLegacy(int $id, Request $request): Response
+    {
+        $rapport = $this->entityManager->getRepository(Rapport::class)->find($id);
+        if (!$rapport) {
+            $this->addFlash('error', 'Rapport introuvable.');
+            return $this->redirectToRoute('app_direction_generale_rapports');
+        }
+
+        $format = $request->query->get('format', 'pdf');
+
+        return $this->redirectToRoute('app_direction_generale_rapports_export', [
+            'id' => $id,
+            'format' => $format,
+        ]);
+    }
+
+    #[Route('/preview/{id}', name: 'app_direction_generale_rapports_preview_legacy')]
+    public function previewLegacy(int $id): Response
+    {
+        return $this->redirectToRoute('app_direction_generale_rapports_details', [
+            'id' => $id,
+        ]);
+    }
+
+    #[Route('/delete/{id}', name: 'app_direction_generale_rapports_delete_legacy', methods: ['POST'])]
+    public function deleteLegacy(int $id, Request $request): Response
+    {
+        $rapport = $this->entityManager->getRepository(Rapport::class)->find($id);
+        if (!$rapport) {
+            return $this->json(['success' => false, 'message' => 'Rapport introuvable'], 404);
+        }
+
+        $token = (string) $request->request->get('_token');
+        if (!$this->isCsrfTokenValid('supprimer_rapport'.$id, $token)) {
+            return $this->json(['success' => false, 'message' => 'Token CSRF invalide'], 400);
+        }
+
+        $this->entityManager->remove($rapport);
+        $this->entityManager->flush();
+
+        return $this->json(['success' => true]);
+    }
+
+    #[Route('/generate/{type}', name: 'app_direction_generale_rapports_generate_legacy')]
+    public function generateLegacy(string $type): Response
+    {
+        $typeMap = [
+            'monthly' => 'mensuel',
+            'quarterly' => 'trimestriel',
+            'annual' => 'annuel',
+        ];
+
+        return $this->redirectToRoute('app_direction_generale_rapports_generer', [
+            'type' => $typeMap[$type] ?? $type,
+        ]);
+    }
+
     #[Route('/valider/{id}', name: 'app_direction_generale_rapports_valider', methods: ['POST'])]
     public function valider(Rapport $rapport, Request $request): Response
     {
@@ -163,8 +222,13 @@ class RapportsConsolidesController extends AbstractController
     }
 
     #[Route('/export/{id}', name: 'app_direction_generale_rapports_export')]
-    public function export(Rapport $rapport, Request $request): Response
+    public function export(?Rapport $rapport, Request $request): Response
     {
+        if (!$rapport) {
+            $this->addFlash('error', 'Rapport introuvable.');
+            return $this->redirectToRoute('app_direction_generale_rapports');
+        }
+
         $format = $request->query->get('format', 'pdf');
         
         // Logique d'export du rapport
