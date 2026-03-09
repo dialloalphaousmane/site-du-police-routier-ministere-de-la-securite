@@ -1,0 +1,144 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvel Accident{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Nouvel Accident</h1>
+        <div class="btn-group">
+            <a href="{{ path('app_admin_accident_index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour à la liste
+            </a>
+            <a href="{{ path('app_admin_accident_dashboard') }}" class="btn btn-info">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Informations de l'Accident</h6>
+        </div>
+        <div class="card-body">
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.reference) }}
+                    {{ form_widget(form.reference, {'attr': {'class': 'form-control', 'readonly': true}}) }}
+                    {{ form_errors(form.reference) }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.dateAccident) }}
+                    {{ form_widget(form.dateAccident, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.dateAccident) }}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12 mb-3">
+                    {{ form_label(form.localisation) }}
+                    {{ form_widget(form.localisation, {'attr': {'class': 'form-control', 'placeholder': 'Entrez la localisation précise de l\'accident'}}) }}
+                    {{ form_errors(form.localisation) }}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12 mb-3">
+                    {{ form_label(form.description) }}
+                    {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 4, 'placeholder': 'Décrivez les circonstances de l\'accident'}}) }}
+                    {{ form_errors(form.description) }}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    {{ form_label(form.gravite) }}
+                    {{ form_widget(form.gravite, {'attr': {'class': 'form-select'}}) }}
+                    {{ form_errors(form.gravite) }}
+                </div>
+                <div class="col-md-4 mb-3">
+                    {{ form_label(form.causePrincipale) }}
+                    {{ form_widget(form.causePrincipale, {'attr': {'class': 'form-select'}}) }}
+                    {{ form_errors(form.causePrincipale) }}
+                </div>
+                <div class="col-md-4 mb-3">
+                    {{ form_label(form.status) }}
+                    {{ form_widget(form.status, {'attr': {'class': 'form-select'}}) }}
+                    {{ form_errors(form.status) }}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.region) }}
+                    {{ form_widget(form.region, {'attr': {'class': 'form-select'}}) }}
+                    {{ form_errors(form.region) }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.brigade) }}
+                    {{ form_widget(form.brigade, {'attr': {'class': 'form-select'}}) }}
+                    {{ form_errors(form.brigade) }}
+                </div>
+            </div>
+
+            <div class="form-group mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Enregistrer l'accident
+                </button>
+                <a href="{{ path('app_admin_accident_index') }}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Annuler
+                </a>
+            </div>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+
+    <!-- Guide d'utilisation -->
+    <div class="card shadow mt-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-info">
+                <i class="fas fa-info-circle"></i> Guide d'utilisation
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="text-primary">Gravité</h6>
+                    <ul class="list-unstyled">
+                        <li><span class="badge badge-danger">MORTEL</span> - Accident avec décès</li>
+                        <li><span class="badge badge-warning">GRAVE</span> - Blessures graves, hospitalisation</li>
+                        <li><span class="badge badge-info">URGENT</span> - Blessures urgentes mais non mortelles</li>
+                        <li><span class="badge badge-light">LEGER</span> - Blessures légères</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="text-primary">Statut</h6>
+                    <ul class="list-unstyled">
+                        <li><span class="badge badge-warning">EN_COURS</span> - Accident en cours de traitement</li>
+                        <li><span class="badge badge-success">TRAITE</span> - Accident traité et clos</li>
+                        <li><span class="badge badge-secondary">ARCHIVE</span> - Accident archivé</li>
+                        <li><span class="badge badge-info">EVACUATION</span> - Évacuation en cours</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-génération de la référence si vide
+document.addEventListener('DOMContentLoaded', function() {
+    const referenceField = document.querySelector('#{{ form.reference.vars.id }}');
+    if (referenceField && !referenceField.value) {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+        referenceField.value = `ACC-${year}${month}-${random}`;
+    }
+});
+</script>
+{% endblock %}

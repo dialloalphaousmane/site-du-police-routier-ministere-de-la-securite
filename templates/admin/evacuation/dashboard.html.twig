@@ -1,0 +1,278 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tableau de Bord - Évacuations{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Tableau de Bord - Évacuations</h1>
+        <div class="btn-group">
+            <a href="{{ path('app_admin_evacuation_new') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Nouvelle Évacuation
+            </a>
+            <a href="{{ path('app_admin_evacuation_index') }}" class="btn btn-info">
+                <i class="fas fa-list"></i> Toutes les Évacuations
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistiques principales -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Évacuations
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ totalEvacuations }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-ambulance fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                En Cours
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ evacuationsEnCours }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Urgentes
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ urgentEnCours }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Terminées
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ evacuationsTerminees }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphiques -->
+    <div class="row">
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Évolution Mensuelle</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area">
+                        <canvas id="evolutionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Répartition par Type</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4 pb-2">
+                        <canvas id="typeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Évacuations urgentes et en attente -->
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-danger">Évacuations Urgentes</h6>
+                    <span class="badge badge-danger">{{ dernieresEvacuationsUrgentes|length }}</span>
+                </div>
+                <div class="card-body">
+                    {% if dernieresEvacuationsUrgentes is not empty %}
+                        {% for evacuation in dernieresEvacuationsUrgentes %}
+                        <div class="d-flex align-items-center mb-3 p-2 border-left-danger border">
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between">
+                                    <div class="font-weight-bold">{{ evacuation.reference }}</div>
+                                    <span class="badge badge-danger">URGENT</span>
+                                </div>
+                                <div class="small text-gray-500">{{ evacuation.dateEvacuation|date('d/m/Y H:i') }}</div>
+                                <div class="small">{{ evacuation.typeEvacuation }}</div>
+                                {% if evacuation.accident %}
+                                <div class="small text-muted">Accident: {{ evacuation.accident.reference }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="ml-auto">
+                                <a href="{{ path('app_admin_evacuation_show', {'id': evacuation.id}) }}" 
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">Aucune évacuation urgente</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-warning">En Attente de Traitement</h6>
+                    <span class="badge badge-warning">{{ evacuationsEnAttente|length }}</span>
+                </div>
+                <div class="card-body">
+                    {% if evacuationsEnAttente is not empty %}
+                        {% for evacuation in evacuationsEnAttente %}
+                        <div class="d-flex align-items-center mb-3 p-2 border-left-warning border">
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between">
+                                    <div class="font-weight-bold">{{ evacuation.reference }}</div>
+                                    <span class="badge badge-warning">EN COURS</span>
+                                </div>
+                                <div class="small text-gray-500">{{ evacuation.dateEvacuation|date('d/m/Y H:i') }}</div>
+                                <div class="small">{{ evacuation.hopitalDestination }}</div>
+                                {% if evacuation.accident %}
+                                <div class="small text-muted">Accident: {{ evacuation.accident.reference }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="ml-auto">
+                                <a href="{{ path('app_admin_evacuation_show', {'id': evacuation.id}) }}" 
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">Aucune évacuation en attente</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance par région -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Performance par Région</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Région</th>
+                                    <th>Total</th>
+                                    <th>En Cours</th>
+                                    <th>Terminées</th>
+                                    <th>Taux de Succès</th>
+                                    <th>Temps Moyen (min)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for region, stats in performanceRegions %}
+                                <tr>
+                                    <td>{{ region }}</td>
+                                    <td>{{ stats.total }}</td>
+                                    <td>{{ stats.enCours }}</td>
+                                    <td>{{ stats.terminees }}</td>
+                                    <td>
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar bg-success" role="progressbar" 
+                                                 style="width: {{ stats.tauxSucces }}%">
+                                                {{ stats.tauxSucces }}%
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ stats.tempsMoyen|round(1) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Données pour les graphiques
+const evolutionData = {{ evolutionMensuelle|json_encode|raw }};
+const typeData = {{ repartitionType|json_encode|raw }};
+
+// Graphique d'évolution
+const evolutionCtx = document.getElementById('evolutionChart').getContext('2d');
+new Chart(evolutionCtx, {
+    type: 'line',
+    data: {
+        labels: evolutionData.map(d => d.monthName),
+        datasets: [{
+            label: 'Nombre d\'évacuations',
+            data: evolutionData.map(d => d.count),
+            borderColor: 'rgb(54, 162, 235)',
+            tension: 0.1
+        }]
+    }
+});
+
+// Graphique de répartition par type
+const typeCtx = document.getElementById('typeChart').getContext('2d');
+new Chart(typeCtx, {
+    type: 'doughnut',
+    data: {
+        labels: Object.keys(typeData),
+        datasets: [{
+            data: Object.values(typeData),
+            backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e']
+        }]
+    }
+});
+</script>
+{% endblock %}

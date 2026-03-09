@@ -58,10 +58,14 @@ class Brigade
     #[ORM\OneToMany(mappedBy: 'brigade', targetEntity: Controle::class)]
     private Collection $controles;
 
+    #[ORM\OneToMany(mappedBy: 'brigade', targetEntity: Accident::class)]
+    private Collection $accidents;
+
     public function __construct()
     {
         $this->agents = new ArrayCollection();
         $this->controles = new ArrayCollection();
+        $this->accidents = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
     }
 
@@ -185,6 +189,33 @@ class Brigade
         if ($this->controles->removeElement($controle)) {
             if ($controle->getBrigade() === $this) {
                 $controle->setBrigade(null);
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Accident>
+     */
+    public function getAccidents(): Collection
+    {
+        return $this->accidents;
+    }
+
+    public function addAccident(Accident $accident): static
+    {
+        if (!$this->accidents->contains($accident)) {
+            $this->accidents->add($accident);
+            $accident->setBrigade($this);
+        }
+        return $this;
+    }
+
+    public function removeAccident(Accident $accident): static
+    {
+        if ($this->accidents->removeElement($accident)) {
+            if ($accident->getBrigade() === $this) {
+                $accident->setBrigade(null);
             }
         }
         return $this;

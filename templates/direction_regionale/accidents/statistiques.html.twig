@@ -1,0 +1,268 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Statistiques Régionales - Accidents{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Statistiques Régionales - Accidents</h1>
+        <div class="btn-group">
+            <a href="{{ path('app_dr_accidents_dashboard') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+            <a href="{{ path('app_dr_accidents_liste') }}" class="btn btn-outline-info">
+                <i class="fas fa-list"></i> Liste
+            </a>
+            <a href="{{ path('app_dr_accidents_carte') }}" class="btn btn-outline-primary">
+                <i class="fas fa-map"></i> Carte
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div class="text-muted">Période d'analyse</div>
+                <div class="btn-group btn-group-sm" role="group" aria-label="Période">
+                    <a class="btn btn-outline-primary {{ period == '24' ? 'active' : '' }}" href="{{ path('app_dr_accidents_statistiques', {period: 24}) }}">24 mois</a>
+                    <a class="btn btn-outline-primary {{ period == '12' ? 'active' : '' }}" href="{{ path('app_dr_accidents_statistiques', {period: 12}) }}">12 mois</a>
+                    <a class="btn btn-outline-primary {{ period == '6' ? 'active' : '' }}" href="{{ path('app_dr_accidents_statistiques', {period: 6}) }}">6 mois</a>
+                    <a class="btn btn-outline-primary {{ period == '3' ? 'active' : '' }}" href="{{ path('app_dr_accidents_statistiques', {period: 3}) }}">3 mois</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Évolution (mensuelle)</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area">
+                        <canvas id="evolutionTemporelleChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Pics horaires</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-bar">
+                        <canvas id="picsHorairesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Comparaison annuelle ({{ previousYear }} vs {{ currentYear }})</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area">
+                        <canvas id="comparaisonAnnuelleChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Taux de résolution (statuts)</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4 pb-2">
+                        <canvas id="tauxResolutionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Statistiques par brigade (période)</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Brigade</th>
+                            <th>Total</th>
+                            <th>Mortels</th>
+                            <th>Graves</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in statsBrigades %}
+                            <tr>
+                                <td><strong>{{ row.brigade }}</strong></td>
+                                <td>{{ row.total }}</td>
+                                <td><span class="badge badge-danger">{{ row.mortels }}</span></td>
+                                <td><span class="badge badge-warning">{{ row.graves }}</span></td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="4" class="text-muted">Aucune donnée</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Temps moyen de traitement par brigade (minutes)</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Brigade</th>
+                            <th>Temps moyen</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in performanceBrigades %}
+                            <tr>
+                                <td><strong>{{ row.brigade }}</strong></td>
+                                <td>{{ row.tempsMoyenTraitement is not null ? row.tempsMoyenTraitement|round(2) : 0 }}</td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="2" class="text-muted">Aucune donnée</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const evolutionTemporelle = {{ evolutionTemporelle|json_encode|raw }};
+    const picsHoraires = {{ picsHoraires|json_encode|raw }};
+    const tauxResolution = {{ tauxResolution|json_encode|raw }};
+
+    const currentYearData = {{ currentYearData|json_encode|raw }};
+    const previousYearData = {{ previousYearData|json_encode|raw }};
+
+    const evolutionLabels = evolutionTemporelle.map(d => d.month);
+    const evolutionValues = evolutionTemporelle.map(d => Number(d.count));
+
+    const evolutionCtx = document.getElementById('evolutionTemporelleChart').getContext('2d');
+    new Chart(evolutionCtx, {
+        type: 'line',
+        data: {
+            labels: evolutionLabels,
+            datasets: [{
+                label: 'Accidents',
+                data: evolutionValues,
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            interaction: { mode: 'index', intersect: false },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+
+    const picsLabels = picsHoraires.map(d => `${d.hour}h`);
+    const picsValues = picsHoraires.map(d => Number(d.count));
+
+    const picsCtx = document.getElementById('picsHorairesChart').getContext('2d');
+    new Chart(picsCtx, {
+        type: 'bar',
+        data: {
+            labels: picsLabels,
+            datasets: [{
+                label: 'Accidents',
+                data: picsValues,
+                backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+
+    const months = [1,2,3,4,5,6,7,8,9,10,11,12];
+    const monthLabels = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+
+    const currentMap = new Map(currentYearData.map(d => [Number(d.month), Number(d.count)]));
+    const previousMap = new Map(previousYearData.map(d => [Number(d.month), Number(d.count)]));
+
+    const currentValues = months.map(m => currentMap.get(m) || 0);
+    const previousValues = months.map(m => previousMap.get(m) || 0);
+
+    const comparaisonCtx = document.getElementById('comparaisonAnnuelleChart').getContext('2d');
+    new Chart(comparaisonCtx, {
+        type: 'line',
+        data: {
+            labels: monthLabels,
+            datasets: [
+                {
+                    label: '{{ previousYear }}',
+                    data: previousValues,
+                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.15)',
+                    tension: 0.1
+                },
+                {
+                    label: '{{ currentYear }}',
+                    data: currentValues,
+                    borderColor: 'rgb(54, 162, 235)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.15)',
+                    tension: 0.1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            interaction: { mode: 'index', intersect: false },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+
+    const statusLabels = tauxResolution.map(d => d.status);
+    const statusValues = tauxResolution.map(d => Number(d.count));
+
+    const resolutionCtx = document.getElementById('tauxResolutionChart').getContext('2d');
+    new Chart(resolutionCtx, {
+        type: 'doughnut',
+        data: {
+            labels: statusLabels,
+            datasets: [{
+                data: statusValues,
+                backgroundColor: ['#ffc107', '#28a745', '#17a2b8', '#6c757d', '#dc3545']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'bottom' } }
+        }
+    });
+</script>
+{% endblock %}

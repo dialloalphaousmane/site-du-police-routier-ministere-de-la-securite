@@ -1,0 +1,259 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste Nationale des Accidents{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Liste Nationale des Accidents</h1>
+        <div class="btn-group">
+            <a href="{{ path('app_dg_accidents_dashboard') }}" class="btn btn-info">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+            <a href="{{ path('app_dg_accidents_carte') }}" class="btn btn-primary">
+                <i class="fas fa-map"></i> Carte Nationale
+            </a>
+            <a href="{{ path('app_dg_accidents_export') }}" class="btn btn-success">
+                <i class="fas fa-download"></i> Exporter
+            </a>
+        </div>
+    </div>
+
+    <!-- Filtres nationaux -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Filtres Nationaux</h6>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-2">
+                    <label for="status" class="form-label">Statut</label>
+                    <select name="status" id="status" class="form-select">
+                        <option value="">Tous</option>
+                        <option value="EN_COURS" {{ currentFilters.status == 'EN_COURS' ? 'selected' : '' }}>En cours</option>
+                        <option value="TRAITE" {{ currentFilters.status == 'TRAITE' ? 'selected' : '' }}>Traité</option>
+                        <option value="ARCHIVE" {{ currentFilters.status == 'ARCHIVE' ? 'selected' : '' }}>Archivé</option>
+                        <option value="EVACUATION" {{ currentFilters.status == 'EVACUATION' ? 'selected' : '' }}>Évacuation</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="gravity" class="form-label">Gravité</label>
+                    <select name="gravity" id="gravity" class="form-select">
+                        <option value="">Toutes</option>
+                        <option value="MORTEL" {{ currentFilters.gravity == 'MORTEL' ? 'selected' : '' }}>Mortel</option>
+                        <option value="GRAVE" {{ currentFilters.gravity == 'GRAVE' ? 'selected' : '' }}>Grave</option>
+                        <option value="URGENT" {{ currentFilters.gravity == 'URGENT' ? 'selected' : '' }}>Urgent</option>
+                        <option value="LEGER" {{ currentFilters.gravity == 'LEGER' ? 'selected' : '' }}>Léger</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="cause" class="form-label">Cause</label>
+                    <select name="cause" id="cause" class="form-select">
+                        <option value="">Toutes</option>
+                        {% for cause, label in constant('App\\Entity\\Accident::CAUSES') %}
+                        <option value="{{ cause }}" {{ currentFilters.cause == cause ? 'selected' : '' }}>
+                            {{ label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="region" class="form-label">Région</label>
+                    <select name="region" id="region" class="form-select">
+                        <option value="">Toutes</option>
+                        {% for region in regions %}
+                        <option value="{{ region.id }}" {{ currentFilters.region == region.id ? 'selected' : '' }}>
+                            {{ region.libelle }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="search" class="form-label">Recherche</label>
+                    <input type="text" name="search" id="search" class="form-control" 
+                           value="{{ currentFilters.search }}" placeholder="Référence ou localisation">
+                </div>
+                <div class="col-md-2">
+                    <label for="period" class="form-label">Période</label>
+                    <select name="period" id="period" class="form-select">
+                        <option value="30">30 jours</option>
+                        <option value="90" {{ currentFilters.period == '90' ? 'selected' : '' }}>3 mois</option>
+                        <option value="180" {{ currentFilters.period == '180' ? 'selected' : '' }}>6 mois</option>
+                        <option value="365" {{ currentFilters.period == '365' ? 'selected' : '' }}>1 an</option>
+                    </select>
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Rechercher
+                    </button>
+                    <a href="{{ path('app_dg_accidents_liste') }}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Réinitialiser
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Liste nationale -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                Accidents Nationaux ({{ total }} résultats)
+            </h6>
+        </div>
+        <div class="card-body">
+            {% if accidents is not empty %}
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Référence</th>
+                            <th>Date</th>
+                            <th>Localisation</th>
+                            <th>Statut</th>
+                            <th>Gravité</th>
+                            <th>Cause</th>
+                            <th>Région</th>
+                            <th>Brigade</th>
+                            <th>Déclarant</th>
+                            <th>Victimes</th>
+                            <th>Véhicules</th>
+                            <th>Évacuation</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for accident in accidents %}
+                        <tr>
+                            <td>{{ accident.reference }}</td>
+                            <td>{{ accident.dateAccident|date('d/m/Y H:i') }}</td>
+                            <td>{{ accident.localisation }}</td>
+                            <td>
+                                <span class="badge badge-{{ 
+                                    accident.status == 'EN_COURS' ? 'warning' : 
+                                    (accident.status == 'TRAITE' ? 'success' : 
+                                    (accident.status == 'ARCHIVE' ? 'secondary' : 'info')) 
+                                }}">
+                                    {{ accident.status }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge badge-{{ 
+                                    accident.gravite == 'MORTEL' ? 'danger' : 
+                                    (accident.gravite == 'GRAVE' ? 'warning' : 
+                                    (accident.gravite == 'URGENT' ? 'info' : 'light')) 
+                                }}">
+                                    {{ accident.gravite }}
+                                </span>
+                            </td>
+                            <td>{{ accident.causePrincipaleLabel }}</td>
+                            <td>{{ accident.region ? accident.region.libelle : '' }}</td>
+                            <td>{{ accident.brigade ? accident.brigade.libelle : '' }}</td>
+                            <td>{{ accident.createdBy ? accident.createdBy.nom ~ ' ' ~ accident.createdBy.prenom : '' }}</td>
+                            <td>
+                                <span class="badge badge-primary">{{ accident.victims|length }}</span>
+                            </td>
+                            <td>
+                                <span class="badge badge-info">{{ accident.vehicles|length }}</span>
+                            </td>
+                            <td>
+                                {% if accident.status == 'EVACUATION' %}
+                                <span class="badge badge-warning">OUI</span>
+                                {% else %}
+                                <span class="badge badge-secondary">NON</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="{{ path('app_dg_accidents_show', {'id': accident.id}) }}" 
+                                       class="btn btn-sm btn-info" title="Voir">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    {% if accident.status == 'EN_COURS' %}
+                                    <a href="{{ path('app_dg_accidents_valider', {'id': accident.id}) }}" 
+                                       class="btn btn-sm btn-success" title="Valider">
+                                        <i class="fas fa-check"></i>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if page > 1 %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ path('app_dg_accidents_liste', {'page': page - 1, 'status': currentFilters.status, 'gravity': currentFilters.gravity, 'cause': currentFilters.cause, 'region': currentFilters.region, 'search': currentFilters.search, 'period': currentFilters.period}) }}">
+                            Précédent
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for i in 1..totalPages %}
+                    <li class="page-item {{ i == page ? 'active' : '' }}">
+                        <a class="page-link" href="{{ path('app_dg_accidents_liste', {'page': i, 'status': currentFilters.status, 'gravity': currentFilters.gravity, 'cause': currentFilters.cause, 'region': currentFilters.region, 'search': currentFilters.search, 'period': currentFilters.period}) }}">
+                            {{ i }}
+                        </a>
+                    </li>
+                    {% endfor %}
+                    
+                    {% if page < totalPages %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ path('app_dg_accidents_liste', {'page': page + 1, 'status': currentFilters.status, 'gravity': currentFilters.gravity, 'cause': currentFilters.cause, 'region': currentFilters.region, 'search': currentFilters.search, 'period': currentFilters.period}) }}">
+                            Suivant
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-inbox fa-3x text-gray-300 mb-3"></i>
+                <p class="text-muted">Aucun accident trouvé</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Statistiques de la page -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">{{ total }}</h5>
+                    <p class="card-text">Total</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title text-warning">{{ accidentsEnCours }}</h5>
+                    <p class="card-text">En cours</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title text-danger">{{ accidentsMortels }}</h5>
+                    <p class="card-text">Mortels</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title text-info">{{ accidentsEvacuation }}</h5>
+                    <p class="card-text">Évacuations</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

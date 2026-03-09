@@ -1,0 +1,578 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Supervision Nationale - Évacuations{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Supervision Nationale - Évacuations</h1>
+        <div class="btn-group">
+            <a href="{{ path('app_dg_evacuations_dashboard') }}" class="btn btn-info">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+            <a href="{{ path('app_dg_evacuations_map') }}" class="btn btn-primary">
+                <i class="fas fa-map"></i> Carte Nationale
+            </a>
+            <a href="{{ path('app_dg_evacuations_export') }}" class="btn btn-success">
+                <i class="fas fa-download"></i> Exporter
+            </a>
+        </div>
+    </div>
+
+    <!-- Filtres de supervision -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Filtres de Supervision</h6>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label for="status" class="form-label">Statut</label>
+                    <select name="status" id="status" class="form-select">
+                        <option value="">Tous</option>
+                        <option value="EN_COURS" {{ currentFilters.status == 'EN_COURS' ? 'selected' : '' }}>En cours</option>
+                        <option value="TERMINE" {{ currentFilters.status == 'TERMINE' ? 'selected' : '' }}>Terminé</option>
+                        <option value="ANNULE" {{ currentFilters.status == 'ANNULE' ? 'selected' : '' }}>Annulé</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="urgence" class="form-label">Urgence</label>
+                    <select name="urgence" id="urgence" class="form-select">
+                        <option value="">Toutes</option>
+                        <option value="HAUTE" {{ currentFilters.urgence == 'HAUTE' ? 'selected' : '' }}>Haute</option>
+                        <option value="MOYENNE" {{ currentFilters.urgence == 'MOYENNE' ? 'selected' : '' }}>Moyenne</option>
+                        <option value="BASSE" {{ currentFilters.urgence == 'BASSE' ? 'selected' : '' }}>Basse</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="type" class="form-label">Type</label>
+                    <select name="type" id="type" class="form-select">
+                        <option value="">Tous</option>
+                        <option value="AMBULANCE" {{ currentFilters.type == 'AMBULANCE' ? 'selected' : '' }}>Ambulance</option>
+                        <option value="HELI" {{ currentFilters.type == 'HELI' ? 'selected' : '' }}>Hélicoptère</option>
+                        <option value="VEHICULE_PERSONNEL" {{ currentFilters.type == 'VEHICULE_PERSONNEL' ? 'selected' : '' }}>Véhicule personnel</option>
+                        <option value="CAMION" {{ currentFilters.type == 'CAMION' ? 'selected' : '' }}>Camion</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="region" class="form-label">Région</label>
+                    <select name="region" id="region" class="form-select">
+                        <option value="">Toutes</option>
+                        {% for region in regions %}
+                        <option value="{{ region.id }}" {{ currentFilters.region == region.id ? 'selected' : '' }}>
+                            {{ region.libelle }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Filtrer
+                    </button>
+                    <a href="{{ path('app_dg_evacuations_supervision') }}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Réinitialiser
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Évacuations critiques -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-danger">
+                        <i class="fas fa-exclamation-triangle"></i> Évacuations Critiques
+                    </h6>
+                    <span class="badge badge-danger">{{ urgentesEnCours|length }}</span>
+                </div>
+                <div class="card-body">
+                    {% if urgentesEnCours is not empty %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Référence</th>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Urgence</th>
+                                    <th>Hôpital</th>
+                                    <th>Région</th>
+                                    <th>Brigade</th>
+                                    <th>Opérateur</th>
+                                    <th>Temps d'attente</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for evacuation in urgentesEnCours %}
+                                <tr class="table-danger">
+                                    <td><strong>{{ evacuation.reference }}</strong></td>
+                                    <td>{{ evacuation.dateEvacuation|date('d/m/Y H:i') }}</td>
+                                    <td>
+                                        <span class="badge badge-{{ 
+                                            evacuation.typeEvacuation == 'AMBULANCE' ? 'primary' : 
+                                            (evacuation.typeEvacuation == 'HELI' ? 'info' : 'secondary') 
+                                        }}">
+                                            {{ evacuation.typeEvacuation }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-danger">HAUTE</span>
+                                    </td>
+                                    <td>{{ evacuation.hopitalDestination }}</td>
+                                    <td>{{ evacuation.region ? evacuation.region.libelle : '' }}</td>
+                                    <td>{{ evacuation.brigade ? evacuation.brigade.libelle : '' }}</td>
+                                    <td>{{ evacuation.createdBy ? evacuation.createdBy.nom ~ ' ' ~ evacuation.createdBy.prenom : '' }}</td>
+                                    <td>
+                                        {% set tempsAttente = date('now').diff(evacuation.dateEvacuation) %}
+                                        <span class="badge badge-{{ 
+                                            tempsAttente.days > 0 ? 'danger' : 
+                                            (tempsAttente.hours > 2 ? 'warning' : 'info') 
+                                        }}">
+                                            {{ tempsAttente.format('%d jour %Hh') }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="{{ path('app_dg_evacuations_show', {'id': evacuation.id}) }}" 
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{{ path('app_dg_evacuations_coordonner', {'id': evacuation.id}) }}" 
+                                               class="btn btn-sm btn-outline-warning">
+                                                <i class="fas fa-cogs"></i>
+                                            </a>
+                                            <form method="post" action="{{ path('app_dg_evacuations_prioriser', {'id': evacuation.id}) }}" 
+                                                  style="display: inline;" onsubmit="return confirm('Prioriser cette évacuation ?');">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('prioriser' ~ evacuation.id) }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                    <i class="fas fa-exclamation-triangle"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                        <p class="text-muted">Aucune évacuation critique en cours</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Évacuations en attente -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-warning">
+                        <i class="fas fa-clock"></i> Évacuations en Attente
+                    </h6>
+                    <span class="badge badge-warning">{{ evacuationsEnAttente|length }}</span>
+                </div>
+                <div class="card-body">
+                    {% if evacuationsEnAttente is not empty %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Référence</th>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Urgence</th>
+                                    <th>Hôpital</th>
+                                    <th>Région</th>
+                                    <th>Brigade</th>
+                                    <th>Opérateur</th>
+                                    <th>Temps d'attente</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for evacuation in evacuationsEnAttente %}
+                                <tr class="table-warning">
+                                    <td><strong>{{ evacuation.reference }}</strong></td>
+                                    <td>{{ evacuation.dateEvacuation|date('d/m/Y H:i') }}</td>
+                                    <td>
+                                        <span class="badge badge-{{ 
+                                            evacuation.typeEvacuation == 'AMBULANCE' ? 'primary' : 
+                                            (evacuation.typeEvacuation == 'HELI' ? 'info' : 'secondary') 
+                                        }}">
+                                            {{ evacuation.typeEvacuation }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-{{ 
+                                            evacuation.urgence == 'HAUTE' ? 'danger' : 
+                                            (evacuation.urgence == 'MOYENNE' ? 'warning' : 'info') 
+                                        }}">
+                                            {{ evacuation.urgence }}
+                                        </span>
+                                    </td>
+                                    <td>{{ evacuation.hopitalDestination }}</td>
+                                    <td>{{ evacuation.region ? evacuation.region.libelle : '' }}</td>
+                                    <td>{{ evacuation.brigade ? evacuation.brigade.libelle : '' }}</td>
+                                    <td>{{ evacuation.createdBy ? evacuation.createdBy.nom ~ ' ~ evacuation.createdBy.prenom : '' }}</td>
+                                    <td>
+                                        {% set tempsAttente = date('now').diff(evacuation.dateEvacuation) %}
+                                        <span class="badge badge-{{ 
+                                            tempsAttente.days > 0 ? 'danger' : 
+                                            (tempsAttente.hours > 2 ? 'warning' : 'info') 
+                                        }}">
+                                            {{ tempsAttente.format('%d jour %Hh') }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="{{ path('app_dg_evacuations_show', {'id': evacuation.id}) }}" 
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{{ path('app_dg_evacuations_coordonner', {'id': evacuation.id}) }}" 
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-cogs"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                        <p class="text-muted">Aucune évacuation en attente</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques de performance -->
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Performance des Brigades</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Brigade</th>
+                                    <th>Total</th>
+                                    <th>En Cours</th>
+                                    <th>Terminées</th>
+                                    <th>Taux Succès</th>
+                                    <th>Temps Moyen</th>
+                                    <th>Opérateurs Actifs</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for brigade, stats in performanceBrigades %}
+                                <tr>
+                                    <td><strong>{{ brigade }}</strong></td>
+                                    <td>{{ stats.total }}</td>
+                                    <td>{{ stats.enCours }}</td>
+                                    <td>{{ stats.terminees }}</td>
+                                    <td>
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar bg-{{ 
+                                                stats.tauxSucces > 80 ? 'success' : 
+                                                (stats.tauxSucces > 60 ? 'warning' : 'danger') 
+                                            }}" role="progressbar" 
+                                                 style="width: {{ stats.tauxSucces }}%">
+                                                {{ stats.tauxSucces }}%
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ stats.tempsMoyen|round(1) }} min</td>
+                                    <td>{{ stats.operateursActifs }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Hôpitaux les Plus Sollicités</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Hôpital</th>
+                                    <th>Total</th>
+                                    <th>Urgentes</th>
+                                    <th>Taux Urgence</th>
+                                    <th>Performance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for hopital, stats in hopitauxFrequent %}
+                                <tr>
+                                    <td><strong>{{ hopital }}</strong></td>
+                                    <td>{{ hopital.total }}</td>
+                                    <td>{{ hopital.urgentes }}</td>
+                                    <td>{{ hopital.tauxUrgence }}%</td>
+                                    <td>
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar bg-{{ 
+                                                hopital.performance > 80 ? 'success' : 
+                                                (hopital.performance > 60 ? 'warning' : 'danger') 
+                                            }}" role="progressbar" 
+                                                 style="width: {{ hopital.performance }}%">
+                                                {{ hopital.performance }}%
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Carte de supervision -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Carte de Supervision Nationale</h6>
+                </div>
+                <div class="card-body">
+                    <div id="map" style="height: 500px; border-radius: 8px;">
+                        <div class="d-flex align-items-center justify-content-center h-100 bg-light rounded">
+                            <div class="text-center">
+                                <i class="fas fa-map-marked-alt fa-3x text-gray-400 mb-3"></i>
+                                <p class="text-muted">Carte de supervision</p>
+                                <p class="small">Intégration avec Google Maps en cours</p>
+                                <div class="mt-3">
+                                    <a href="{{ path('app_dg_evacuations_map') }}" 
+                                       class="btn btn-primary btn-sm">
+                                        <i class="fas fa-map"></i> Voir la carte complète
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions rapides -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Actions Rapides</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="d-grid gap-2">
+                                <button type="button" class="btn btn-outline-primary" onclick="prioriserToutes()">
+                                    <i class="fas fa-exclamation-triangle"></i> Prioriser toutes les urgentes
+                                </button>
+                                <button type="button" class="btn btn-outline-warning" onclick="exporterRapport()">
+                                    <i class="fas fa-file-export"></i> Exporter le rapport
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-grid gap-2">
+                                <button type="button" class="btn btn-outline-info" onclick="rafraichirRessources()">
+                                    <i class="fas fa-sync"></i> Répartir les ressources
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="actualiserDonnees()">
+                                    <i class="fas fa-sync"></i> Actualiser les données
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-grid gap-2">
+                                <button type="button" class="btn btn-outline-success" onclick="alerterCoordination()">
+                                    <i class="fas fa-broadcast"></i> Alerte coordination
+                                </button>
+                                <button type="button" class="btn btn-outline-danger" onclick="exporterCSV()">
+                                    <i class="fas fa-file-csv"></i> Exporter CSV
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-grid gap-2">
+                                <button type="button" class="btn btn-outline-primary" onclick="imprimerRapport()">
+                                    <i class="fas fa-print"></i> Imprimer le rapport
+                                </button>
+                                <button type="button" class="btn btn-outline-info" onclick="envoyerEmail()">
+                                    <i class="fas fa-envelope"></i> Envoyer par email
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Fonctions d'actions rapides
+function prioriserToutes() {
+    if (confirm('Prioriser toutes les évacuations urgentes ?')) {
+        fetch('{{ path('app_dg_evacuations_prioriser_toutes') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(`${data.message} (${data.count} évacuations prioritées)`);
+            location.reload();
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+        });
+    }
+}
+
+function prioriserToutes() {
+    if (confirm('Prioriser toutes les évacuations urgentes ?')) {
+        fetch('{{ path('app_dg_evacuations_prioriser_toutes') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(`${data.message} (${data.count} évacuations prioritées)`);
+            location.reload();
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+        });
+    }
+}
+
+function exportRapport() {
+    window.open('{{ path('app_dg_evacuations_export') }}?format=pdf', '_blank');
+}
+
+function rafraichirRessources() {
+    if (confirm('Répartir les ressources entre régions ?')) {
+        fetch('{{ path('app_dg_evacuations_repartir_ressources') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(`${data.message}`);
+            location.reload();
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+        });
+    }
+}
+
+function actualiserDonnees() {
+    if (confirm('Actualiser les données en temps réel ?')) {
+        fetch('{{ path('app_dg_evacuations_actualiser') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(`${data.message}`);
+            location.reload();
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+        });
+    }
+}
+
+function alterterCoordination() {
+    if (confirm('Envoyer une alerte de coordination ?')) {
+        fetch('{{ path('app_dg_evacuations_alerter_coordination') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'script',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.text())
+        .then(data => {
+            alert('Alerte de coordination envoyée');
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+        });
+    }
+}
+
+function envoyerEmail() {
+    if (confirm('Envoyer le rapport par email ?')) {
+        fetch('{{ path('app_dg_evacuations_envoyer_email') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(`${data.message}`);
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+        });
+    }
+}
+
+function exporterCSV() {
+    window.open('{{ path('app_dg_evacuations_export') }}?format=csv', '_blank');
+}
+
+function imprimerRapport() {
+    window.open('{{ path('app_dg_evacuations_export') }}?format=pdf', '_blank');
+}
+
+// Auto-rafraîchissement des données toutes les 5 minutes
+setInterval(() => {
+    actualiserDonnees();
+}, 300000); // 5 minutes
+</script>
+{% endblock %}

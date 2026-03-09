@@ -1,0 +1,167 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}RTG Guinée - Performance{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">RTG Guinée - Performance</h1>
+        <div class="btn-group">
+            <a href="{{ path('app_rtg_dashboard') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour Dashboard
+            </a>
+            <a href="{{ path('app_rtg_regions') }}" class="btn btn-info">
+                <i class="fas fa-map"></i> Régions
+            </a>
+            <a href="{{ path('app_rtg_evolution') }}" class="btn btn-primary">
+                <i class="fas fa-chart-line"></i> Évolution
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Accidents (10 ans)</div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ globalStats.total_accidents }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Total Évacuations (10 ans)</div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ globalStats.total_evacuations }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Accidents Mortels</div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ globalStats.accidents_mortels }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Taux de mortalité</div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ globalStats.mortalite_rate|round(2) }}%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Performance des Régions</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Région</th>
+                                    <th>Accidents</th>
+                                    <th>Évacuations</th>
+                                    <th>Victimes</th>
+                                    <th>Véhicules</th>
+                                    <th>Temps moyen (min)</th>
+                                    <th>Performance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in regionalPerformance %}
+                                    <tr>
+                                        <td><strong>{{ row.region }}</strong></td>
+                                        <td>{{ row.total_accidents }}</td>
+                                        <td>{{ row.total_evacuations }}</td>
+                                        <td>{{ row.total_victimes }}</td>
+                                        <td>{{ row.total_vehicules }}</td>
+                                        <td>{{ row.temps_moyen_traitement }}</td>
+                                        <td>{{ row.performance|round(1) }}%</td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted">Aucune donnée disponible.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Top Régions par Accidents</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Région</th>
+                                    <th>Accidents</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for region in topRegionsAccidents %}
+                                    <tr>
+                                        <td>{{ region.libelle }}</td>
+                                        <td>{{ region.total_accidents }}</td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="2" class="text-center text-muted">Aucune donnée disponible.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Top Régions par Évacuations</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Région</th>
+                                    <th>Évacuations</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for region in topRegionsEvacuations %}
+                                    <tr>
+                                        <td>{{ region.libelle }}</td>
+                                        <td>{{ region.total_evacuations }}</td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="2" class="text-center text-muted">Aucune donnée disponible.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

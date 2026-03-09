@@ -1,0 +1,185 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvelle Évacuation{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Nouvelle Évacuation</h1>
+        <div class="btn-group">
+            <a href="{{ path('app_admin_evacuation_index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour à la liste
+            </a>
+            <a href="{{ path('app_admin_evacuation_dashboard') }}" class="btn btn-info">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Informations de l'Évacuation</h6>
+        </div>
+        <div class="card-body">
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.reference) }}
+                    {{ form_widget(form.reference, {'attr': {'class': 'form-control', 'readonly': true}}) }}
+                    {{ form_errors(form.reference) }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.dateEvacuation) }}
+                    {{ form_widget(form.dateEvacuation, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.dateEvacuation) }}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    {{ form_label(form.typeEvacuation) }}
+                    {{ form_widget(form.typeEvacuation, {'attr': {'class': 'form-select'}}) }}
+                    {{ form_errors(form.typeEvacuation) }}
+                </div>
+                <div class="col-md-4 mb-3">
+                    {{ form_label(form.urgence) }}
+                    {{ form_widget(form.urgence, {'attr': {'class': 'form-select'}}) }}
+                    {{ form_errors(form.urgence) }}
+                </div>
+                <div class="col-md-4 mb-3">
+                    {{ form_label(form.status) }}
+                    {{ form_widget(form.status, {'attr': {'class': 'form-select'}}) }}
+                    {{ form_errors(form.status) }}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.hopitalDestination) }}
+                    {{ form_widget(form.hopitalDestination, {'attr': {'class': 'form-control', 'placeholder': 'Nom de l\'hôpital de destination'}}) }}
+                    {{ form_errors(form.hopitalDestination) }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.dateArrivee) }}
+                    {{ form_widget(form.dateArrivee, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.dateArrivee) }}
+                    <small class="form-text text-muted">Laisser vide si l'évacuation n'est pas encore terminée</small>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    {{ form_label(form.accident) }}
+                    {{ form_widget(form.accident, {'attr': {'class': 'form-select'}}) }}
+                    {{ form_errors(form.accident) }}
+                </div>
+                <div class="col-md-4 mb-3">
+                    {{ form_label(form.region) }}
+                    {{ form_widget(form.region, {'attr': {'class': 'form-select'}}) }}
+                    {{ form_errors(form.region) }}
+                </div>
+                <div class="col-md-4 mb-3">
+                    {{ form_label(form.brigade) }}
+                    {{ form_widget(form.brigade, {'attr': {'class': 'form-select'}}) }}
+                    {{ form_errors(form.brigade) }}
+                </div>
+            </div>
+
+            <div class="form-group mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Enregistrer l'évacuation
+                </button>
+                <a href="{{ path('app_admin_evacuation_index') }}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Annuler
+                </a>
+            </div>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+
+    <!-- Guide d'utilisation -->
+    <div class="card shadow mt-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-info">
+                <i class="fas fa-info-circle"></i> Guide d'utilisation
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="text-primary">Type d'Évacuation</h6>
+                    <ul class="list-unstyled">
+                        <li><span class="badge badge-primary">AMBULANCE</span> - Transport médical standard</li>
+                        <li><span class="badge badge-info">HELI</span> - Évacuation par hélicoptère</li>
+                        <li><span class="badge badge-secondary">VEHICULE_PERSONNEL</span> - Véhicule personnel</li>
+                        <li><span class="badge badge-warning">CAMION</span> - Transport lourd</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="text-primary">Niveau d'Urgence</h6>
+                    <ul class="list-unstyled">
+                        <li><span class="badge badge-danger">HAUTE</span> - Vie en danger, intervention immédiate</li>
+                        <li><span class="badge badge-warning">MOYENNE</span> - Blessures graves, surveillance requise</li>
+                        <li><span class="badge badge-info">BASSE</span> - Blessures légères, transport standard</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-md-6">
+                    <h6 class="text-primary">Statut</h6>
+                    <ul class="list-unstyled">
+                        <li><span class="badge badge-warning">EN_COURS</span> - Évacuation en progression</li>
+                        <li><span class="badge badge-success">TERMINE</span> - Évacuation terminée avec succès</li>
+                        <li><span class="badge badge-secondary">ANNULE</span> - Évacuation annulée</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="text-primary">Instructions</h6>
+                    <ul class="list-unstyled small">
+                        <li>✅ Sélectionner l'accident associé si applicable</li>
+                        <li>✅ Choisir le type de transport approprié</li>
+                        <li>✅ Indiquer l'hôpital de destination</li>
+                        <li>✅ Remplir la date d'arrivée seulement si terminée</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-génération de la référence si vide
+document.addEventListener('DOMContentLoaded', function() {
+    const referenceField = document.querySelector('#{{ form.reference.vars.id }}');
+    if (referenceField && !referenceField.value) {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+        referenceField.value = `EVA-${year}${month}-${random}`;
+    }
+
+    // Auto-complétion des champs si un accident est sélectionné
+    const accidentField = document.querySelector('#{{ form.accident.vars.id }}');
+    const regionField = document.querySelector('#{{ form.region.vars.id }}');
+    const brigadeField = document.querySelector('#{{ form.brigade.vars.id }}');
+
+    if (accidentField) {
+        accidentField.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const regionId = selectedOption.getAttribute('data-region');
+            const brigadeId = selectedOption.getAttribute('data-brigade');
+            
+            if (regionId && regionField) {
+                regionField.value = regionId;
+            }
+            if (brigadeId && brigadeField) {
+                brigadeField.value = brigadeId;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,129 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails de l'Accident {{ accident.reference }}{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Accident {{ accident.reference }}</h1>
+        <div class="btn-group">
+            <a href="{{ path('app_brigade_accidents_liste') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+            {% if accident.status == 'EN_COURS' %}
+            <a href="{{ path('app_brigade_accidents_edit', {'id': accident.id}) }}" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Modifier
+            </a>
+            {% endif %}
+            <a href="{{ path('app_brigade_accidents_victims', {'id': accident.id}) }}" class="btn btn-info">
+                <i class="fas fa-user-injured"></i> Victimes
+            </a>
+            <a href="{{ path('app_brigade_accidents_vehicles', {'id': accident.id}) }}" class="btn btn-primary">
+                <i class="fas fa-car"></i> Véhicules
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Informations de l'Accident</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Référence:</strong> {{ accident.reference }}</p>
+                            <p><strong>Date:</strong> {{ accident.dateAccident|date('d/m/Y H:i') }}</p>
+                            <p><strong>Localisation:</strong> {{ accident.localisation }}</p>
+                            {% if accident.ville %}<p><strong>Ville:</strong> {{ accident.ville }}</p>{% endif %}
+                            {% if accident.commune %}<p><strong>Commune:</strong> {{ accident.commune }}</p>{% endif %}
+                            {% if accident.route %}<p><strong>Route:</strong> {{ accident.route }}</p>{% endif %}
+                            {% if accident.carrefour %}<p><strong>Carrefour:</strong> {{ accident.carrefour }}</p>{% endif %}
+                            {% if accident.meteo %}<p><strong>Météo:</strong> {{ accident.meteo }}</p>{% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Statut:</strong> <span class="badge badge-secondary">{{ accident.status }}</span></p>
+                            <p><strong>Gravité:</strong> <span class="badge badge-secondary">{{ accident.gravite }}</span></p>
+                            <p><strong>Cause principale:</strong> {{ accident.causePrincipaleLabel }}</p>
+                            {% if accident.causesSecondaires is not empty %}
+                                <p><strong>Causes secondaires:</strong>
+                                    {% for c in accident.causesSecondaires %}
+                                        <span class="badge badge-light">{{ constant('App\\Entity\\Accident::CAUSES')[c]|default(c) }}</span>
+                                    {% endfor %}
+                                </p>
+                            {% endif %}
+                            <p><strong>Région:</strong> {{ accident.region ? accident.region.libelle : 'Non définie' }}</p>
+                            <p><strong>Brigade:</strong> {{ accident.brigade ? accident.brigade.libelle : 'Non définie' }}</p>
+                        </div>
+                    </div>
+
+                    {% if accident.description %}
+                    <div class="mt-3">
+                        <p><strong>Description:</strong></p>
+                        <p class="text-muted">{{ accident.description|nl2br }}</p>
+                    </div>
+                    {% endif %}
+
+                    {% if accident.dateValidationBrigade %}
+                    <div class="mt-3 p-3 bg-success bg-opacity-10 rounded">
+                        <h6 class="text-success">✅ Validé par la brigade</h6>
+                        <p class="mb-0 text-muted">Le {{ accident.dateValidationBrigade|date('d/m/Y H:i') }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Preuves ({{ accident.medias|length }})</h6>
+                </div>
+                <div class="card-body">
+                    {% include 'shared/accidents/_medias.html.twig' with { accident: accident } %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Statistiques</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="h4 mb-0 font-weight-bold text-primary">{{ victims|length }}</div>
+                            <div class="small text-gray-500">Victimes</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="h4 mb-0 font-weight-bold text-info">{{ vehicles|length }}</div>
+                            <div class="small text-gray-500">Véhicules</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Actions</h6>
+                </div>
+                <div class="card-body">
+                    {% if accident.status == 'EN_COURS' and accident.dateValidationBrigade is null %}
+                        <form action="{{ path('app_brigade_accidents_valider', {'id': accident.id}) }}" method="post" class="mb-3">
+                            <input type="hidden" name="_token" value="{{ csrf_token('valider' ~ accident.id) }}">
+                            <button type="submit" class="btn btn-success btn-sm">
+                                <i class="fas fa-check"></i> Valider (Brigade)
+                            </button>
+                        </form>
+                    {% endif %}
+                    {% if is_granted('edit', accident) %}
+                        {% include 'shared/accidents/_media_upload_form.html.twig' with { accident: accident } %}
+                    {% else %}
+                        <p class="text-muted mb-0">Vous ne pouvez pas ajouter de preuves sur cet accident.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

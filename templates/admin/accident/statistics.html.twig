@@ -1,0 +1,261 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Statistiques Admin - Accidents{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Statistiques Admin - Accidents</h1>
+        <div class="btn-group">
+            <a href="{{ path('app_admin_accident_dashboard') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+            <a href="{{ path('app_admin_accident_index') }}" class="btn btn-outline-info">
+                <i class="fas fa-list"></i> Liste
+            </a>
+            <a href="{{ path('app_admin_accident_export') }}" class="btn btn-outline-success">
+                <i class="fas fa-download"></i> Exporter
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Accidents</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ totalAccidents }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-car-crash fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">En cours</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ byStatus.EN_COURS|default(0) }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Traités</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ byStatus.TRAITE|default(0) }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Mortels</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ byGravity.MORTEL|default(0) }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-skull-crossbones fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Évolution (12 derniers mois)</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area">
+                        <canvas id="byMonthChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Répartition par gravité</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4 pb-2">
+                        <canvas id="byGravityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Répartition par statut</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4 pb-2">
+                        <canvas id="byStatusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Top causes</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Cause</th>
+                                    <th>Nombre</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for label, count in byCause %}
+                                    <tr>
+                                        <td><strong>{{ label }}</strong></td>
+                                        <td>{{ count }}</td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="2" class="text-muted">Aucune donnée</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Accidents par région</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Région</th>
+                            <th>Nombre</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for region, count in byRegion %}
+                            <tr>
+                                <td><strong>{{ region }}</strong></td>
+                                <td>{{ count }}</td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="2" class="text-muted">Aucune donnée</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const byMonth = {{ byMonth|json_encode|raw }};
+    const byStatus = {{ byStatus|json_encode|raw }};
+    const byGravity = {{ byGravity|json_encode|raw }};
+
+    const monthLabels = byMonth.slice().reverse().map(d => d.month);
+    const monthValues = byMonth.slice().reverse().map(d => Number(d.count));
+
+    const monthCtx = document.getElementById('byMonthChart').getContext('2d');
+    new Chart(monthCtx, {
+        type: 'line',
+        data: {
+            labels: monthLabels,
+            datasets: [{
+                label: 'Accidents',
+                data: monthValues,
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            interaction: { mode: 'index', intersect: false },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+
+    const statusLabels = Object.keys(byStatus);
+    const statusValues = Object.values(byStatus).map(v => Number(v));
+
+    const statusCtx = document.getElementById('byStatusChart').getContext('2d');
+    new Chart(statusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: statusLabels,
+            datasets: [{
+                data: statusValues,
+                backgroundColor: ['#ffc107', '#28a745', '#17a2b8', '#6c757d', '#dc3545']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'bottom' } }
+        }
+    });
+
+    const gravityLabels = Object.keys(byGravity);
+    const gravityValues = Object.values(byGravity).map(v => Number(v));
+
+    const gravityCtx = document.getElementById('byGravityChart').getContext('2d');
+    new Chart(gravityCtx, {
+        type: 'doughnut',
+        data: {
+            labels: gravityLabels,
+            datasets: [{
+                data: gravityValues,
+                backgroundColor: ['#dc3545', '#ffc107', '#17a2b8', '#28a745']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'bottom' } }
+        }
+    });
+</script>
+{% endblock %}

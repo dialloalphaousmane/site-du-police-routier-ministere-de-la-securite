@@ -1,0 +1,420 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails de l'Accident {{ accident.reference }}{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Accident {{ accident.reference }}</h1>
+        <div class="btn-group">
+            <a href="{{ path('app_dg_accidents_liste') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour à la liste
+            </a>
+            <a href="{{ path('app_dg_accidents_dashboard') }}" class="btn btn-info">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+            {% if accident.status == 'EN_COURS' %}
+            <form action="{{ path('app_dg_accidents_valider', {'id': accident.id}) }}" method="post" style="display:inline;">
+                <input type="hidden" name="_token" value="{{ csrf_token('valider' ~ accident.id) }}">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-check"></i> Valider
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Informations principales -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Informations de l'Accident</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Référence:</strong> {{ accident.reference }}</p>
+                            <p><strong>Date:</strong> {{ accident.dateAccident|date('d/m/Y H:i') }}</p>
+                            <p><strong>Localisation:</strong> {{ accident.localisation }}</p>
+                            <p><strong>Statut:</strong> 
+                                <span class="badge badge-{{ 
+                                    accident.status == 'EN_COURS' ? 'warning' : 
+                                    (accident.status == 'TRAITE' ? 'success' : 
+                                    (accident.status == 'ARCHIVE' ? 'secondary' : 'info')) 
+                                }}">
+                                    {{ accident.status }}
+                                </span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Gravité:</strong> 
+                                <span class="badge badge-{{ 
+                                    accident.gravite == 'MORTEL' ? 'danger' : 
+                                    (accident.gravite == 'GRAVE' ? 'warning' : 
+                                    (accident.gravite == 'URGENT' ? 'info' : 'light')) 
+                                }}">
+                                    {{ accident.gravite }}
+                                </span>
+                            </p>
+                            <p><strong>Cause principale:</strong> {{ accident.causePrincipaleLabel }}</p>
+                            <p><strong>Région:</strong> {{ accident.region ? accident.region.libelle : 'Non définie' }}</p>
+                            <p><strong>Brigade:</strong> {{ accident.brigade ? accident.brigade.libelle : 'Non définie' }}</p>
+                        </div>
+                    </div>
+                    
+                    {% if accident.description %}
+                    <div class="mt-3">
+                        <p><strong>Description:</strong></p>
+                        <p class="text-muted">{{ accident.description|nl2br }}</p>
+                    </div>
+                    {% endif %}
+
+                    {% if accident.status == 'TRAITE' and accident.dateValidation %}
+                    <div class="mt-3 p-3 bg-success bg-opacity-10 rounded">
+                        <h6 class="text-success">✅ Accident validé</h6>
+                        <p class="mb-0 text-muted">Validé le {{ accident.dateValidation|date('d/m/Y H:i') }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Preuves ({{ accident.medias|length }})</h6>
+                </div>
+                <div class="card-body">
+                    {% include 'shared/accidents/_medias.html.twig' with { accident: accident } %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Statistiques</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="h4 mb-0 font-weight-bold text-primary">{{ victims|length }}</div>
+                            <div class="small text-gray-500">Victimes</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="h4 mb-0 font-weight-bold text-info">{{ vehicles|length }}</div>
+                            <div class="small text-gray-500">Véhicules</div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="text-center">
+                        <p class="mb-0"><small class="text-gray-500">Déclaré par</small></p>
+                        <p class="font-weight-bold">{{ accident.createdBy ? accident.createdBy.nom ~ ' ' ~ accident.createdBy.prenom : 'Non défini' }}</p>
+                        <p class="small text-gray-500">{{ accident.dateAccident|date('d/m/Y H:i') }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Actions</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        {% if accident.status == 'EN_COURS' %}
+                        <form action="{{ path('app_dg_accidents_valider', {'id': accident.id}) }}" method="post" style="display:inline;">
+                            <input type="hidden" name="_token" value="{{ csrf_token('valider' ~ accident.id) }}">
+                            <button type="submit" class="btn btn-success btn-sm">
+                                <i class="fas fa-check"></i> Valider l'accident
+                            </button>
+                        </form>
+                        {% endif %}
+                        <a href="{{ path('app_dg_accidents_carte') }}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-map-marker-alt"></i> Voir sur la carte
+                        </a>
+                        <a href="{{ path('app_dg_accidents_export') }}?accident={{ accident.id }}" class="btn btn-outline-success btn-sm">
+                            <i class="fas fa-download"></i> Exporter
+                        </a>
+                    </div>
+                    <hr>
+                    {% if is_granted('edit', accident) %}
+                        {% include 'shared/accidents/_media_upload_form.html.twig' with { accident: accident } %}
+                    {% else %}
+                        <p class="text-muted mb-0">Vous ne pouvez pas ajouter de preuves sur cet accident.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Victimes -->
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Victimes ({{ victims|length }})</h6>
+                    <a href="{{ path('app_dg_accidents_victims', {'id': accident.id}) }}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-eye"></i> Voir tout
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if victims is not empty %}
+                        {% for victim in victims %}
+                        <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded">
+                            <div>
+                                <strong>{{ victim.nom }} {{ victim.prenom }}</strong>
+                                <span class="badge badge-{{ 
+                                    victim.gravite == 'MORTEL' ? 'danger' : 
+                                    (victim.gravite == 'BLESSE_GRAVE' ? 'warning' : 'info') 
+                                }} ml-2">
+                                    {{ victim.gravite }}
+                                </span>
+                            </div>
+                            <div class="ml-auto">
+                                <small class="text-muted">{{ victim.age }} ans, {{ victim.sexe }}</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center">Aucune victime enregistrée</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Véhicules -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Véhicules ({{ vehicles|length }})</h6>
+                    <a href="{{ path('app_dg_accidents_vehicles', {'id': accident.id}) }}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-eye"></i> Voir tout
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if vehicles is not empty %}
+                        {% for vehicle in vehicles %}
+                        <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded">
+                            <div>
+                                <strong>{{ vehicle.marque }} {{ vehicle.modele }}</strong>
+                                <br>
+                                <small class="text-muted">{{ vehicle.immatriculation }}</small>
+                            </div>
+                            <div class="ml-auto">
+                                <span class="badge badge-secondary">{{ vehicle.typeVehicule }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center">Aucun véhicule enregistré</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Évacuations associées -->
+    {% if accident.evacuations is not empty %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Évacuations Associées</h6>
+                </div>
+                <div class="card-body">
+                    {% for evacuation in accident.evacuations %}
+                    <div class="d-flex justify-content-between align-items-center mb-2 p-3 border rounded">
+                        <div>
+                            <div class="d-flex justify-content-between">
+                                <div class="font-weight-bold">{{ evacuation.reference }}</div>
+                                <span class="badge badge-{{ 
+                                    evacuation.status == 'EN_COURS' ? 'warning' : 
+                                    (evacuation.status == 'TERMINE' ? 'success' : 'secondary') 
+                                }}">
+                                    {{ evacuation.status }}
+                                </span>
+                            </div>
+                            <div class="small text-gray-500">{{ evacuation.dateEvacuation|date('d/m/Y H:i') }}</div>
+                            <div class="small">{{ evacuation.typeEvacuation }}</div>
+                            <div class="small text-muted">Hôpital: {{ evacuation.hopitalDestination }}</div>
+                        </div>
+                        <div class="ml-auto">
+                            <span class="badge badge-{{ 
+                                evacuation.urgence == 'HAUTE' ? 'danger' : 
+                                (evacuation.urgence == 'MOYENNE' ? 'warning' : 'info') 
+                            }}">
+                                {{ evacuation.urgence }}
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Carte de localisation -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Localisation</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div id="map" style="height: 400px; border-radius: 8px;"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <h6>Informations de localisation</h6>
+                            <p><strong>Adresse:</strong> {{ accident.localisation }}</p>
+                            {% if accident.region %}
+                            <p><strong>Région:</strong> {{ accident.region.libelle }}</p>
+                            {% endif %}
+                            {% if accident.brigade %}
+                            <p><strong>Brigade:</strong> {{ accident.brigade.libelle }}</p>
+                            {% endif %}
+                            <p><strong>Coordonnées GPS:</strong></p>
+                            <p><small class="text-muted">Non disponibles pour le moment</small></p>
+                            
+                            <div class="mt-3">
+                                <a href="https://www.google.com/maps/search/?q={{ accident.localisation }}" 
+                                   target="_blank" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-map"></i> Voir sur Google Maps
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historique des modifications -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Historique</h6>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-primary">
+                                <i class="fas fa-play"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <h6 class="mb-1">Déclaration de l'accident</h6>
+                                <p class="text-muted">{{ accident.dateAccident|date('d/m/Y H:i') }}</p>
+                                <p>Déclaré par: {{ accident.createdBy ? accident.createdBy.nom ~ ' ' ~ accident.createdBy.prenom : 'Non défini' }}</p>
+                                <p>Localisation: {{ accident.localisation }}</p>
+                            </div>
+                        </div>
+                        
+                        {% if accident.status == 'TRAITE' and accident.updatedAt %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-success">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <h6 class="mb-1">Validation de l'accident</h6>
+                                <p class="text-muted">{{ accident.updatedAt|date('d/m/Y H:i') }}</p>
+                                <p>L'accident a été validé et marqué comme traité</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-{{ 
+                                accident.status == 'EN_COURS' ? 'warning' : 
+                                (accident.status == 'TRAITE' ? 'success' : 'secondary') 
+                            }}">
+                                <i class="fas fa-{{ 
+                                    accident.status == 'EN_COURS' ? 'clock' : 
+                                    (accident.status == 'TRAITE' ? 'check' : 'archive') 
+                                }}"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <h6 class="mb-1">Statut actuel</h6>
+                                <p class="text-muted">{{ accident.status }}</p>
+                                {% if accident.status == 'EN_COURS' %}
+                                <p class="text-warning">L'accident est en cours de traitement</p>
+                                {% elseif accident.status == 'TRAITE' %}
+                                <p class="text-success">L'accident a été traité et clos</p>
+                                {% else %}
+                                <p class="text-secondary">L'accident est archivé</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline {
+    position: relative;
+    padding-left: 40px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e3e6f0;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -40px;
+    top: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 12px;
+}
+
+.timeline-content {
+    background: #f8f9fc;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid #e3e6f0;
+}
+</style>
+
+<script>
+// Initialiser la carte simple (placeholder pour une vraie implémentation)
+document.addEventListener('DOMContentLoaded', function() {
+    const mapElement = document.getElementById('map');
+    if (mapElement) {
+        mapElement.innerHTML = `
+            <div class="d-flex align-items-center justify-content-center h-100 bg-light rounded">
+                <div class="text-center">
+                    <i class="fas fa-map-marked-alt fa-3x text-gray-400 mb-3"></i>
+                    <p class="text-muted">Carte de localisation</p>
+                    <p class="small">Intégration avec Google Maps en cours</p>
+                    <a href="https://www.google.com/maps/search/?q={{ accident.localisation }}" 
+                       target="_blank" class="btn btn-primary btn-sm mt-2">
+                        <i class="fas fa-external-link-alt"></i> Ouvrir dans Google Maps
+                    </a>
+                </div>
+            </div>
+        `;
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Police Routière Guinée{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
+    
+    {% block stylesheets %}
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fc;
+        }
+        .navbar-brand {
+            font-weight: bold;
+        }
+        .sidebar {
+            background-color: #f8f9fc;
+            min-height: calc(100vh - 56px);
+            box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+        }
+        .sidebar .nav-link {
+            color: #333;
+            padding: 0.75rem 1rem;
+            border-radius: 0.375rem;
+            margin: 0.125rem 0;
+        }
+        .sidebar .nav-link:hover {
+            background-color: #e9ecef;
+            color: #0056b3;
+        }
+        .sidebar .nav-link.active {
+            background-color: #007bff;
+            color: white;
+        }
+        .sidebar .nav-link i {
+            margin-right: 0.5rem;
+        }
+        main {
+            padding-top: 56px;
+        }
+        .card {
+            border: none;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        }
+        .border-left-primary {
+            border-left: 0.25rem solid #4e73df !important;
+        }
+        .border-left-success {
+            border-left: 0.25rem solid #1cc88a !important;
+        }
+        .border-left-info {
+            border-left: 0.25rem solid #36b9cc !important;
+        }
+        .border-left-warning {
+            border-left: 0.25rem solid #f6c23e !important;
+        }
+        .border-left-danger {
+            border-left: 0.25rem solid #e74a3b !important;
+        }
+        .text-xs {
+            font-size: 0.7rem;
+        }
+        .font-weight-bold {
+            font-weight: 700 !important;
+        }
+        .text-gray-800 {
+            color: #5a5c69 !important;
+        }
+        .text-gray-300 {
+            color: #dddfeb !important;
+        }
+        .text-gray-500 {
+            color: #858796 !important;
+        }
+        .chart-pie {
+            position: relative;
+            height: 20rem;
+        }
+        .chart-bar {
+            position: relative;
+            height: 15rem;
+        }
+        .chart-area {
+            position: relative;
+            height: 20rem;
+        }
+        .timeline {
+            position: relative;
+            padding-left: 40px;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e3e6f0;
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 30px;
+        }
+        .timeline-marker {
+            position: absolute;
+            left: -40px;
+            top: 0;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+        .timeline-content {
+            background: #f8f9fc;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #e3e6f0;
+        }
+    </style>
+    {% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ path('app_dashboard') }}">
+                <i class="fas fa-shield-alt"></i> Police Routière Guinée
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_dashboard') }}">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </li>
+                    
+                    <!-- Menu RTG Guinée -->
+                    {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="rtgDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-chart-bar"></i> RTG Guinée
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ path('app_rtg_dashboard') }}">
+                                <i class="fas fa-tachometer-alt"></i> Dashboard RTG
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ path('app_rtg_regions') }}">
+                                <i class="fas fa-map"></i> Régions
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ path('app_rtg_evolution') }}">
+                                <i class="fas fa-chart-line"></i> Évolution
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ path('app_rtg_performance') }}">
+                                <i class="fas fa-tachometer-alt"></i> Performance
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ path('app_rtg_export') }}">
+                                <i class="fas fa-download"></i> Exporter
+                            </a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                    {% if is_granted('ROLE_ADMIN') %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-cogs"></i> Administration
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ path('app_admin_accident_dashboard') }}">
+                                <i class="fas fa-car-crash"></i> Accidents
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ path('app_admin_accident_carte') }}">
+                                <i class="fas fa-map"></i> Carte Accidents
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ path('app_admin_evacuations_dashboard') }}">
+                                <i class="fas fa-ambulance"></i> Évacuations
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ path('app_admin_brigades_index') }}">
+                                <i class="fas fa-users"></i> Brigades
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ path('app_admin_regions_index') }}">
+                                <i class="fas fa-map"></i> Régions
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ path('app_admin_agents_index') }}">
+                                <i class="fas fa-user-shield"></i> Agents
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ path('app_admin_reports_index') }}">
+                                <i class="fas fa-file-alt"></i> Rapports
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ path('app_admin_config_index') }}">
+                                <i class="fas fa-cog"></i> Configuration
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ path('app_admin_log_index') }}">
+                                <i class="fas fa-list"></i> Logs
+                            </a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                    
+                    <!-- Menu Direction Générale -->
+                    {% if is_granted('ROLE_DIRECTION_GENERALE') %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="dgDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-globe"></i> Direction Générale
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ path('app_dg_accidents_dashboard') }}">
+                                <i class="fas fa-car-crash"></i> Accidents
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ path('app_dg_evacuations_dashboard') }}">
+                                <i class="fas fa-ambulance"></i> Évacuations
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ path('app_dg_accidents_carte') }}">
+                                <i class="fas fa-map"></i> Carte Accidents
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ path('app_dg_evacuations_map') }}">
+                                <i class="fas fa-map"></i> Carte Évacuations
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ path('app_dg_evacuations_supervision') }}">
+                                <i class="fas fa-eye"></i> Supervision
+                            </a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                    
+                    <!-- Menu Direction Régionale -->
+                    {% if is_granted('ROLE_DIRECTION_REGIONALE') %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="drDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-map-marked-alt"></i> Direction Régionale
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ path('app_dr_accidents_dashboard') }}">
+                                <i class="fas fa-car-crash"></i> Accidents
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ path('app_dr_evacuations_dashboard') }}">
+                                <i class="fas fa-ambulance"></i> Évacuations
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ path('app_dr_accidents_carte') }}">
+                                <i class="fas fa-map"></i> Carte Accidents
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ path('app_dr_evacuations_coordonner') }}">
+                                <i class="fas fa-cogs"></i> Coordination
+                            </a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                    
+                    <!-- Menu Brigade -->
+                    {% if is_granted('ROLE_CHEF_BRIGADE') %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="brigadeDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-shield-alt"></i> Brigade
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ path('app_brigade_accidents_dashboard') }}">
+                                <i class="fas fa-car-crash"></i> Accidents
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ path('app_brigade_evacuations_dashboard') }}">
+                                <i class="fas fa-ambulance"></i> Évacuations
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ path('app_brigade_accidents_carte') }}">
+                                <i class="fas fa-map"></i> Carte Accidents
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ path('app_brigade_agents_index') }}">
+                                <i class="fas fa-users"></i> Agents
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ path('app_brigade_statistics') }}">
+                                <i class="fas fa-chart-bar"></i> Statistiques
+                            </a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                    
+                    <!-- Menu Agent -->
+                    {% if is_granted('ROLE_AGENT') %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="agentDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user"></i> Agent
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ path('app_agent_accidents_dashboard') }}">
+                                <i class="fas fa-car-crash"></i> Mes Accidents
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ path('app_agent_evacuations_dashboard') }}">
+                                <i class="fas fa-ambulance"></i> Mes Évacuations
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ path('app_agent_accidents_carte') }}">
+                                <i class="fas fa-map"></i> Carte Accidents
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ path('app_agent_stats') }}">
+                                <i class="fas fa-chart-line"></i> Mes Statistiques
+                            </a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                </ul>
+                
+                <!-- User menu -->
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle"></i> {{ app.user.nom }} {{ app.user.prenom }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{{ path('app_profile') }}">
+                                <i class="fas fa-user"></i> Profil
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ path('app_settings') }}">
+                                <i class="fas fa-cog"></i> Paramètres
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ path('app_logout') }}">
+                                <i class="fas fa-sign-out-alt"></i> Déconnexion
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main content -->
+    {% block body %}{% endblock %}
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    {% block javascripts %}
+    <script>
+        // Initialisation des tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Initialisation des dropdowns
+        var dropdownTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="dropdown"]'));
+        var dropdownList = dropdownTriggerList.map(function (dropdownTriggerEl) {
+            return new bootstrap.Dropdown(dropdownTriggerEl);
+        });
+
+        // Auto-rafraîchissement des données (toutes les 5 minutes)
+        setInterval(function() {
+            // Rafraîchir les dashboards
+            if (window.location.pathname.includes('dashboard')) {
+                window.location.reload();
+            }
+        }, 300000); // 5 minutes
+    </script>
+    {% endblock %}
+</body>
+</html>

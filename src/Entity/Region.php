@@ -48,10 +48,14 @@ class Region
     #[ORM\OneToMany(mappedBy: 'region', targetEntity: Agent::class)]
     private Collection $agents;
 
+    #[ORM\OneToMany(mappedBy: 'region', targetEntity: Accident::class)]
+    private Collection $accidents;
+
     public function __construct()
     {
         $this->brigades = new ArrayCollection();
         $this->agents = new ArrayCollection();
+        $this->accidents = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
     }
 
@@ -153,6 +157,33 @@ class Region
         if ($this->agents->removeElement($agent)) {
             if ($agent->getRegion() === $this) {
                 $agent->setRegion(null);
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Accident>
+     */
+    public function getAccidents(): Collection
+    {
+        return $this->accidents;
+    }
+
+    public function addAccident(Accident $accident): static
+    {
+        if (!$this->accidents->contains($accident)) {
+            $this->accidents->add($accident);
+            $accident->setRegion($this);
+        }
+        return $this;
+    }
+
+    public function removeAccident(Accident $accident): static
+    {
+        if ($this->accidents->removeElement($accident)) {
+            if ($accident->getRegion() === $this) {
+                $accident->setRegion(null);
             }
         }
         return $this;

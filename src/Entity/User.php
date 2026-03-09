@@ -53,9 +53,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: AuditLog::class)]
     private Collection $auditLogs;
 
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Notification::class)]
+    private Collection $notifications;
+
     public function __construct()
     {
         $this->auditLogs = new ArrayCollection();
+        $this->notifications = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
     }
@@ -208,6 +212,33 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         if ($this->auditLogs->removeElement($auditLog)) {
             if ($auditLog->getUser() === $this) {
                 $auditLog->setUser(null);
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Notification>
+     */
+    public function getNotifications(): Collection
+    {
+        return $this->notifications;
+    }
+
+    public function addNotification(Notification $notification): static
+    {
+        if (!$this->notifications->contains($notification)) {
+            $this->notifications->add($notification);
+            $notification->setUser($this);
+        }
+        return $this;
+    }
+
+    public function removeNotification(Notification $notification): static
+    {
+        if ($this->notifications->removeElement($notification)) {
+            if ($notification->getUser() === $this) {
+                $notification->setUser(null);
             }
         }
         return $this;

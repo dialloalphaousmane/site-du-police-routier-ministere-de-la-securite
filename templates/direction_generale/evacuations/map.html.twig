@@ -1,0 +1,289 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Carte Nationale des Évacuations{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Carte Nationale des Évacuations</h1>
+        <div class="btn-group">
+            <a href="{{ path('app_dg_evacuations_dashboard') }}" class="btn btn-info">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+            <a href="{{ path('app_dg_evacuations_supervision') }}" class="btn btn-primary">
+                <i class="fas fa-list"></i> Supervision
+            </a>
+            <a href="{{ path('app_dg_evacuations_export') }}" class="btn btn-success">
+                <i class="fas fa-download"></i> Exporter
+            </a>
+        </div>
+    </div>
+
+    <!-- Filtres de carte -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Filtres de la Carte</h6>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label for="status" class="form-label">Statut</label>
+                    <select name="status" id="status" class="form-select">
+                        <option value="">Tous</option>
+                        <option value="EN_COURS" {{ currentFilters.status == 'EN_COURS' ? 'selected' : '' }}>En cours</option>
+                        <option value="TERMINE" {{ currentFilters.status == 'TERMINE' ? 'selected' : '' }}>Terminé</option>
+                        <option value="ANNULE" {{ currentFilters.status == 'ANNULE' ? 'selected' : '' }}>Annulé</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="urgence" class="form-label">Urgence</label>
+                    <select name="urgence" id="urgence" class="form-select">
+                        <option value="">Toutes</option>
+                        <option value="HAUTE" {{ currentFilters.urgence == 'HAUTE' ? 'selected' : '' }}>Haute</option>
+                        <option value="MOYENNE" {{ currentFilters.urgence == 'MOYENNE' ? 'selected' : '' }}>Moyenne</option>
+                        <option value="BASSE" {{ currentFilters.urgence == 'BASSE' ? 'selected' : '' }}>Basse</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="region" class="form-label">Région</label>
+                    <select name="region" id="region" class="form-select">
+                        <option value="">Toutes</option>
+                        {% for region in regions %}
+                        <option value="{{ region.id }}" {{ currentFilters.region == region.id ? 'selected' : '' }}>
+                            {{ region.libelle }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="period" class="form-label">Période</label>
+                    <select name="period" id="period" class="form-select">
+                        <option value="24">24 heures</option>
+                        <option value="7" {{ currentFilters.period == '7' ? 'selected' : '' }}>7 jours</option>
+                        <option value="30" {{ currentFilters.period == '30' ? 'selected' : '' }}>30 jours</option>
+                        <option value="90" {{ currentFilters.period == '90' ? 'selected' : '' }}>3 mois</option>
+                    </select>
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Appliquer les filtres
+                    </button>
+                    <a href="{{ path('app_dg_evacuations_map') }}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Réinitialiser
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Carte interactive -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Carte Interactive des Évacuations</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div id="map" style="height: 600px; border-radius: 0;">
+                        <div class="d-flex align-items-center justify-content-center h-100 bg-light">
+                            <div class="text-center">
+                                <i class="fas fa-map-marked-alt fa-3x text-gray-400 mb-3"></i>
+                                <p class="text-muted">Carte interactive</p>
+                                <p class="small">Intégration avec Google Maps en cours</p>
+                                <div class="mt-3">
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-primary" onclick="initMap()">
+                                            <i class="fas fa-sync"></i> Initialiser la carte
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="exporterCarte()">
+                                            <i class="fas fa-download"></i> Exporter la carte
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques de la carte -->
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Statistiques de la Période</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="h4 mb-0 font-weight-bold text-primary">{{ statsCarte.total }}</div>
+                            <div class="small text-gray-500">Total</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="h4 mb-0 font-weight-bold text-warning">{{ statsCarte.enCours }}</div>
+                            <div class="small text-gray-500">En cours</div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="h4 mb-0 font-weight-bold text-success">{{ statsCarte.terminees }}</div>
+                            <div class="small text-gray-500">Terminées</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="h4 mb-0 font-weight-bold text-info">{{ statsCarte.urgentes }}</div>
+                            <div class="small text-gray-500">Urgentes</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Répartition par Type</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4 pb-2">
+                        <canvas id="typeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Légende -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Légende des Évacuations</h6>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        {% for evacuation in timeline %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-{{ 
+                                evacuation.status == 'TERMINE' ? 'success' : 
+                                (evacuation.status == 'EN_COURS' ? 'warning' : 'secondary') 
+                            }}">
+                                <i class="fas fa-{{ 
+                                    evacuation.status == 'TERMINE' ? 'check' : 
+                                    (evacuation.status == 'EN_COURS' ? 'clock' : 'archive') 
+                                }}"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <h6 class="mb-1">{{ evacuation.reference }}</h6>
+                                <p class="text-muted">{{ evacuation.dateEvacuation|date('d/m/Y H:i') }}</p>
+                                <p>{{ evacuation.typeEvacuation }} - {{ evacuation.urgence }}</p>
+                                <p>Hôpital: {{ evacuation.hopitalDestination }}</p>
+                                {% if evacuation.dateArrivee %}
+                                <p class="text-success">Arrivée: {{ evacuation.dateArrivee|date('d/m/Y H:i') }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Données pour les graphiques
+const typeData = {{ repartitionType|json_encode|raw }};
+const statsCarte = {{ statsCarte|json_encode|raw }};
+const timeline = {{ timeline|json_encode|raw }};
+
+// Initialiser la carte
+function initMap() {
+    // Placeholder pour l'initialisation de la carte
+    const mapElement = document.getElementById('map');
+    mapElement.innerHTML = `
+        <div class="d-flex align-items-center justify-content-center h-100 bg-light rounded">
+            <div class="text-center">
+                <i class="fas fa-sync fa-spin fa-3x text-primary mb-3"></i>
+                <p class="text-muted">Initialisation de la carte...</p>
+            </div>
+        </div>
+    `;
+    
+    // Simuler l'initialisation
+    setTimeout(() => {
+        mapElement.innerHTML = `
+            <div class="d-flex align-items-center justify-content-center h-100 bg-light rounded">
+                <div class="text-center">
+                    <i class="fas fa-map-marked-alt fa-3x text-success mb-3"></i>
+                    <p class="text-muted">Carte initialisée</p>
+                    <div class="mt-3">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-primary" onclick="refreshMap()">
+                                <i class="fas fa-sync"></i> Actualiser
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }, 2000);
+}
+
+// Rafraîchir la carte
+function refreshMap() {
+    initMap();
+}
+
+// Exporter la carte
+function exporterCarte() {
+    window.open('{{ path('app_dg_evacuations_export') }}?format=map', '_blank');
+}
+
+// Graphique de répartition par type
+const typeCtx = document.getElementById('typeChart');
+if (typeCtx) {
+    new Chart(typeCtx, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(typeData),
+            datasets: [{
+                data: Object.values(typeData),
+                backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e']
+            }]
+        }
+    });
+}
+
+// Gestion de la timeline
+function updateTimeline() {
+    const timelineElement = document.querySelector('.timeline');
+    if (timelineElement) {
+        timelineElement.innerHTML = '';
+        timeline.forEach(item => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'timeline-item';
+            itemDiv.innerHTML = `
+                <div class="timeline-marker bg-${item.status === 'TERMINE' ? 'success' : (item.status === 'EN_COURS' ? 'warning' : 'secondary')}">
+                    <i class="fas fa-${item.status === 'TERMINE' ? 'check' : (item.status === 'EN_COURS' ? 'clock' : 'archive')}"></i>
+                </div>
+                <div class="timeline-content">
+                    <h6 class="mb-1">${item.reference}</h6>
+                    <p class="text-muted">${item.dateEvacuation|date('d/m/Y H:i')}</p>
+                    <p>${item.typeEvacuation}} - ${item.urgence}</p>
+                    <p>Hôpital: ${item.hopitalDestination}</p>
+                </div>
+            `;
+            timelineElement.appendChild(itemDiv);
+        });
+    }
+}
+
+// Initialiser les graphiques
+document.addEventListener('DOMContentLoaded', function() {
+    updateTimeline();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,22 @@
+<form action="{{ path('app_accident_media_add', {id: accident.id}) }}" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="_token" value="{{ csrf_token('accident_media_add' ~ accident.id) }}">
+
+    <div class="form-group">
+        <label for="media_type_{{ accident.id }}">Type</label>
+        <select class="form-control" id="media_type_{{ accident.id }}" name="type" required>
+            <option value="PHOTO">Photo</option>
+            <option value="DOCUMENT">Document</option>
+            <option value="CROQUIS">Croquis</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="media_file_{{ accident.id }}">Fichier</label>
+        <input type="file" class="form-control" id="media_file_{{ accident.id }}" name="file" required>
+        <small class="form-text text-muted">Formats images et documents autorisés.</small>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-sm">
+        <i class="fas fa-upload"></i> Ajouter
+    </button>
+</form>

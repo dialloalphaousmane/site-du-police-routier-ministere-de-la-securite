@@ -1,0 +1,242 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des Évacuations{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Liste des Évacuations</h1>
+        <div class="btn-group">
+            <a href="{{ path('app_admin_evacuation_new') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Nouvelle Évacuation
+            </a>
+            <a href="{{ path('app_admin_evacuation_dashboard') }}" class="btn btn-info">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+            <a href="{{ path('app_admin_evacuation_export') }}" class="btn btn-success">
+                <i class="fas fa-download"></i> Exporter
+            </a>
+        </div>
+    </div>
+
+    <!-- Filtres -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Filtres</h6>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label for="status" class="form-label">Statut</label>
+                    <select name="status" id="status" class="form-select">
+                        <option value="">Tous</option>
+                        <option value="EN_COURS" {{ currentFilters.status == 'EN_COURS' ? 'selected' : '' }}>En cours</option>
+                        <option value="TERMINE" {{ currentFilters.status == 'TERMINE' ? 'selected' : '' }}>Terminé</option>
+                        <option value="ANNULE" {{ currentFilters.status == 'ANNULE' ? 'selected' : '' }}>Annulé</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="urgence" class="form-label">Urgence</label>
+                    <select name="urgence" id="urgence" class="form-select">
+                        <option value="">Toutes</option>
+                        <option value="HAUTE" {{ currentFilters.urgence == 'HAUTE' ? 'selected' : '' }}>Haute</option>
+                        <option value="MOYENNE" {{ currentFilters.urgence == 'MOYENNE' ? 'selected' : '' }}>Moyenne</option>
+                        <option value="BASSE" {{ currentFilters.urgence == 'BASSE' ? 'selected' : '' }}>Basse</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="type" class="form-label">Type</label>
+                    <select name="type" id="type" class="form-select">
+                        <option value="">Tous</option>
+                        <option value="AMBULANCE" {{ currentFilters.type == 'AMBULANCE' ? 'selected' : '' }}>Ambulance</option>
+                        <option value="HELI" {{ currentFilters.type == 'HELI' ? 'selected' : '' }}>Hélicoptère</option>
+                        <option value="VEHICULE_PERSONNEL" {{ currentFilters.type == 'VEHICULE_PERSONNEL' ? 'selected' : '' }}>Véhicule personnel</option>
+                        <option value="CAMION" {{ currentFilters.type == 'CAMION' ? 'selected' : '' }}>Camion</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="search" class="form-label">Recherche</label>
+                    <input type="text" name="search" id="search" class="form-control" 
+                           value="{{ currentFilters.search }}" placeholder="Référence ou hôpital">
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Rechercher
+                    </button>
+                    <a href="{{ path('app_admin_evacuation_index') }}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Réinitialiser
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Liste des évacuations -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                Évacuations ({{ total }} résultats)
+            </h6>
+        </div>
+        <div class="card-body">
+            {% if evacuations is not empty %}
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Référence</th>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Statut</th>
+                            <th>Urgence</th>
+                            <th>Hôpital Destination</th>
+                            <th>Région</th>
+                            <th>Brigade</th>
+                            <th>Opérateur</th>
+                            <th>Accident</th>
+                            <th>Date Arrivée</th>
+                            <th>Durée</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for evacuation in evacuations %}
+                        <tr>
+                            <td>{{ evacuation.reference }}</td>
+                            <td>{{ evacuation.dateEvacuation|date('d/m/Y H:i') }}</td>
+                            <td>
+                                <span class="badge badge-{{ 
+                                    evacuation.typeEvacuation == 'AMBULANCE' ? 'primary' : 
+                                    (evacuation.typeEvacuation == 'HELI' ? 'info' : 
+                                    (evacuation.typeEvacuation == 'CAMION' ? 'warning' : 'secondary')) 
+                                }}">
+                                    {{ evacuation.typeEvacuation }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge badge-{{ 
+                                    evacuation.status == 'EN_COURS' ? 'warning' : 
+                                    (evacuation.status == 'TERMINE' ? 'success' : 'secondary') 
+                                }}">
+                                    {{ evacuation.status }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge badge-{{ 
+                                    evacuation.urgence == 'HAUTE' ? 'danger' : 
+                                    (evacuation.urgence == 'MOYENNE' ? 'warning' : 'info') 
+                                }}">
+                                    {{ evacuation.urgence }}
+                                </span>
+                            </td>
+                            <td>{{ evacuation.hopitalDestination }}</td>
+                            <td>{{ evacuation.region ? evacuation.region.libelle : '' }}</td>
+                            <td>{{ evacuation.brigade ? evacuation.brigade.libelle : '' }}</td>
+                            <td>{{ evacuation.createdBy ? evacuation.createdBy.nom ~ ' ' ~ evacuation.createdBy.prenom : '' }}</td>
+                            <td>
+                                {% if evacuation.accident %}
+                                <a href="{{ path('app_admin_accident_show', {'id': evacuation.accident.id}) }}" 
+                                   class="btn btn-sm btn-outline-info">
+                                    {{ evacuation.accident.reference }}
+                                </a>
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if evacuation.dateArrivee %}
+                                    {{ evacuation.dateArrivee|date('d/m/Y H:i') }}
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if evacuation.dateArrivee %}
+                                    {% set duration = evacuation.dateEvacuation.diff(evacuation.dateArrivee) %}
+                                    {{ duration.format('%i') }} min
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="{{ path('app_admin_evacuation_show', {'id': evacuation.id}) }}" 
+                                       class="btn btn-sm btn-info" title="Voir">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ path('app_admin_evacuation_edit', {'id': evacuation.id}) }}" 
+                                       class="btn btn-sm btn-warning" title="Modifier">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    {% if evacuation.status == 'EN_COURS' %}
+                                    <form method="post" action="{{ path('app_admin_evacuation_complete', {'id': evacuation.id}) }}" 
+                                          style="display: inline;" onsubmit="return confirm('Marquer cette évacuation comme terminée ?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('complete' ~ evacuation.id) }}">
+                                        <button type="submit" class="btn btn-sm btn-success" title="Terminer">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                    </form>
+                                    <form method="post" action="{{ path('app_admin_evacuation_cancel', {'id': evacuation.id}) }}" 
+                                          style="display: inline;" onsubmit="return confirm('Annuler cette évacuation ?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ evacuation.id) }}">
+                                        <button type="submit" class="btn btn-sm btn-danger" title="Annuler">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                    <form method="post" action="{{ path('app_admin_evacuation_delete', {'id': evacuation.id}) }}" 
+                                          style="display: inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette évacuation ?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ evacuation.id) }}">
+                                        <button type="submit" class="btn btn-sm btn-danger" title="Supprimer">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if page > 1 %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ path('app_admin_evacuation_index', {'page': page - 1, 'status': currentFilters.status, 'urgence': currentFilters.urgence, 'type': currentFilters.type, 'search': currentFilters.search}) }}">
+                            Précédent
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for i in 1..totalPages %}
+                    <li class="page-item {{ i == page ? 'active' : '' }}">
+                        <a class="page-link" href="{{ path('app_admin_evacuation_index', {'page': i, 'status': currentFilters.status, 'urgence': currentFilters.urgence, 'type': currentFilters.type, 'search': currentFilters.search}) }}">
+                            {{ i }}
+                        </a>
+                    </li>
+                    {% endfor %}
+                    
+                    {% if page < totalPages %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ path('app_admin_evacuation_index', {'page': page + 1, 'status': currentFilters.status, 'urgence': currentFilters.urgence, 'type': currentFilters.type, 'search': currentFilters.search}) }}">
+                            Suivant
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-ambulance fa-3x text-gray-300 mb-3"></i>
+                <p class="text-muted">Aucune évacuation trouvée</p>
+                <a href="{{ path('app_admin_evacuation_new') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Créer la première évacuation
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

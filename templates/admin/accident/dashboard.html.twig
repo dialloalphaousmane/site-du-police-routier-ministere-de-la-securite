@@ -1,0 +1,210 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tableau de Bord - Accidents{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Tableau de Bord - Accidents</h1>
+        <div class="btn-group">
+            <a href="{{ path('app_admin_accident_new') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Nouvel Accident
+            </a>
+            <a href="{{ path('app_admin_accident_index') }}" class="btn btn-info">
+                <i class="fas fa-list"></i> Tous les Accidents
+            </a>
+            <a href="{{ path('app_admin_accident_statistics') }}" class="btn btn-secondary">
+                <i class="fas fa-chart-bar"></i> Statistiques
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistiques principales -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Accidents
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ totalAccidents }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-car-crash fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                En Cours
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ accidentsEnCours }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Accidents Mortels
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ accidentsMortels }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-skull-crossbones fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Évacuations
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ accidentsEvacuation }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-ambulance fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphiques -->
+    <div class="row">
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Évolution Mensuelle</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area">
+                        <canvas id="evolutionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Répartition par Gravité</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4 pb-2">
+                        <canvas id="graviteChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Accidents récents -->
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Accidents Récents</h6>
+                </div>
+                <div class="card-body">
+                    {% if derniersAccidents is not empty %}
+                        {% for accident in derniersAccidents %}
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="flex-grow-1">
+                                <div class="small text-gray-500">{{ accident.dateAccident|date('d/m/Y H:i') }}</div>
+                                <div class="font-weight-bold">{{ accident.reference }}</div>
+                                <div class="small">{{ accident.localisation }}</div>
+                            </div>
+                            <div class="ml-auto">
+                                <span class="badge badge-{{ accident.gravite == 'MORTEL' ? 'danger' : (accident.gravite == 'GRAVE' ? 'warning' : 'info') }}">
+                                    {{ accident.gravite }}
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">Aucun accident récent</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Accidents par Région</h6>
+                </div>
+                <div class="card-body">
+                    {% for region, count in accidentsParRegion %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>{{ region }}</span>
+                        <div class="progress" style="width: 100px;">
+                            <div class="progress-bar" role="progressbar" style="width: {{ (count / max(accidentsParRegion) * 100) }}%"></div>
+                        </div>
+                        <span class="ml-2">{{ count }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Données pour les graphiques
+const evolutionData = {{ evolutionMensuelle|json_encode|raw }};
+const graviteData = {{ repartitionGravite|json_encode|raw }};
+
+// Graphique d'évolution
+const evolutionCtx = document.getElementById('evolutionChart').getContext('2d');
+new Chart(evolutionCtx, {
+    type: 'line',
+    data: {
+        labels: evolutionData.map(d => d.monthName),
+        datasets: [{
+            label: 'Nombre d\'accidents',
+            data: evolutionData.map(d => d.count),
+            borderColor: 'rgb(75, 192, 192)',
+            tension: 0.1
+        }]
+    }
+});
+
+// Graphique de répartition par gravité
+const graviteCtx = document.getElementById('graviteChart').getContext('2d');
+new Chart(graviteCtx, {
+    type: 'doughnut',
+    data: {
+        labels: Object.keys(graviteData),
+        datasets: [{
+            data: Object.values(graviteData),
+            backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e']
+        }]
+    }
+});
+</script>
+{% endblock %}

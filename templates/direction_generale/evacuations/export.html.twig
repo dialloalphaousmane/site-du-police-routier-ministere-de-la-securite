@@ -1,0 +1,150 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Export National - Évacuations{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Export National - Évacuations</h1>
+        <div class="btn-group">
+            <a href="{{ path('app_dg_evacuations_dashboard') }}" class="btn btn-info">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+            <a href="{{ path('app_dg_evacuations_supervision') }}" class="btn btn-primary">
+                <i class="fas fa-list"></i> Supervision
+            </a>
+            <a href="{{ path('app_dg_evacuations_map') }}" class="btn btn-primary">
+                <i class="fas fa-map"></i> Carte
+            </a>
+        </div>
+    </div>
+
+    <!-- Options d'export -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Options d'Export</h6>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label for="format" class="form-label">Format d'export</label>
+                    <select name="format" id="format" class="form-select">
+                        <option value="csv" {{ currentFilters.format == 'csv' ? 'selected' : '' }}>CSV</option>
+                        <option value="pdf" {{ currentFilters.format == 'pdf' ? 'selected' : '' }}>PDF</option>
+                        <option value="excel" {{ currentFilters.format == 'excel' ? 'selected' : '' }}>Excel</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="period" class="form-label">Période</label>
+                    <select name="period" id="period" class="form-select">
+                        <option value="30" {{ currentFilters.period == '30' ? 'selected' : '' }}>30 derniers jours</option>
+                        <option value="90" {{ currentFilters.period == '90' ? 'selected' : '' }}>3 mois</option>
+                        <option value="180" {{ currentFilters.period == '180' ? 'selected' : '' }}>6 mois</option>
+                        <option value="365" {{ currentFilters.period == '365' ? 'selected' : '' }}>1 an</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="region" class="form-label">Région</label>
+                    <select name="region" id="region" class="form-select">
+                        <option value="">Toutes les régions</option>
+                        {% for region in regions %}
+                        <option value="{{ region.id }}" {{ currentFilters.region == region.id ? 'selected' : '' }}>
+                            {{ region.libelle }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-download"></i> Exporter
+                    </button>
+                    <a href="{{ path('app_dg_evacuations_supervision') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Retour
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Résultats de l'export -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Résultats de l'Export</h6>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-info">
+                <h6><i class="fas fa-info-circle"></i> Export en cours...</h6>
+                <p class="mb-0">Le fichier sera généré et téléchargé automatiquement.</p>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%">
+                        <div class="progress-bar" id="exportProgress"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Gestion de l'export
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(form);
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const progressDiv = document.getElementById('exportProgress');
+            
+            // Désactiver le bouton
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Export en cours...';
+            
+            // Afficher la progression
+            progressDiv.style.width = '0%';
+            
+            // Envoyer la requête
+            fetch(form.action, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    progressDiv.style.width = '100%';
+                    submitBtn.innerHTML = '<i class="fas fa-check"></i> Export terminé';
+                    submitBtn.disabled = false;
+                    
+                    // Télécharger le fichier
+                    return response.blob();
+                } else {
+                    throw new Error('Erreur lors de l\'export');
+                }
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `evacuations_nationales_${new Date().toISOString().split('T')[0]}_${new Date().toISOString().split('T')[1]}.${currentFilters.format}`;
+                document.body.appendChild(a);
+                a.click();
+            })
+            .catch(error => {
+                    progressDiv.style.width = '0%';
+                    submitBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Erreur d\'export';
+                    submitBtn.disabled = false;
+                    console.error('Erreur:', error);
+                });
+        });
+    });
+});
+
+// Mise à jour de la progression
+function updateProgress(percentage) {
+    const progressDiv = document.getElementById('exportProgress');
+    if (progressDiv) {
+        progressDiv.style.width = percentage + '%';
+    }
+}
+</script>
+{% endblock %}

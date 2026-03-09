@@ -1,0 +1,421 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Tableau de Bord RTG Guinée{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Tableau de Bord RTG Guinée</h1>
+        <div class="btn-group">
+            <a href="{{ path('app_rtg_regions') }}" class="btn btn-info">
+                <i class="fas fa-map"></i> Régions
+            </a>
+            <a href="{{ path('app_rtg_evolution') }}" class="btn btn-primary">
+                <i class="fas fa-chart-line"></i> Évolution
+            </a>
+            <a href="{{ path('app_rtg_performance') }}" class="btn btn-warning">
+                <i class="fas fa-tachometer-alt"></i> Performance
+            </a>
+            <a href="{{ path('app_rtg_export') }}" class="btn btn-success">
+                <i class="fas fa-download"></i> Exporter
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistiques globales RTG Guinée -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Accidents (10 ans)
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ globalStats.total_accidents }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-car-crash fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Total Évacuations (10 ans)
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ globalStats.total_evacuations }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-ambulance fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Accidents Mortels
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ globalStats.accidents_mortels }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-skull-crossbones fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Taux de Mortalité
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ globalStats.mortalite_rate|round(2) }}%</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-percentage fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphiques RTG Guinée -->
+    <div class="row">
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Évolution Mensuelle (10 dernières années)</h6>
+                    <div class="btn-group btn-group-sm">
+                        <button type="button" class="btn btn-outline-primary active" data-period="120">120 mois</button>
+                        <button type="button" class="btn btn-outline-primary" data-period="60">60 mois</button>
+                        <button type="button" class="btn btn-outline-primary" data-period="24">24 mois</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area">
+                        <canvas id="evolutionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Répartition par Type</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4 pb-2">
+                        <canvas id="typeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance des régions RTG Guinée -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Performance des Régions (10 dernières années)</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Région</th>
+                                    <th>Total Accidents</th>
+                                    <th>Total Évacuations</th>
+                                    <th>Total Victimes</th>
+                                    <th>Total Véhicules</th>
+                                    <th>Temps Moyen (min)</th>
+                                    <th>Taux Performance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for region in regionalPerformance %}
+                                <tr>
+                                    <td><strong>{{ region.region }}</strong></td>
+                                    <td>{{ region.total_accidents }}</td>
+                                    <td>{{ region.total_evacuations }}</td>
+                                    <td>{{ region.total_victimes }}</td>
+                                    <td>{{ region.total_vehicules }}</td>
+                                    <td>{{ region.temps_moyen_traitement }}</td>
+                                    <td>
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar bg-{{ 
+                                                region.performance > 80 ? 'success' : 
+                                                (region.performance > 60 ? 'warning' : 'danger') 
+                                            }}" role="progressbar" 
+                                                 style="width: {{ region.performance }}%">
+                                                {{ region.performance|round(1) }}%
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top régions RTG Guinée -->
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Top 10 Régions par Accidents</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Région</th>
+                                    <th>Total Accidents</th>
+                                    <th>Classement</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for region in topRegionsAccidents %}
+                                <tr>
+                                    <td><strong>{{ region.libelle }}</strong></td>
+                                    <td>{{ region.total_accidents }}</td>
+                                    <td>
+                                        <span class="badge badge-{{ 
+                                            loop.index <= 3 ? 'danger' : 
+                                            (loop.index <= 6 ? 'warning' : 'info') 
+                                        }}">
+                                            {{ loop.index }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Top 10 Régions par Évacuations</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Région</th>
+                                    <th>Total Évacuations</th>
+                                    <th>Classement</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for region in topRegionsEvacuations %}
+                                <tr>
+                                    <td><strong>{{ region.libelle }}</strong></td>
+                                    <td>{{ region.total_evacuations }}</td>
+                                    <td>
+                                        <span class="badge badge-{{ 
+                                            loop.index <= 3 ? 'success' : 
+                                            (loop.index <= 6 ? 'warning' : 'info') 
+                                        }}">
+                                            {{ loop.index }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activités récentes RTG Guinée -->
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Top 10 Accidents Récents</h6>
+                </div>
+                <div class="card-body">
+                    {% if topAccidents is not empty %}
+                        {% for accident in topAccidents %}
+                        <div class="d-flex align-items-center mb-3 p-2 border rounded">
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between">
+                                    <div class="font-weight-bold">{{ accident.reference }}</div>
+                                    <span class="badge badge-{{ 
+                                        accident.gravite == 'MORTEL' ? 'danger' : 
+                                        (accident.gravite == 'GRAVE' ? 'warning' : 'info') 
+                                    }}">
+                                        {{ accident.gravite }}
+                                    </span>
+                                </div>
+                                <div class="small text-gray-500">{{ accident.dateAccident|date('d/m/Y H:i') }}</div>
+                                <div class="small">{{ accident.localisation }}</div>
+                                <div class="small text-muted">
+                                    {{ accident.region ? accident.region.libelle : '' }} - 
+                                    {{ accident.brigade ? accident.brigade.libelle : '' }}
+                                </div>
+                            </div>
+                            <div class="ml-auto">
+                                <a href="#" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">Aucun accident récent</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Top 10 Évacuations Récentes</h6>
+                </div>
+                <div class="card-body">
+                    {% if topEvacuations is not empty %}
+                        {% for evacuation in topEvacuations %}
+                        <div class="d-flex align-items-center mb-3 p-2 border rounded">
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between">
+                                    <div class="font-weight-bold">{{ evacuation.reference }}</div>
+                                    <span class="badge badge-{{ 
+                                        evacuation.status == 'TERMINE' ? 'success' : 
+                                        (evacuation.status == 'EN_COURS' ? 'warning' : 'secondary') 
+                                    }}">
+                                        {{ evacuation.status }}
+                                    </span>
+                                </div>
+                                <div class="small text-gray-500">{{ evacuation.dateEvacuation|date('d/m/Y H:i') }}</div>
+                                <div class="small">{{ evacuation.typeEvacuation }}</div>
+                                <div class="small text-muted">
+                                    {{ evacuation.region ? evacuation.region.libelle : '' }} - 
+                                    {{ evacuation.brigade ? evacuation.brigade.libelle : '' }}
+                                </div>
+                            </div>
+                            <div class="ml-auto">
+                                <a href="#" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">Aucune évacuation récente</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Données pour les graphiques RTG Guinée
+const monthlyStats = {{ monthlyStats|json_encode|raw }};
+const globalStats = {{ globalStats|json_encode|raw }};
+
+// Graphique d'évolution
+const evolutionCtx = document.getElementById('evolutionChart');
+if (evolutionCtx) {
+    new Chart(evolutionCtx, {
+        type: 'line',
+        data: {
+            labels: monthlyStats.map(d => d.date),
+            datasets: [{
+                label: 'Accidents',
+                data: monthlyStats.map(d => d.accidents_count),
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                tension: 0.1
+            }, {
+                label: 'Évacuations',
+                data: monthlyStats.map(d => d.evacuations_count),
+                borderColor: 'rgb(54, 162, 235)',
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+// Graphique de répartition par type
+const typeCtx = document.getElementById('typeChart');
+if (typeCtx) {
+    new Chart(typeCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Accidents', 'Évacuations'],
+            datasets: [{
+                data: [globalStats.total_accidents, globalStats.total_evacuations],
+                backgroundColor: ['#dc3545', '#17a2b8']
+            }]
+        }
+    });
+}
+
+// Gestion des périodes
+document.querySelectorAll('[data-period]').forEach(button => {
+    button.addEventListener('click', function() {
+        document.querySelectorAll('[data-period]').forEach(btn => btn.classList.remove('active'));
+        this.classList.add('active');
+        // Recharger les données avec la nouvelle période
+        window.location.href = '{{ path('app_rtg_dashboard') }}?period=' + this.dataset.period;
+    });
+});
+
+// Auto-rafraîchissement des données RTG
+setInterval(() => {
+    fetch('{{ path('app_rtg_api_stats') }}')
+        .then(response => response.json())
+        .then(data => {
+            // Mettre à jour les graphiques
+            console.log('Données RTG mises à jour:', data);
+        })
+        .catch(error => {
+            console.error('Erreur lors de la mise à jour des données RTG:', error);
+        });
+}, 300000); // 5 minutes
+</script>
+{% endblock %}
